@@ -78,14 +78,14 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietService {
                 CongSuat congSuat = congSuatRepository.findById(congSuatId)
                         .orElseThrow(() -> new RuntimeException("Không tìm thấy công suất với ID: " + congSuatId));
 
-                // Kiểm tra biến thể đã tồn tại chưa
+                // Kiểm tra biến thể đã tồn tại chưa (kiểm tra tất cả thuộc tính)
                 boolean exists = sanPhamChiTietRepository.existsBySanPhamIdAndMauSacIdAndCongSuatIdAndHangIdAndNutBamId(
                         request.getSanPhamId(), mauSacId, congSuatId, request.getHangId(), request.getNutBamId());
 
                 if (exists) {
-                    log.warn("Biến thể đã tồn tại: SP={}, Màu={}, Công suất={}", 
-                            request.getSanPhamId(), mauSac.getTen(), congSuat.getTen());
-                    continue;
+                    log.warn("Không thể tạo biến thể vì đã tồn tại biến thể với cùng thuộc tính: SP={}, Màu={}, Công suất={}, Hãng={}, Nút bấm={}", 
+                            request.getSanPhamId(), mauSac.getTen(), congSuat.getTen(), hang.getTen(), nutBam.getTen());
+                    throw new RuntimeException("Biến thể với các thuộc tính này đã tồn tại: " + mauSac.getTen() + " - " + congSuat.getTen() + " - " + hang.getTen() + " - " + nutBam.getTen());
                 }
 
                 // Tạo biến thể mới
@@ -236,6 +236,20 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietService {
                              String moTa, MultipartFile hinhAnh) {
         log.info("Bắt đầu thêm sản phẩm chi tiết mới cho sản phẩm ID: {}", sanPhamId);
         
+        // Kiểm tra biến thể đã tồn tại chưa (kiểm tra tất cả thuộc tính)
+        log.info("=== KIỂM TRA DUPLICATE (TẤT CẢ THUỘC TÍNH) ===");
+        log.info("SanPham ID: {}, MauSac ID: {}, CongSuat ID: {}, Hang ID: {}, NutBam ID: {}", 
+                sanPhamId, mauSacId, congSuatId, hangId, nutBamId);
+        
+        boolean exists = sanPhamChiTietRepository.existsBySanPhamIdAndMauSacIdAndCongSuatIdAndHangIdAndNutBamId(
+                sanPhamId, mauSacId, congSuatId, hangId, nutBamId);
+        
+        if (exists) {
+            log.warn("=== BIẾN THỂ ĐÃ TỒN TẠI (CÙNG TẤT CẢ THUỘC TÍNH) ===");
+            throw new RuntimeException("Biến thể với các thuộc tính này đã tồn tại! Vui lòng thay đổi ít nhất một thuộc tính.");
+        }
+        
+        log.info("=== BIẾN THỂ CHƯA TỒN TẠI, TIẾP TỤC TẠO MỚI ===");
         SanPhamChiTiet spct = new SanPhamChiTiet();
         
         // Set sản phẩm
@@ -352,14 +366,13 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietService {
             NutBam nutBam = nutBamRepository.findById(variant.getNutBamId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy nút bấm với ID: " + variant.getNutBamId()));
 
-            // Kiểm tra biến thể đã tồn tại chưa
+            // Kiểm tra biến thể đã tồn tại chưa (kiểm tra tất cả thuộc tính)
             boolean exists = sanPhamChiTietRepository.existsBySanPhamIdAndMauSacIdAndCongSuatIdAndHangIdAndNutBamId(
-                    request.getSanPhamId(), variant.getMauSacId(), variant.getCongSuatId(), 
-                    variant.getHangId(), variant.getNutBamId());
+                    request.getSanPhamId(), variant.getMauSacId(), variant.getCongSuatId(), variant.getHangId(), variant.getNutBamId());
 
             if (exists) {
-                log.warn("Biến thể đã tồn tại: SP={}, Màu={}, Công suất={}", 
-                        request.getSanPhamId(), mauSac.getTen(), congSuat.getTen());
+                log.warn("Biến thể đã tồn tại với cùng tất cả thuộc tính: SP={}, Màu={}, Công suất={}, Hãng={}, Nút bấm={}", 
+                        request.getSanPhamId(), mauSac.getTen(), congSuat.getTen(), hang.getTen(), nutBam.getTen());
                 continue;
             }
 
@@ -390,5 +403,44 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietService {
     @Override
     public void delete(Long id) {
         sanPhamChiTietRepository.deleteById(id);
+    }
+    
+    @Override
+    @Transactional
+    public void toggleStatus(Long id) {
+        log.info("=== BẮT ĐẦU THAY ĐỔI TRẠNG THÁI SPCT ===");
+        log.info("ID: {}", id);
+        
+        SanPhamChiTiet spct = sanPhamChiTietRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết với ID: " + id));
+        
+        Boolean currentStatus = spct.getTrangThai();
+        Boolean newStatus = currentStatus == null ? false : !currentStatus;
+        
+        log.info("Trạng thái hiện tại: {}, Trạng thái mới: {}", currentStatus, newStatus);
+        
+        spct.setTrangThai(newStatus);
+        
+        try {
+            SanPhamChiTiet saved = sanPhamChiTietRepository.save(spct);
+            log.info("=== THAY ĐỔI TRẠNG THÁI THÀNH CÔNG ===");
+            log.info("SPCT ID: {}, Trạng thái mới: {}", saved.getId(), saved.getTrangThai());
+        } catch (Exception e) {
+            log.error("=== LỖI KHI THAY ĐỔI TRẠNG THÁI ===", e);
+            throw new RuntimeException("Không thể thay đổi trạng thái: " + e.getMessage(), e);
+        }
+    }
+    
+    @Override
+    public boolean checkDuplicate(Long sanPhamId, Long mauSacId, Long congSuatId, Long hangId, Long nutBamId) {
+        log.info("=== KIỂM TRA DUPLICATE CHO PREVIEW ===");
+        log.info("SanPham ID: {}, MauSac ID: {}, CongSuat ID: {}, Hang ID: {}, NutBam ID: {}", 
+                sanPhamId, mauSacId, congSuatId, hangId, nutBamId);
+        
+        boolean exists = sanPhamChiTietRepository.existsBySanPhamIdAndMauSacIdAndCongSuatIdAndHangIdAndNutBamId(
+                sanPhamId, mauSacId, congSuatId, hangId, nutBamId);
+        
+        log.info("Kết quả check duplicate: {}", exists);
+        return exists;
     }
 } 

@@ -171,7 +171,7 @@ public class BanHangTaiQuayController {
 
     @PostMapping("/updateSoLuong")
     @ResponseBody
-    public ResponseEntity<String> updateSoLuong(UpdateSoLuongRequest request) {
+    public ResponseEntity<String> updateSoLuong(@RequestBody UpdateSoLuongRequest request) {
         hoaDonService.updateSoluong(request);
         banHangService.updateTongTienHoaDon(request.getIdHD());
 

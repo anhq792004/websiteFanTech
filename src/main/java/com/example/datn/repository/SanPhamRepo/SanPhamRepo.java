@@ -25,4 +25,7 @@ public interface SanPhamRepo extends JpaRepository<SanPham,Long> {
     //khoi
     @Query("SELECT s FROM SanPham s WHERE s.trangThai = true")
     List<SanPham> findByTrangThaiTrue();
+    
+    @Query("SELECT s.ma FROM SanPham s WHERE s.ma LIKE 'SP%' ORDER BY s.ma DESC")
+    List<String> findLatestProductCode();
 }

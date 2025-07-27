@@ -430,8 +430,36 @@ class VariantsManager {
         previewContainer.innerHTML = previewHtml;
     }
     
+    // Kiểm tra biến thể duplicate trước khi preview
+    async checkDuplicateVariant(sanPhamId, mauSacId, congSuatId, hangId, nutBamId) {
+        try {
+            // Kiểm tra tham số hợp lệ và không phải NaN
+            if (!sanPhamId || !mauSacId || !congSuatId || !hangId || !nutBamId ||
+                isNaN(sanPhamId) || isNaN(mauSacId) || isNaN(congSuatId) || isNaN(hangId) || isNaN(nutBamId)) {
+                console.error('Tham số không hợp lệ:', { sanPhamId, mauSacId, congSuatId, hangId, nutBamId });
+                return false;
+            }
+
+            const url = `/api/san-pham-chi-tiet/check-duplicate?sanPhamId=${sanPhamId}&mauSacId=${mauSacId}&congSuatId=${congSuatId}&hangId=${hangId}&nutBamId=${nutBamId}`;
+            console.log('Checking duplicate với URL:', url);
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                console.error('API response error:', response.status, response.statusText);
+                return false;
+            }
+            
+            const result = await response.json();
+            return result.exists || false;
+        } catch (error) {
+            console.error('Lỗi khi kiểm tra duplicate:', error);
+            return false;
+        }
+    }
+
     // Tạo danh sách biến thể preview
-    generateVariantsList() {
+    async generateVariantsList() {
         try {
             // Validate
             if (this.selectedMauSacIds.size === 0) {
@@ -463,16 +491,32 @@ class VariantsManager {
                 trangThai: document.getElementById('trangThai').checked
             };
 
-            // Tạo danh sách biến thể
+            // Tạo danh sách biến thể và kiểm tra duplicate cho từng combination
             this.variantsList = [];
             let index = 1;
+            const duplicates = [];
             
-            this.selectedMauSacIds.forEach(mauSacId => {
+            console.log('=== KIỂM TRA DUPLICATE CHO TỪNG BIẾN THỂ ===');
+            
+            for (const mauSacId of this.selectedMauSacIds) {
                 const mauSac = this.mauSacData.get(mauSacId);
                 
-                this.selectedCongSuatIds.forEach(congSuatId => {
+                for (const congSuatId of this.selectedCongSuatIds) {
                     const congSuat = this.congSuatData.get(congSuatId);
                     
+                    // Kiểm tra duplicate cho combination này (đảm bảo các tham số là số)
+                    const isDuplicate = await this.checkDuplicateVariant(
+                        parseInt(this.sanPhamId), 
+                        parseInt(mauSacId), 
+                        parseInt(congSuatId), 
+                        parseInt(hangId), 
+                        parseInt(nutBamId)
+                    );
+                    
+                    if (isDuplicate) {
+                        duplicates.push(`${mauSac?.ten || ''} - ${congSuat?.ten || ''}`);
+                        console.log(`Duplicate found: ${mauSac?.ten} - ${congSuat?.ten}`);
+                    } else {
                     this.variantsList.push({
                         index: index++,
                         mauSacId: parseInt(mauSacId),
@@ -481,8 +525,20 @@ class VariantsManager {
                         congSuatTen: congSuat?.ten || '',
                         ...commonData
                     });
-                });
-            });
+                    }
+                }
+            }
+            
+            // Nếu có duplicate, hiển thị cảnh báo nhưng vẫn tiếp tục với các variant không duplicate
+            if (duplicates.length > 0) {
+                this.showError(`Các biến thể sau đã tồn tại và sẽ được bỏ qua: ${duplicates.join(', ')}`);
+            }
+            
+            // Nếu không có variant nào có thể tạo
+            if (this.variantsList.length === 0) {
+                this.showError('Tất cả các biến thể đã tồn tại! Vui lòng chọn các thuộc tính khác.');
+                return;
+            }
 
             // Hiển thị bảng và nút lưu
             this.renderVariantsTable();

@@ -344,6 +344,47 @@ $(".quantity-btn-1").click(function () {
         }
     });
 });
+// update infor khach hang
+$(document).ready(function () {
+    $(".btn-update-infor").click(function () {
+        let formData = {
+            idHD: $("#idHD").val(),
+            tenNguoiNhan: $("#tenNguoiNhan").val(),
+            sdtNguoiNhan: $("#sdtNguoiNhan").val(),
+            soNhaNgoDuong: $("#soNhaNgoDuong").val(),
+            xa: $("#ward").val(),
+            huyen: $("#district").val(),
+            tinh: $("#city").val()
+        };
+
+        $.ajax({
+            url: "/hoa-don/updateInfor",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(formData),
+            success: function (response) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: response,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 500
+                }).then(() => location.reload());
+            },
+            error: function (xhr) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    title: xhr.responseText,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+            }
+        });
+    });
+});
 
 function updateTongTienDisplay() {
     // Tính toán lại tổng tiền từ các sản phẩm hiện có
@@ -387,6 +428,54 @@ function updateTongTienSauGiamGia(tongTien) {
         }
     });
 }
+
+$(document).ready(function () {
+    $('.update-so-luong-form').on('submit', function (e) {
+        e.preventDefault();
+
+        const form = $(this);
+        const idsp = form.data('idsp');
+        const idhd = form.data('idhd');
+        const soLuong = form.find('.quantity-input').val();
+        const gia = form.data('gia');
+
+        $.ajax({
+            url: `/hoa-don/updateSoLuong`,
+            type: 'POST',
+            data: JSON.stringify({
+                idSP: idsp,
+                idHD: idhd,
+                soLuong: soLuong,
+                gia: gia
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: response,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    timerProgressBar: true
+                }).then(() => {
+                    location.reload();
+                });
+            },
+            error: function (xhr) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    title: xhr.responseText,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            }
+        });
+    });
+});
 
 
 

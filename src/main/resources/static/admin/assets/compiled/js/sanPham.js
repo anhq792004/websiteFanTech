@@ -274,7 +274,28 @@ $(document).ready(function() {
     
     // Save new product
     $("#saveProductBtn").click(function() {
-        const formData = getFormData($("#addProductForm"));
+        // Validate form trước khi submit
+        const form = document.getElementById("addProductModalForm");
+        if (form) {
+            // Kiểm tra các trường bắt buộc
+            const tenSanPham = form.querySelector('[name="ten"]').value;
+            const kieuQuat = form.querySelector('[name="kieuQuat.id"]').value;
+            
+            if (!tenSanPham.trim()) {
+                showToast('error', 'Vui lòng nhập tên sản phẩm');
+                return;
+            }
+            
+            if (!kieuQuat) {
+                showToast('error', 'Vui lòng chọn kiểu quạt');
+                return;
+            }
+        }
+        
+        const formData = getFormData($("#addProductModalForm"));
+
+        // Bỏ mã sản phẩm để backend tự động tạo
+        delete formData.ma;
 
         // Add current date
         formData.ngayTao = new Date().toISOString();

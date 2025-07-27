@@ -168,11 +168,13 @@ $(document).ready(function() {
             return false;
         }
         
-        // Kiểm tra mã sản phẩm
-        const productCode = form.querySelector('[name="ma"]').value;
-        if (!productCode.match(/^[A-Za-z0-9]+$/)) {
+        const productCodeField = form.querySelector('[name="ma"]');
+        if (productCodeField && !productCodeField.readOnly) {
+            const productCode = productCodeField.value;
+            if (productCode && !productCode.match(/^[A-Za-z0-9]+$/)) {
             showToast("error", "Mã sản phẩm chỉ được chứa chữ cái và số");
             return false;
+            }
         }
         
         // Kiểm tra kiểu quạt
@@ -192,6 +194,16 @@ $(document).ready(function() {
     if (document.getElementById('addProductForm')) {
         document.getElementById('addProductForm').addEventListener('submit', function(event) {
             if (!validateProductForm('addProductForm')) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+    }
+    
+    // Thiết lập sự kiện cho modal form thêm mới
+    if (document.getElementById('addProductModalForm')) {
+        document.getElementById('addProductModalForm').addEventListener('submit', function(event) {
+            if (!validateProductForm('addProductModalForm')) {
                 event.preventDefault();
                 event.stopPropagation();
             }

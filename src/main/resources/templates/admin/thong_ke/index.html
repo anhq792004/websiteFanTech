@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:insert="~{/admin/fragments/head :: head}">
+    <title>Thống kê doanh thu</title>
+    <link rel="stylesheet" th:href="@{/admin/assets/compiled/css/bootstrap.min.css}"/>
+    <style>
+        .card-summary { min-height: 110px; }
+    </style>
+    <script src="/admin/assets/compiled/js/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+<div class="wrapper">
+    <div th:replace="/admin/fragments/sidebar :: sidebar"></div>
+    <div id="main">
+        <header th:replace="/admin/fragments/header :: header"></header>
+        <div class="page-content">
+            <section class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Thống kê doanh thu</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Card tổng quan -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card card-summary mb-3" style="background: #e3f0ff; border: none;">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title" style="color: #3b5998;">Tổng doanh thu</h6>
+                                        <h3 id="cardTongDoanhThu" style="color: #3b5998;">0 VND</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card card-summary mb-3" style="background: #e6f9f0; border: none;">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title" style="color: #1abc9c;">Doanh thu hôm nay</h6>
+                                        <h3 id="cardDoanhThuHomNay" style="color: #1abc9c;">0 VND</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card card-summary mb-3" style="background: #f0f7fa; border: none;">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title" style="color: #2980b9;">Doanh thu tuần này</h6>
+                                        <h3 id="cardDoanhThuTuanNay" style="color: #2980b9;">0 VND</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card card-summary mb-3" style="background: #fff7e6; border: none;">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title" style="color: #f39c12;">Doanh thu tháng này</h6>
+                                        <h3 id="cardDoanhThuThangNay" style="color: #f39c12;">0 VND</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Biểu đồ doanh thu từng ngày trong tháng -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-2 d-flex align-items-center">
+                                    <span class="me-2">Doanh thu theo từng ngày:</span>
+                                    <select id="selectMonth" class="form-select w-auto me-2"></select>
+                                    <select id="selectYear" class="form-select w-auto"></select>
+                                </div>
+                                <canvas id="chartNgay"></canvas>
+                            </div>
+                            <!-- Biểu đồ doanh thu từng tháng trong năm -->
+                            <div class="col-md-6">
+                                <div class="mb-2 d-flex align-items-center">
+                                    <span class="me-2">Doanh thu theo từng tháng:</span>
+                                    <select id="selectYearThang" class="form-select w-auto"></select>
+                                </div>
+                                <canvas id="chartThang"></canvas>
+                            </div>
+                        </div>
+                        <!-- Biểu đồ doanh thu theo khoảng ngày -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="mb-2 d-flex align-items-center">
+                                    <span class="me-2">Theo khoảng thời gian:</span>
+                                    <input type="date" id="fromDate" class="form-control w-auto me-2"/>
+                                    <input type="date" id="toDate" class="form-control w-auto me-2"/>
+                                    <button class="btn btn-primary" id="btnKhoang">Áp dụng</button>
+                                </div>
+                                <canvas id="chartKhoang"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <footer th:replace="/admin/fragments/footer :: footer"></footer>
+    </div>
+</div>
+<script>
+window.addEventListener('load', function() {
+    // Card tổng quan
+    async function loadCardTongQuan() {
+        const res = await fetch('/api/thong-ke/doanh-thu-tong-hop');
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById('cardTongDoanhThu').innerText = data.tongDoanhThu.toLocaleString() + ' VND';
+            document.getElementById('cardDoanhThuHomNay').innerText = data.doanhThuHomNay.toLocaleString() + ' VND';
+            document.getElementById('cardDoanhThuTuanNay').innerText = data.doanhThuTuanNay.toLocaleString() + ' VND';
+            document.getElementById('cardDoanhThuThangNay').innerText = data.doanhThuThangNay.toLocaleString() + ' VND';
+        }
+    }
+    // Helper: fill select tháng/năm
+    function fillMonthYearSelects() {
+        const now = new Date();
+        const selectMonth = document.getElementById('selectMonth');
+        const selectYear = document.getElementById('selectYear');
+        const selectYearThang = document.getElementById('selectYearThang');
+        selectMonth.innerHTML = '';
+        for (let m = 1; m <= 12; m++) {
+            selectMonth.innerHTML += `<option value="${m}" ${m === now.getMonth() + 1 ? 'selected' : ''}>Tháng ${m}</option>`;
+        }
+        selectYear.innerHTML = '';
+        selectYearThang.innerHTML = '';
+        for (let y = now.getFullYear() - 5; y <= now.getFullYear() + 1; y++) {
+            selectYear.innerHTML += `<option value="${y}" ${y === now.getFullYear() ? 'selected' : ''}>${y}</option>`;
+            selectYearThang.innerHTML += `<option value="${y}" ${y === now.getFullYear() ? 'selected' : ''}>${y}</option>`;
+        }
+    }
+    // Chart.js instance
+    let chartNgay, chartThang, chartKhoang;
+    // Load chart doanh thu từng ngày trong tháng
+    async function loadChartNgay() {
+        const month = document.getElementById('selectMonth').value;
+        const year = document.getElementById('selectYear').value;
+        const res = await fetch(`/api/thong-ke/doanh-thu-ngay-trong-thang?year=${year}&month=${month}`);
+        const data = res.ok ? await res.json() : [];
+        const labels = data.map(d => d.ngay);
+        const values = data.map(d => d.tongDoanhThu);
+        if (chartNgay) chartNgay.destroy();
+        chartNgay = new Chart(document.getElementById('chartNgay').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Doanh thu',
+                    data: values,
+                    borderColor: '#3b5998',
+                    backgroundColor: 'rgba(59,89,152,0.08)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+    }
+    // Load chart doanh thu từng tháng trong năm
+    async function loadChartThang() {
+        const year = document.getElementById('selectYearThang').value;
+        const res = await fetch(`/api/thong-ke/doanh-thu-thang-trong-nam?year=${year}`);
+        const data = res.ok ? await res.json() : [];
+        const labels = data.map(d => 'Tháng ' + d.thang);
+        const values = data.map(d => d.tongDoanhThu);
+        if (chartThang) chartThang.destroy();
+        chartThang = new Chart(document.getElementById('chartThang').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Doanh thu',
+                    data: values,
+                    borderColor: '#1abc9c',
+                    backgroundColor: 'rgba(26,188,156,0.08)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+    }
+    // Load chart doanh thu theo khoảng ngày
+    async function loadChartKhoang() {
+        const from = document.getElementById('fromDate').value;
+        const to = document.getElementById('toDate').value;
+        if (!from || !to) return;
+        const res = await fetch(`/api/thong-ke/doanh-thu-theo-khoang?from=${from}&to=${to}`);
+        const data = res.ok ? await res.json() : [];
+        const labels = data.map(d => d.ngay);
+        const values = data.map(d => d.tongDoanhThu);
+        if (chartKhoang) chartKhoang.destroy();
+        chartKhoang = new Chart(document.getElementById('chartKhoang').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Doanh thu',
+                    data: values,
+                    borderColor: '#f39c12',
+                    backgroundColor: 'rgba(243,156,18,0.08)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+    }
+    // Sự kiện
+    fillMonthYearSelects();
+    loadCardTongQuan();
+    loadChartNgay();
+    loadChartThang();
+    document.getElementById('selectMonth').onchange = loadChartNgay;
+    document.getElementById('selectYear').onchange = loadChartNgay;
+    document.getElementById('selectYearThang').onchange = loadChartThang;
+    document.getElementById('btnKhoang').onclick = loadChartKhoang;
+});
+</script>
+</body>
+</html> 

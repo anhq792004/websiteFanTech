@@ -80,20 +80,14 @@ public class SanPhamController {
     }
     
     @PostMapping("/add")
-    public String addSanPham(
-            @ModelAttribute SanPham sanPham,
-            @RequestParam(value = "hinhAnh", required = false) MultipartFile hinhAnh) {
+    public String addSanPham(@ModelAttribute SanPham sanPham) {
         
         // Set ngày tạo cho sản phẩm -> Lấy ngày hiện tại
         sanPham.setNgayTao(LocalDateTime.now());
         
-        // Lưu hình ảnh nếu có
-        if (hinhAnh != null && !hinhAnh.isEmpty()) {
-            // Xử lý lưu hình ảnh trong service
-            sanPhamService.saveSanPhamWithImage(sanPham, hinhAnh);
-        } else {
+        // Chỉ lưu sản phẩm, không tạo biến thể
+        // Hình ảnh sẽ được thêm khi tạo biến thể sản phẩm chi tiết
             sanPhamService.saveSanPham(sanPham);
-        }
         
         return "redirect:/admin/san-pham/list";
     }

@@ -23,14 +23,14 @@
                             <h5 class="card-title">Thêm sản phẩm mới</h5>
                         </div>
                         <div class="card-body">
-                            <form id="addProductForm" th:action="@{/admin/san-pham/add}" method="post" enctype="multipart/form-data">
+                            <form id="addProductForm" th:action="@{/admin/san-pham/add}" method="post" enctype="multipart/form-data" novalidate>
                                 <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label for="productCode" class="form-label">Mã sản phẩm <span
-                                                class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="productCode" name="ma" required
-                                            pattern="[A-Za-z0-9]+" title="Mã sản phẩm chỉ chứa chữ cái và số">
-                                        <div class="invalid-feedback">Vui lòng nhập mã sản phẩm hợp lệ</div>
+                                        <label for="productCode" class="form-label">Mã sản phẩm</label>
+                                        <input type="text" class="form-control" id="productCode" name="ma" 
+                                            readonly placeholder="Mã sẽ được tự động tạo" 
+                                            style="background-color: #f8f9fa; color: #6c757d;">
+                                        <small class="text-muted">Mã sản phẩm sẽ được tự động tạo khi lưu</small>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="productName" class="form-label">Tên sản phẩm <span
@@ -57,11 +57,12 @@
                                     </div>
                                 </div>
 
-                                <!-- Thêm phần tải hình ảnh sản phẩm -->
+                                <!-- Ghi chú về hình ảnh -->
                                 <div class="mb-3">
-                                    <label for="productImage" class="form-label">Hình ảnh sản phẩm</label>
-                                    <input type="file" class="form-control" id="productImage" name="hinhAnh"
-                                        accept="image/*">
+                                    <div class="alert alert-info" role="alert">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        <strong>Lưu ý:</strong> Hình ảnh sản phẩm sẽ được thêm khi tạo biến thể sản phẩm chi tiết.
+                                    </div>
                                 </div>
 
                                 <!-- Mô tả sản phẩm -->
@@ -93,29 +94,8 @@
     </div>
     <script th:src="@{/admin/assets/compiled/js/sanPhamForm.js}"></script>
     <script>
-        // Preview hình ảnh khi chọn
-        document.getElementById('productImage').addEventListener('change', function () {
-            const fileInput = this;
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const preview = document.createElement('img');
-                    preview.id = 'imagePreview';
-                    preview.src = e.target.result;
-                    preview.style.maxWidth = '200px';
-                    preview.style.marginTop = '10px';
-
-                    // Xóa preview cũ nếu có
-                    const oldPreview = document.getElementById('imagePreview');
-                    if (oldPreview) {
-                        oldPreview.remove();
-                    }
-
-                    fileInput.parentNode.appendChild(preview);
-                }
-                reader.readAsDataURL(fileInput.files[0]);
-            }
-        });
+        // Script cho form thêm sản phẩm
+        // Hình ảnh sẽ được thêm khi tạo biến thể sản phẩm chi tiết
     </script>
     <!-- hienthitendangnhap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

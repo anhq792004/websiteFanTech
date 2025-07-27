@@ -1,9 +1,6 @@
 package com.example.datn.service.Implements;
 
-import com.example.datn.dto.request.AddKHToHDCTRequest;
-import com.example.datn.dto.request.AddSPToHDCTRequest;
-import com.example.datn.dto.request.TrangThaiHoaDonRequest;
-import com.example.datn.dto.request.UpdateSoLuongRequest;
+import com.example.datn.dto.request.*;
 import com.example.datn.dto.response.LichSuHoaDonResponse;
 import com.example.datn.dto.response.LichSuThanhToanResponse;
 import com.example.datn.entity.HoaDon.HoaDon;
@@ -579,6 +576,21 @@ public class HoaDonServiceImpl implements HoaDonService {
     public Integer tongSoLuong(Long idHD) {
         Integer tongSoLuong = hoaDonChiTietRepo.sumSoLuong(idHD);
         return tongSoLuong != null ? tongSoLuong : 0;
+    }
+
+    @Override
+    public void updateInfor(UpdateInforRequest request) {
+        Optional<HoaDon> hoaDonOptional = hoaDonRepo.findById(request.getIdHD());
+        if (hoaDonOptional.isPresent()) {
+            HoaDon hoaDon = hoaDonOptional.get();
+            hoaDon.setTenNguoiNhan(request.getTenNguoiNhan());
+            hoaDon.setSdtNguoiNhan(request.getSdtNguoiNhan());
+            hoaDon.setTinh(request.getTinh());
+            hoaDon.setHuyen(request.getHuyen());
+            hoaDon.setXa(request.getXa());
+            hoaDon.setSoNhaNgoDuong(request.getSoNhaNgoDuong());
+            hoaDonRepo.save(hoaDon);
+        }
     }
 
 

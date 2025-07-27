@@ -12,4 +12,10 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
      */
     boolean existsBySanPhamIdAndMauSacIdAndCongSuatIdAndHangIdAndNutBamId(
             Long sanPhamId, Long mauSacId, Long congSuatId, Long hangId, Long nutBamId);
+    
+    /**
+     * Kiểm tra biến thể sản phẩm đã tồn tại với cùng hãng và nút bấm
+     */
+    boolean existsBySanPhamIdAndHangIdAndNutBamId(
+            Long sanPhamId, Long hangId, Long nutBamId);
 } 

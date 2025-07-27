@@ -320,8 +320,10 @@
                                                         <button class="btn btn-sm btn-outline-warning" th:onclick="'editVariant(' + ${spct.id} + ')'" title="Chỉnh sửa">
                                                             <i class="bi bi-pencil"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-outline-danger" th:onclick="'deleteVariant(' + ${spct.id} + ')'" title="Xóa">
-                                                            <i class="bi bi-trash"></i>
+                                                        <button th:class="${spct.trangThai} ? 'btn btn-sm btn-outline-warning' : 'btn btn-sm btn-outline-success'" 
+                                                                th:onclick="'toggleVariantStatus(' + ${spct.id} + ')'" 
+                                                                th:title="${spct.trangThai} ? 'Tắt hoạt động' : 'Bật hoạt động'">
+                                                            <i th:class="${spct.trangThai} ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -475,29 +477,29 @@
         window.location.href = `/admin/san-pham/chi-tiet/edit?id=${variantId}`;
     }
 
-    // Xóa biến thể
-    function deleteVariant(variantId) {
+    // Thay đổi trạng thái biến thể (thay vì xóa)
+    function toggleVariantStatus(variantId) {
         Swal.fire({
-            title: 'Xác nhận xóa',
-            text: 'Bạn có chắc chắn muốn xóa biến thể này không?',
-            icon: 'warning',
+            title: 'Xác nhận thay đổi trạng thái',
+            text: 'Bạn có chắc chắn muốn thay đổi trạng thái biến thể này không?',
+            icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Xóa',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Xác nhận',
             cancelButtonText: 'Hủy'
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/api/san-pham-chi-tiet/${variantId}`,
-                    type: "DELETE",
-                    success: function () {
-                        Swal.fire('Đã xóa!', 'Biến thể đã được xóa thành công.', 'success');
+                    url: `/api/san-pham-chi-tiet/${variantId}/toggle-status`,
+                    type: "PUT",
+                    success: function (response) {
+                        Swal.fire('Thành công!', 'Đã thay đổi trạng thái biến thể.', 'success');
                         location.reload();
                     },
                     error: function (error) {
-                        console.error("Lỗi khi xóa biến thể", error);
-                        Swal.fire('Lỗi!', 'Có lỗi xảy ra khi xóa biến thể.', 'error');
+                        console.error("Lỗi khi thay đổi trạng thái biến thể", error);
+                        Swal.fire('Lỗi!', 'Có lỗi xảy ra khi thay đổi trạng thái biến thể.', 'error');
                     }
                 });
             }

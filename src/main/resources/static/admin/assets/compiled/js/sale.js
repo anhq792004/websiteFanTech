@@ -281,12 +281,13 @@ $(document).ready(function () {
         $.ajax({
             url: `/sale/updateSoLuong`,
             type: 'POST',
-            data: {
-                idsp: idsp,
-                idhd: idhd,
+            data: JSON.stringify({
+                idSP: idsp,
+                idHD: idhd,
                 soLuong: soLuong,
                 gia: gia
-            },
+            }),
+            contentType: 'application/json; charset=utf-8',
             success: function (response) {
                 Swal.fire({
                     toast: true,

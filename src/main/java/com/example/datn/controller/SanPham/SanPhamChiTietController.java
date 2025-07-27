@@ -99,6 +99,45 @@ public class SanPhamChiTietController {
         }
     }
 
+    /**
+     * Thay đổi trạng thái sản phẩm chi tiết (tắt/bật) thay vì xóa
+     */
+    @PutMapping("/{id}/toggle-status")
+    public ResponseEntity<?> toggleStatus(@PathVariable Long id) {
+        try {
+            sanPhamChiTietService.toggleStatus(id);
+            return ResponseEntity.ok("Thay đổi trạng thái thành công");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    
+    /**
+     * Kiểm tra biến thể duplicate (check tất cả thuộc tính)
+     */
+    @GetMapping("/check-duplicate")
+    public ResponseEntity<?> checkDuplicate(@RequestParam String sanPhamId,
+                                          @RequestParam String mauSacId,
+                                          @RequestParam String congSuatId, 
+                                          @RequestParam String hangId, 
+                                          @RequestParam String nutBamId) {
+        try {
+            // Convert string to Long
+            Long sanPhamIdLong = Long.parseLong(sanPhamId);
+            Long mauSacIdLong = Long.parseLong(mauSacId);
+            Long congSuatIdLong = Long.parseLong(congSuatId);
+            Long hangIdLong = Long.parseLong(hangId);
+            Long nutBamIdLong = Long.parseLong(nutBamId);
+            
+            boolean exists = sanPhamChiTietService.checkDuplicate(sanPhamIdLong, mauSacIdLong, congSuatIdLong, hangIdLong, nutBamIdLong);
+            return ResponseEntity.ok(java.util.Map.of("exists", exists));
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body("Tham số không hợp lệ: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PutMapping("/{id}/test")
     public ResponseEntity<?> testUpdate(@PathVariable Long id,
                                        @RequestParam(required = false) Integer soLuong,

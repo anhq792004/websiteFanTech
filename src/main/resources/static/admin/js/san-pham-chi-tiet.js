@@ -88,22 +88,24 @@ $(document).ready(function() {
         });
     });
 
-    // Xử lý khi click nút xóa
-    $('.delete-variant-btn').click(function() {
+    // Xử lý khi click nút thay đổi trạng thái
+    $('.toggle-status-variant-btn').click(function() {
         const id = $(this).data('id');
+        const currentStatus = $(this).data('status');
+        const actionText = currentStatus ? 'tắt hoạt động' : 'bật hoạt động';
         
-        if (confirm('Bạn có chắc chắn muốn xóa sản phẩm chi tiết này không?')) {
+        if (confirm(`Bạn có chắc chắn muốn ${actionText} sản phẩm chi tiết này không?`)) {
             $.ajax({
-                url: '/admin/api/san-pham-chi-tiet/delete/' + id,
-                type: 'POST',
+                url: `/api/san-pham-chi-tiet/${id}/toggle-status`,
+                type: 'PUT',
                 success: function(response) {
-                    showToast('success', 'Xóa sản phẩm chi tiết thành công');
+                    showToast('success', `Đã ${actionText} sản phẩm chi tiết thành công`);
                     setTimeout(function() {
                         location.reload();
                     }, 1000);
                 },
                 error: function(xhr, status, error) {
-                    showToast('error', 'Có lỗi xảy ra khi xóa sản phẩm chi tiết');
+                    showToast('error', 'Có lỗi xảy ra khi thay đổi trạng thái sản phẩm chi tiết');
                 }
             });
         }

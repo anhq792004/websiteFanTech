@@ -144,23 +144,25 @@ $(document).ready(function () {
         });
     });
 
-    // Xử lý khi nhấp vào nút Xóa biến thể
-    $(document).on("click", ".delete-variant-btn", function () {
+    // Xử lý khi nhấp vào nút Thay đổi trạng thái biến thể
+    $(document).on("click", ".toggle-status-variant-btn", function () {
         const variantId = $(this).data("id");
+        const currentStatus = $(this).data("status");
+        const actionText = currentStatus ? "tắt hoạt động" : "bật hoạt động";
 
-        if (confirm("Bạn có chắc chắn muốn xóa biến thể này không?")) {
+        if (confirm(`Bạn có chắc chắn muốn ${actionText} biến thể này không?`)) {
             $.ajax({
-                url: `/admin/san-pham-chi-tiet/xoa/${variantId}`,
-                type: "POST",
+                url: `/api/san-pham-chi-tiet/${variantId}/toggle-status`,
+                type: "PUT",
                 success: function (response) {
-                    showToast('success', 'Xóa biến thể sản phẩm thành công');
+                    showToast('success', `Đã ${actionText} biến thể sản phẩm thành công`);
                     setTimeout(function () {
                         location.reload();
                     }, 1000);
                 },
                 error: function (error) {
-                    console.error("Lỗi khi xóa biến thể sản phẩm:", error);
-                    showToast('error', 'Lỗi khi xóa biến thể sản phẩm');
+                    console.error("Lỗi khi thay đổi trạng thái biến thể sản phẩm:", error);
+                    showToast('error', 'Lỗi khi thay đổi trạng thái biến thể sản phẩm');
                 }
             });
         }

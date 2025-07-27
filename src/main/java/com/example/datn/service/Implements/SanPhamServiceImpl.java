@@ -63,46 +63,65 @@ public class SanPhamServiceImpl implements SanPhamService {
 
     @Override
     public void saveSanPham(SanPham sanPham) {
+        if (sanPham.getMa() == null || sanPham.getMa().trim().isEmpty()) {
+            sanPham.setMa(generateNextProductCode());
+        }
+        
         // Đảm bảo ngày tạo được thiết lập
         if (sanPham.getNgayTao() == null) {
             sanPham.setNgayTao(LocalDateTime.now());
         }
         sanPhamRepo.save(sanPham);
     }
+    private String generateNextProductCode() {
+        List<String> latestCodes = sanPhamRepo.findLatestProductCode();
+        
+        if (latestCodes.isEmpty()) {
+            // Nếu chưa có sản phẩm nào, bắt đầu từ SP001
+            return "SP001";
+        }
+        
+        String latestCode = latestCodes.get(0);
+        try {
+            // Lấy phần số từ mã (bỏ "SP" ở đầu)
+            String numberPart = latestCode.substring(2);
+            int nextNumber = Integer.parseInt(numberPart) + 1;
+            
+            // Format lại thành SP + 3 chữ số (001, 002, ...)
+            return String.format("SP%03d", nextNumber);
+        } catch (Exception e) {
+            // Nếu có lỗi trong việc parse, tìm số lượng sản phẩm hiện có và tạo mã mới
+            long productCount = sanPhamRepo.count();
+            return String.format("SP%03d", productCount + 1);
+        }
+    }
 
     @Override
     public void saveSanPhamWithImage(SanPham sanPham, MultipartFile imageFile) {
+        // Tự động tạo mã sản phẩm nếu chưa có
+        if (sanPham.getMa() == null || sanPham.getMa().trim().isEmpty()) {
+            sanPham.setMa(generateNextProductCode());
+        }
+        
         // Đảm bảo ngày tạo được thiết lập
         if (sanPham.getNgayTao() == null) {
             sanPham.setNgayTao(LocalDateTime.now());
         }
 
-        // Lưu sản phẩm trước để có ID
-        SanPham savedSanPham = sanPhamRepo.save(sanPham);
+        // Chỉ lưu sản phẩm, không tạo biến thể
+        // Hình ảnh sẽ được thêm sau khi tạo biến thể riêng biệt
+        sanPhamRepo.save(sanPham);
 
+        // Lưu file hình ảnh vào thư mục để sử dụng sau này
         try {
-            // Sử dụng FileUploadService để lưu file
             String imagePath = fileUploadService.saveFile(imageFile);
-            // Tạo đối tượng HinhAnh
-            HinhAnh hinhAnh = new HinhAnh();
-            hinhAnh.setHinhAnh(imagePath);
-            HinhAnh savedHinhAnh = hinhAnhRepo.save(hinhAnh);
-
-            // Tạo SanPhamChiTiet mới với ảnh
-            SanPhamChiTiet spct = new SanPhamChiTiet();
-            spct.setSanPham(savedSanPham);
-            spct.setHinhAnh(savedHinhAnh);
-            spct.setTrangThai(true);
-
-            // Khởi tạo danh sách nếu chưa có
-            if (savedSanPham.getSanPhamChiTiet() == null) {
-                savedSanPham.setSanPhamChiTiet(new ArrayList<>());
-            }
-
-            sanPhamChiTietRepo.save(spct);
+            // Log đường dẫn file để sử dụng khi tạo biến thể
+            System.out.println("Đã lưu hình ảnh sản phẩm tại: " + imagePath);
+            System.out.println("Hình ảnh sẽ được gán khi tạo biến thể sản phẩm chi tiết");
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Lỗi khi lưu hình ảnh: " + e.getMessage());
+            // Không throw exception để không ảnh hưởng đến việc tạo sản phẩm
+            System.err.println("Lỗi khi lưu hình ảnh: " + e.getMessage());
         }
     }
 

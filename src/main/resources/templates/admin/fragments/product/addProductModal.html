@@ -11,13 +11,14 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="addProductForm">
+                    <form id="addProductModalForm" novalidate>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="productCode" class="form-label" style="color: #222; font-weight: 600;">Mã sản phẩm <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="productCode" name="ma" required
-                                       pattern="[A-Za-z0-9]+" title="Mã sản phẩm chỉ chứa chữ cái và số">
-                                <div class="invalid-feedback">Vui lòng nhập mã sản phẩm hợp lệ</div>
+                                <label for="productCode" class="form-label" style="color: #222; font-weight: 600;">Mã sản phẩm</label>
+                                <input type="text" class="form-control" id="productCode" name="ma" 
+                                       readonly placeholder="Mã sẽ được tự động tạo" 
+                                       style="background-color: #f8f9fa; color: #6c757d;">
+                                <small class="text-muted">Mã sản phẩm sẽ được tự động tạo khi lưu</small>
                             </div>
                             <div class="col-md-6">
                                 <label for="productName" class="form-label" style="color: #222; font-weight: 600;">Tên sản phẩm <span class="text-danger">*</span></label>
