@@ -169,6 +169,7 @@ public class HoaDonServiceImpl implements HoaDonService {
             }
             // Xóa sản phẩm khỏi giỏ hàng
             hoaDonChiTietRepo.deleteSanPhamChiTiet_Id(idSPCT);
+            updateTongTienHoaDon(idHD);
         } else {
             throw new RuntimeException("Không tìm thấy sản phẩm trong giỏ hàng");
         }
