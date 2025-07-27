@@ -6,9 +6,6 @@
     <style>
         .card-summary { min-height: 110px; }
     </style>
-    <script src="/admin/assets/compiled/js/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
 <div class="wrapper">
@@ -95,13 +92,29 @@
         <footer th:replace="/admin/fragments/footer :: footer"></footer>
     </div>
 </div>
+
+<!-- Load scripts -->
+<script th:src="@{/admin/assets/compiled/js/chart.umd.min.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
 <script>
 window.addEventListener('load', function() {
+    console.log('Page loaded, checking Chart.js...');
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded!');
+        alert('Lỗi: Chart.js không được load. Vui lòng refresh trang.');
+        return;
+    }
+    console.log('Chart.js loaded successfully:', Chart.version);
+
     // Card tổng quan
     async function loadCardTongQuan() {
+        console.log('Loading card tổng quan...');
         const res = await fetch('/api/thong-ke/doanh-thu-tong-hop');
         if (res.ok) {
             const data = await res.json();
+            console.log('Card data:', data);
             document.getElementById('cardTongDoanhThu').innerText = data.tongDoanhThu.toLocaleString() + ' VND';
             document.getElementById('cardDoanhThuHomNay').innerText = data.doanhThuHomNay.toLocaleString() + ' VND';
             document.getElementById('cardDoanhThuTuanNay').innerText = data.doanhThuTuanNay.toLocaleString() + ' VND';
@@ -129,80 +142,126 @@ window.addEventListener('load', function() {
     let chartNgay, chartThang, chartKhoang;
     // Load chart doanh thu từng ngày trong tháng
     async function loadChartNgay() {
+        console.log('Loading chart ngày...');
         const month = document.getElementById('selectMonth').value;
         const year = document.getElementById('selectYear').value;
         const res = await fetch(`/api/thong-ke/doanh-thu-ngay-trong-thang?year=${year}&month=${month}`);
         const data = res.ok ? await res.json() : [];
+        console.log('Chart ngày data:', data);
         const labels = data.map(d => d.ngay);
         const values = data.map(d => d.tongDoanhThu);
         if (chartNgay) chartNgay.destroy();
         chartNgay = new Chart(document.getElementById('chartNgay').getContext('2d'), {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'Doanh thu',
                     data: values,
+                    backgroundColor: 'rgba(59,89,152,0.8)',
                     borderColor: '#3b5998',
-                    backgroundColor: 'rgba(59,89,152,0.08)',
-                    tension: 0.3,
-                    fill: true
+                    borderWidth: 1
                 }]
             },
-            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            options: { 
+                responsive: true, 
+                plugins: { legend: { display: false } }, 
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' VND';
+                            }
+                        }
+                    } 
+                } 
+            }
         });
+        console.log('Chart ngày created successfully');
     }
     // Load chart doanh thu từng tháng trong năm
     async function loadChartThang() {
+        console.log('Loading chart tháng...');
         const year = document.getElementById('selectYearThang').value;
         const res = await fetch(`/api/thong-ke/doanh-thu-thang-trong-nam?year=${year}`);
         const data = res.ok ? await res.json() : [];
+        console.log('Chart tháng data:', data);
         const labels = data.map(d => 'Tháng ' + d.thang);
         const values = data.map(d => d.tongDoanhThu);
         if (chartThang) chartThang.destroy();
         chartThang = new Chart(document.getElementById('chartThang').getContext('2d'), {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'Doanh thu',
                     data: values,
+                    backgroundColor: 'rgba(26,188,156,0.8)',
                     borderColor: '#1abc9c',
-                    backgroundColor: 'rgba(26,188,156,0.08)',
-                    tension: 0.3,
-                    fill: true
+                    borderWidth: 1
                 }]
             },
-            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            options: { 
+                responsive: true, 
+                plugins: { legend: { display: false } }, 
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' VND';
+                            }
+                        }
+                    } 
+                } 
+            }
         });
+        console.log('Chart tháng created successfully');
     }
     // Load chart doanh thu theo khoảng ngày
     async function loadChartKhoang() {
+        console.log('Loading chart khoảng...');
         const from = document.getElementById('fromDate').value;
         const to = document.getElementById('toDate').value;
         if (!from || !to) return;
         const res = await fetch(`/api/thong-ke/doanh-thu-theo-khoang?from=${from}&to=${to}`);
         const data = res.ok ? await res.json() : [];
+        console.log('Chart khoảng data:', data);
         const labels = data.map(d => d.ngay);
         const values = data.map(d => d.tongDoanhThu);
         if (chartKhoang) chartKhoang.destroy();
         chartKhoang = new Chart(document.getElementById('chartKhoang').getContext('2d'), {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'Doanh thu',
                     data: values,
+                    backgroundColor: 'rgba(243,156,18,0.8)',
                     borderColor: '#f39c12',
-                    backgroundColor: 'rgba(243,156,18,0.08)',
-                    tension: 0.3,
-                    fill: true
+                    borderWidth: 1
                 }]
             },
-            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            options: { 
+                responsive: true, 
+                plugins: { legend: { display: false } }, 
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' VND';
+                            }
+                        }
+                    } 
+                } 
+            }
         });
+        console.log('Chart khoảng created successfully');
     }
     // Sự kiện
+    console.log('Initializing charts...');
     fillMonthYearSelects();
     loadCardTongQuan();
     loadChartNgay();
@@ -211,6 +270,7 @@ window.addEventListener('load', function() {
     document.getElementById('selectYear').onchange = loadChartNgay;
     document.getElementById('selectYearThang').onchange = loadChartThang;
     document.getElementById('btnKhoang').onclick = loadChartKhoang;
+    console.log('Charts initialized successfully');
 });
 </script>
 </body>

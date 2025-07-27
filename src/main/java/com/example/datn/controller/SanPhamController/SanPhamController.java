@@ -98,8 +98,21 @@ public class SanPhamController {
         if (sanPhamOptional.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm");
         }
-        model.addAttribute("sanPham", sanPhamOptional.get());
-        model.addAttribute("kieuQuat", kieuQuatService.findAllKieuQuat());
+        
+        SanPham sanPham = sanPhamOptional.get();
+        System.out.println("=== DEBUG EDIT SAN PHAM ===");
+        System.out.println("SanPham ID: " + sanPham.getId());
+        System.out.println("SanPham Ten: " + sanPham.getTen());
+        System.out.println("SanPham KieuQuat: " + (sanPham.getKieuQuat() != null ? 
+            "ID=" + sanPham.getKieuQuat().getId() + ", Ten=" + sanPham.getKieuQuat().getTen() : "NULL"));
+        
+        List<KieuQuat> kieuQuatList = kieuQuatService.findAllKieuQuat();
+        System.out.println("KieuQuat List Size: " + kieuQuatList.size());
+        kieuQuatList.forEach(kq -> System.out.println("  - ID: " + kq.getId() + ", Ten: " + kq.getTen()));
+        System.out.println("=== END DEBUG ===");
+        
+        model.addAttribute("sanPham", sanPham);
+        model.addAttribute("kieuQuat", kieuQuatList);
         return "admin/san_pham/edit";
     }
     

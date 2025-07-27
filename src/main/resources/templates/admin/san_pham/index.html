@@ -83,7 +83,8 @@
                                     <td th:text="${iterStat.count}"></td>
                                     <td th:text="${item.ma}"></td>
                                     <td th:text="${item.ten}"></td>
-                                    <td th:text="${item.kieuQuat != null ? item.kieuQuat.ten : 'N/A'}"></td>
+                                    <td th:text="${item.kieuQuat != null ? item.kieuQuat.ten : 'N/A'}" 
+                                        th:data-kieu-quat-id="${item.kieuQuat != null ? item.kieuQuat.id : ''}"></td>
                                     <td th:text="${#temporals.format(item.ngayTao, 'dd-MM-yyyy')}"></td>
                                     <td>
                                         <span th:if="${item.trangThai}" class="badge bg-success">Đang kinh doanh</span>
@@ -137,6 +138,73 @@
     <!-- Footer-->
     <div>
         <footer th:replace="/admin/fragments/footer :: footer"></footer>
+    </div>
+</div>
+
+<!-- Modal Edit Product -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProductModalLabel">Chỉnh sửa sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProductForm">
+                    <input type="hidden" id="editProductId" name="id">
+                    <!-- Thông tin cơ bản -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="editProductCode" class="form-label" style="color: #222; font-weight: 600;">Mã sản phẩm <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="editProductCode" name="ma" required>
+                            <div class="invalid-feedback">Vui lòng nhập mã sản phẩm</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editProductName" class="form-label" style="color: #222; font-weight: 600;">Tên sản phẩm <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="editProductName" name="ten" required>
+                            <div class="invalid-feedback">Vui lòng nhập tên sản phẩm</div>
+                        </div>
+                    </div>
+
+                    <!-- Kiểu quạt và trạng thái -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="editFanType" class="form-label" style="color: #222; font-weight: 600;">Kiểu quạt <span class="text-danger">*</span></label>
+                            <select class="form-select" id="editFanType" name="kieuQuat.id" required>
+                                <option value="">-- Chọn kiểu quạt --</option>
+                            </select>
+                            <div class="invalid-feedback">Vui lòng chọn kiểu quạt</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editProductStatus" class="form-label" style="color: #222; font-weight: 600;">Trạng thái</label>
+                            <select class="form-select" id="editProductStatus" name="trangThai">
+                                <option value="true">Đang kinh doanh</option>
+                                <option value="false">Ngừng kinh doanh</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Hình ảnh -->
+                    <div class="mb-3">
+                        <label for="editProductImage" class="form-label" style="color: #222; font-weight: 600;">Hình ảnh sản phẩm</label>
+                        <input type="file" class="form-control" id="editProductImage" name="hinhAnh" accept="image/*">
+                        <div class="mt-2">
+                            <img id="editProductImagePreview" src="" alt="Preview" style="max-width: 200px; display: none;">
+                        </div>
+                    </div>
+
+                    <!-- Mô tả -->
+                    <div class="mb-3">
+                        <label for="editProductDescription" class="form-label" style="color: #222; font-weight: 600;">Mô tả sản phẩm</label>
+                        <textarea class="form-control" id="editProductDescription" name="moTa" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="updateProductBtn">Cập nhật sản phẩm</button>
+            </div>
+        </div>
     </div>
 </div>
 
