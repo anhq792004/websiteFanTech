@@ -184,74 +184,64 @@
             div.setAttribute('data-id', item.sanPhamChiTietId);
 
             div.innerHTML = `
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-2 col-12 mb-3 mb-md-0">
-                            <div class="d-flex justify-content-center">
-                                ${item.hinhAnh ?
-                `<img src="${item.hinhAnh}" alt="${item.tenSanPham}" class="img-fluid rounded" style="max-width: 100px; max-height: 100px;">` :
-                `<div class="bg-light d-flex align-items-center justify-content-center rounded" style="width: 100px; height: 100px;">
-                                        <i class="fas fa-image fs-1 text-muted"></i>
-                                    </div>`
-            }
-                            </div>
-                        </div>
-
-                        <div class="col-md-4 col-12 mb-3 mb-md-0">
-                            <h5 class="card-title text-primary mb-2">${item.tenSanPham}</h5>
-                            <div class="mb-2">
-                                ${item.mauSac ? `<span class="badge bg-secondary me-1">Màu: ${item.mauSac}</span>` : ''}
-                                ${item.congSuat ? `<span class="badge bg-secondary me-1">Công suất: ${item.congSuat}</span>` : ''}
-                                ${item.hang ? `<span class="badge bg-secondary me-1">Hãng: ${item.hang}</span>` : ''}
-                            </div>
-                            <small class="text-muted">Còn lại: ${item.soLuongTon} sản phẩm</small>
-                        </div>
-
-                        <div class="col-md-2 col-6 mb-3 mb-md-0">
-                            <div class="text-center">
-                                <div class="fs-5 fw-bold text-danger">${this.formatPrice(item.gia)}</div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4 col-12">
-                            <div class="row align-items-center">
-                                <div class="col-8">
-                                    <div class="input-group">
-                                        <button class="btn btn-outline-secondary" type="button"
-                                                onclick="cart.updateQuantity(${item.sanPhamChiTietId}, ${item.soLuong - 1})"
-                                                ${item.soLuong <= 1 ? 'disabled' : ''}>
-                                            <i class="fas fa-minus"></i>
-                                        </button>
-                                        <input type="number" class="form-control text-center" value="${item.soLuong}"
-                                               min="1" max="${item.soLuongTon}"
-                                               onchange="cart.updateQuantity(${item.sanPhamChiTietId}, this.value)">
-                                        <button class="btn btn-outline-secondary" type="button"
-                                                onclick="cart.updateQuantity(${item.sanPhamChiTietId}, ${item.soLuong + 1})"
-                                                ${item.soLuong >= item.soLuongTon ? 'disabled' : ''}>
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <button class="btn btn-danger w-100" onclick="cart.removeItem(${item.sanPhamChiTietId})">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-2 col-12 mb-3 mb-md-0">
+                    <div class="d-flex justify-content-center">
+                        <img src="${item.hinhAnh || '/images/default-product.jpg'}" alt="${item.tenSanPham}" class="img-fluid rounded" style="max-width: 100px; max-height: 100px;">
                     </div>
-
-                    <div class="row mt-3">
-                        <div class="col-md-8 offset-md-4">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="fw-bold">Thành tiền:</span>
-                                <span class="fs-5 fw-bold text-danger">${this.formatPrice(item.tongTien)}</span>
+                </div>
+                <div class="col-md-4 col-12 mb-3 mb-md-0">
+                    <h5 class="card-title text-primary mb-2">${item.tenSanPham}</h5>
+                    <div class="mb-2">
+                        ${item.mauSac ? `<span class="badge bg-secondary me-1">Màu: ${item.mauSac}</span>` : ''}
+                        ${item.congSuat ? `<span class="badge bg-secondary me-1">Công suất: ${item.congSuat}</span>` : ''}
+                        ${item.hang ? `<span class="badge bg-secondary me-1">Hãng: ${item.hang}</span>` : ''}
+                    </div>
+                    <small class="text-muted">Còn lại: ${item.soLuongTon} sản phẩm</small>
+                </div>
+                <div class="col-md-2 col-6 mb-3 mb-md-0">
+                    <div class="text-center">
+                        <div class="fs-5 fw-bold text-danger">${this.formatPrice(item.gia)}</div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-12">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <div class="input-group">
+                                <button class="btn btn-outline-secondary" type="button"
+                                        onclick="cart.updateQuantity(${item.sanPhamChiTietId}, ${item.soLuong - 1})"
+                                        ${item.soLuong <= 1 ? 'disabled' : ''}>
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" class="form-control text-center" value="${item.soLuong}"
+                                       min="1" max="${item.soLuongTon}"
+                                       onchange="cart.updateQuantity(${item.sanPhamChiTietId}, this.value)">
+                                <button class="btn btn-outline-secondary" type="button"
+                                        onclick="cart.updateQuantity(${item.sanPhamChiTietId}, ${item.soLuong + 1})"
+                                        ${item.soLuong >= item.soLuongTon ? 'disabled' : ''}>
+                                    <i class="fas fa-plus"></i>
+                                </button>
                             </div>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-danger w-100" onclick="cart.removeItem(${item.sanPhamChiTietId})">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
-            `;
-
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-8 offset-md-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Thành tiền:</span>
+                        <span class="fs-5 fw-bold text-danger">${this.formatPrice(item.tongTien)}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
             return div;
         }
 
@@ -385,29 +375,6 @@
                 style: 'currency',
                 currency: 'VND'
             }).format(price);
-        }
-
-        showAlert(message, type) {
-            const alertContainer = document.getElementById('alertContainer');
-            const alertId = 'alert-' + Date.now();
-
-            const alertHtml = `
-                <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `;
-
-            alertContainer.insertAdjacentHTML('beforeend', alertHtml);
-
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                const alert = document.getElementById(alertId);
-                if (alert) {
-                    alert.remove();
-                }
-            }, 5000);
         }
     }
 

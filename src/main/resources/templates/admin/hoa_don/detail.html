@@ -180,10 +180,10 @@
                                   class="me-2" th:data-id="${hoaDon.id}">
                                 <button type="button" class="btn btn-outline-danger btn-huy">Hủy</button>
                             </form>
-<!--                            <form th:if="${hoaDon.trangThai != 3 && hoaDon.trangThai != 2 && hoaDon.trangThai != 0}"-->
-<!--                                  class="me-2" th:data-id="${hoaDon.id}">-->
-<!--                                <button type="button" class="btn btn-outline-danger btn-huy">Hủy onl</button>-->
-<!--                            </form>-->
+                            <!--                            <form th:if="${hoaDon.trangThai != 3 && hoaDon.trangThai != 2 && hoaDon.trangThai != 0}"-->
+                            <!--                                  class="me-2" th:data-id="${hoaDon.id}">-->
+                            <!--                                <button type="button" class="btn btn-outline-danger btn-huy">Hủy onl</button>-->
+                            <!--                            </form>-->
                         </div>
                     </div>
                 </div>
@@ -233,23 +233,27 @@
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h2>Thông tin khách hàng</h2>
-                        <button type="submit" class="btn btn-outline-warning"
-                                th:if="${hoaDon.trangThai == 0 || hoaDon.trangThai == 1 ||hoaDon.trangThai == 2}">
+                        <button type="submit" class="btn btn-outline-warning btn-update-infor"
+                                th:if="${hoaDon.trangThai == 0 || hoaDon.trangThai == 1 ||hoaDon.trangThai == 2}"
+                                th:data-id="${hoaDon.id}">
                             <i class="bi bi-gear-wide-connected"></i>
                         </button>
                     </div>
-                    <form class="px-4">
+                    <form class="px-4" id="updateForm">
+                        <input type="hidden" id="idHD" th:value="${hoaDon.id}">
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bolder">Tên người nhận</label>
-                                <input type="text" class="form-control" placeholder="Tên"
+                                <input type="text" class="form-control" placeholder="Tên" name="tenNguoiNhan"
+                                       id="tenNguoiNhan"
                                        th:value="${hoaDon.tenNguoiNhan}"
                                        th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3}"
                                 >
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bolder">Số điện thoại</label>
-                                <input type="text" class="form-control" placeholder="Số điện thoại"
+                                <input type="text" class="form-control" placeholder="Số điện thoại" name="sdtNguoiNhan"
+                                       id="sdtNguoiNhan"
                                        th:value="${hoaDon.sdtNguoiNhan}"
                                        th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3}">
                             </div>
@@ -257,14 +261,14 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bolder" for="city">Thành phố</label>
-                                <select class="form-control" id="city" name="tinh_thanh_pho"
+                                <select class="form-control" id="city" name="tinh"
                                         th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3}">
                                     <option value="" selected>Chọn tỉnh thành</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bolder" for="district">Quận huyện</label>
-                                <select class="form-control" id="district" name="quan_huyen"
+                                <select class="form-control" id="district" name="huyen"
                                         th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3}">
                                     <option value="" selected>Chọn quận huyện</option>
                                 </select>
@@ -273,18 +277,22 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bolder" for="district">Phường xã</label>
-                                <select class="form-control" id="ward" name="xa_phuong"
+                                <select class="form-control" id="ward" name="xa"
                                         th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3}">
                                     <option value="" selected>Chọn phường xã</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bolder">Số nhà / Ngõ đường</label>
-                                <input type="text" class="form-control"
+                                <input type="text" class="form-control" th:value="${hoaDon.soNhaNgoDuong}"
+                                       id="soNhaNgoDuong"
                                        placeholder="1300 Rockdick Rd., Unit A Markham, ON L3R8C3"
                                        th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3}">
                             </div>
                         </div>
+                        <input type="hidden" id="tinh" th:value="${hoaDon.tinh}"/>
+                        <input type="hidden" id="huyen" th:value="${hoaDon.huyen}"/>
+                        <input type="hidden" id="xa" th:value="${hoaDon.xa}"/>
                     </form>
                 </div>
                 <!--                Thông tin sản phẩm-->
@@ -315,6 +323,13 @@
                                                                 th:text="${item.sanPhamChiTiet.hang.ten}"></span></p>
                                 </div>
                             </div>
+                            <div class="align-items-center ">
+                                <p class="mb-2">Màu: <span class="product-category"
+                                                           th:text="${item.sanPhamChiTiet.mauSac.ten}"></span></p>
+                                <p class="mb-2">Công suất: <span class="product-category"
+                                                                 th:text="${item.sanPhamChiTiet.congSuat.ten}"></span>
+                                </p>
+                            </div>
                             <div class="product-soLuong d-flex align-items-center justify-content-between">
                                 <div class="text-center">
                                     <form th:data-idsp="${item.sanPhamChiTiet.id}"
@@ -322,7 +337,7 @@
                                           th:data-gia="${item.gia}"
                                           id="updateSoLuong"
                                           method="post"
-                                          action="/sale/updateSoLuong"
+                                          action="/hoa-don/updateSoLuong"
                                           class="update-so-luong-form">
                                         <div class="quantity-container">
                                             <button class="quantity-btn-1" type="button"
@@ -330,7 +345,7 @@
                                                 −
                                             </button>
                                             <input type="text" class="quantity-input"
-                                                   th:disabled="${hoaDon.trangThai != 0 || hoaDon.trangThai != 1 ||hoaDon.trangThai != 2}"
+                                                   th:disabled="${hoaDon.trangThai == 3 || hoaDon.trangThai == 4 ||hoaDon.trangThai == 5}"
                                                    th:value="${item.soLuong}" id="soLuong" name="soLuong">
                                             <button class="quantity-btn" type="button"
                                                     th:if="${hoaDon.trangThai == 0 || hoaDon.trangThai == 1 ||hoaDon.trangThai == 2}">
@@ -354,11 +369,16 @@
                     </div>
 
                     <div class="summary mt-5 mx-4">
-                        <p>Tổng số lượng <span class="float-end" th:text="${tongSoLuong}"></span></p>
-<!--                        <p>Shipping fee <span class="float-end">$20.00</span></p>-->
-                        <p>Tổng tiền <span class="order-total float-end giaVND" th:text="${tongTien}"></span></p>
-<!--                        <p>Discount Voucher <span class="discount float-end">$25</span></p>-->
-<!--                        <p>Estimated delivery time <span class="float-end">5 days</span></p>-->
+                        <p>Tổng số lượng sản phẩm <span class="float-end " th:text="${tongSoLuong}"></span></p>
+                        <!--                        <p>Shipping fee <span class="float-end">$20.00</span></p>-->
+                        <p>Tổng tiền <span class="order-total float-end giaVND" th:text="${hoaDon.tongTien}"></span></p>
+                        <p>
+                            Phiếu giảm giá
+                            <span class="discount float-end"
+                                  th:text="${hoaDon.phieuGiamGia != null ? hoaDon.phieuGiamGia.ten : 'Null'}"></span>
+                        </p>
+                        <p>Tổng tiền sau giảm giá <span class="order-total float-end giaVND"
+                                                        th:text="${hoaDon.tongTienSauGiamGia}"></span></p>
                     </div>
                 </div>
             </section>
@@ -446,11 +466,78 @@
 <script th:replace="/admin/fragments/script :: script"></script>
 <script th:src="@{/admin/assets/compiled/js/components.js}"></script>
 <script th:src="@{/admin/assets/compiled/js/hdct.js}"></script>
-<!-- hienthitendangnhap -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/simplePagination.js/1.6/jquery.simplePagination.min.js"></script>
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        const idTinh = document.getElementById("tinh").value;
+        const idHuyen = document.getElementById("huyen").value;
+        const idXa = document.getElementById("xa").value;
 
+        const citis = document.getElementById("city");
+        const districts = document.getElementById("district");
+        const wards = document.getElementById("ward");
+
+        const Parameter = {
+            url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",
+            method: "GET",
+            responseType: "application/json",
+        };
+
+        axios(Parameter).then(function (result) {
+            const data = result.data;
+            renderCity(data);
+
+            // Set selected Tỉnh
+            citis.value = idTinh;
+            citis.dispatchEvent(new Event('change'));
+
+            // Chờ render Huyện rồi set selected Huyện
+            setTimeout(function () {
+                districts.value = idHuyen;
+                districts.dispatchEvent(new Event('change'));
+            }, 300);
+
+            // Chờ render Xã rồi set selected Xã
+            setTimeout(function () {
+                wards.value = idXa;
+            }, 600);
+        });
+
+        function renderCity(data) {
+            // Render tỉnh
+            for (const city of data) {
+                citis.options[citis.options.length] = new Option(city.Name, city.Id);
+            }
+
+            // Khi chọn tỉnh
+            citis.onchange = function () {
+                districts.length = 1;
+                wards.length = 1;
+
+                const selectedCity = data.find(c => c.Id === this.value);
+                if (selectedCity) {
+                    for (const district of selectedCity.Districts) {
+                        districts.options[districts.options.length] = new Option(district.Name, district.Id);
+                    }
+                }
+            };
+
+            // Khi chọn huyện
+            districts.onchange = function () {
+                wards.length = 1;
+
+                const selectedCity = data.find(c => c.Id === citis.value);
+                if (selectedCity) {
+                    const selectedDistrict = selectedCity.Districts.find(d => d.Id === this.value);
+                    if (selectedDistrict) {
+                        for (const ward of selectedDistrict.Wards) {
+                            wards.options[wards.options.length] = new Option(ward.Name, ward.Id);
+                        }
+                    }
+                }
+            };
+        }
+    });
+</script>
 
 </body>
 </html>

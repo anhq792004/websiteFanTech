@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:insert="~{/admin/fragments/head :: head}"></head>
+<head th:insert="~{/user/fragments/head :: head}"></head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Thanh Toán - Checkout</title>
@@ -160,8 +160,8 @@
                                     <div class="border rounded p-3 payment-method" data-method="cod">
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="phuongThucThanhToan"
-                                                   value="COD" id="cod">
-                                            <label class="form-check-label w-100" for="cod">
+                                                   value="TIEN_MAT" id="TIEN_MAT">
+                                            <label class="form-check-label w-100" for="TIEN_MAT">
                                                 <div class="fw-bold">
                                                     <i class="fas fa-money-bill-wave me-2 text-success"></i>
                                                     Thanh toán khi nhận hàng
@@ -239,6 +239,11 @@
                                 <span>Giảm giá:</span>
                                 <span id="discount" class="text-success fw-bold">0</span>
                             </div>
+                            <!-- Thêm thông báo voucher tốt nhất -->
+                            <div id="bestVoucherInfo" class="text-success small mb-3" style="display: none;">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Đã tự động áp dụng phiếu giảm giá tốt nhất
+                            </div>
                             <hr>
                             <div class="d-flex justify-content-between mb-4">
                                 <strong class="fs-5">Tổng cộng:</strong>
@@ -300,7 +305,7 @@
     </div>
 </div>
 
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -351,7 +356,39 @@
 
         // Format currency to VND (e.g., 10000 -> 10.000 đ)
         formatCurrency(amount) {
-            return amount.toLocaleString('vi-VN', { style: 'decimal', minimumFractionDigits: 0 }) + ' đ';
+            return amount.toLocaleString('vi-VN', {style: 'decimal', minimumFractionDigits: 0}) + ' đ';
+        }
+
+        // Thêm phương thức tìm voucher tốt nhất
+        findBestVoucher(vouchers, cartTotal) {
+            if (!vouchers || vouchers.length === 0) return null;
+
+            let bestVoucher = null;
+            let maxDiscount = 0;
+
+            vouchers.forEach(voucher => {
+                if (
+                    cartTotal >= (voucher.giaTriDonHangToiThieu || 0) &&
+                    (voucher.soLuongConLai > 0 || voucher.soLuongConLai === undefined)
+                ) {
+                    let discount = 0;
+                    if (voucher.loaiGiam === 'PERCENT') {
+                        discount = cartTotal * (Number(voucher.giaTriGiam) / 100);
+                        if (voucher.giaTriGiamToiDa && discount > voucher.giaTriGiamToiDa) {
+                            discount = voucher.giaTriGiamToiDa;
+                        }
+                    } else {
+                        discount = Number(voucher.giaTriGiam);
+                    }
+
+                    if (discount > maxDiscount) {
+                        maxDiscount = discount;
+                        bestVoucher = voucher;
+                    }
+                }
+            });
+
+            return bestVoucher;
         }
 
         async loadCartData() {
@@ -486,10 +523,27 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const vouchers = await response.json();
+
+                // Chỉ áp dụng voucher tốt nhất từ tất cả các phiếu (không phân biệt công khai hay cá nhân)
+                if (!this.selectedVoucher && vouchers.length > 0) {
+                    const bestVoucher = this.findBestVoucher(vouchers, this.cartData?.totalAmount || 0);
+                    if (bestVoucher) {
+                        this.selectedVoucher = bestVoucher;
+                        document.getElementById('voucherCode').value = bestVoucher.ma;
+                        document.getElementById('bestVoucherInfo').style.display = 'block';
+                        this.updateSummary(this.cartData);
+                    }
+                } else if (this.selectedVoucher) {
+                    // Đảm bảo voucher đã chọn được hiển thị
+                    document.getElementById('voucherCode').value = this.selectedVoucher.ma;
+                    document.getElementById('bestVoucherInfo').style.display = this.findBestVoucher([this.selectedVoucher], this.cartData?.totalAmount || 0) ? 'block' : 'none';
+                    this.updateSummary(this.cartData);
+                }
+
                 this.renderVouchers(vouchers);
             } catch (error) {
                 console.error('Error loading vouchers:', error);
-                // Xử lý lỗi
+                this.showAlert('Lỗi tải danh sách phiếu giảm giá', 'danger');
             }
         }
 
@@ -507,77 +561,6 @@
                 return;
             }
 
-            // ✅ SỬA: Cải thiện logic xác định loại voucher
-            const getVoucherTypeInfo = (voucher) => {
-                // Kiểm tra theo type trước
-                if (voucher.type === 'public') {
-                    return { text: 'Công khai', color: 'success', icon: 'globe' };
-                } else if (voucher.type === 'private') {
-                    return { text: 'Cá nhân', color: 'warning', icon: 'user' };
-                }
-
-                // Kiểm tra theo loaiPhieu
-                if (voucher.loaiPhieu === true || voucher.loaiPhieu === 1) {
-                    return { text: 'Công khai', color: 'success', icon: 'globe' };
-                } else if (voucher.loaiPhieu === false || voucher.loaiPhieu === 0) {
-                    return { text: 'Cá nhân', color: 'warning', icon: 'user' };
-                }
-
-                // Mặc định
-                return { text: 'Không xác định', color: 'secondary', icon: 'question' };
-            };
-
-            // ✅ SỬA: Tách voucher theo loại để hiển thị rõ ràng
-            const publicVouchers = vouchers.filter(v => v.type === 'public' || v.loaiPhieu === true);
-            const privateVouchers = vouchers.filter(v => v.type === 'private' || v.loaiPhieu === false);
-
-            console.log('DEBUG: Public vouchers count:', publicVouchers.length);
-            console.log('DEBUG: Private vouchers count:', privateVouchers.length);
-
-            let html = '';
-
-            // Hiển thị voucher cá nhân trước (ưu tiên)
-            if (privateVouchers.length > 0) {
-                html += `
-            <div class="mb-3">
-                <h6 class="text-warning">
-                    <i class="fas fa-user me-2"></i>
-                    Phiếu giảm giá cá nhân (${privateVouchers.length})
-                </h6>
-                <hr>
-            </div>
-        `;
-                html += this.renderVoucherGroup(privateVouchers);
-            }
-
-            // Hiển thị voucher công khai
-            if (publicVouchers.length > 0) {
-                html += `
-            <div class="mb-3 ${privateVouchers.length > 0 ? 'mt-4' : ''}">
-                <h6 class="text-success">
-                    <i class="fas fa-globe me-2"></i>
-                    Phiếu giảm giá công khai (${publicVouchers.length})
-                </h6>
-                <hr>
-            </div>
-        `;
-                html += this.renderVoucherGroup(publicVouchers);
-            }
-
-            container.innerHTML = html;
-
-            // Bind events
-            document.querySelectorAll('.select-voucher').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const voucherData = JSON.parse(e.target.closest('.select-voucher').dataset.voucher);
-                    this.selectVoucher(voucherData);
-                });
-            });
-        }
-
-        // ✅ THÊM: Method mới để render từng nhóm voucher
-        renderVoucherGroup(vouchers) {
             const getVoucherTypeInfo = (voucher) => {
                 if (voucher.type === 'public' || voucher.loaiPhieu === true) {
                     return { text: 'Công khai', color: 'success', icon: 'globe' };
@@ -587,8 +570,13 @@
                 return { text: 'Không xác định', color: 'secondary', icon: 'question' };
             };
 
-            return vouchers.map(voucher => {
+            // Sử dụng toàn bộ danh sách vouchers để tìm voucher tốt nhất
+            const bestVoucher = this.findBestVoucher(vouchers, this.cartData?.totalAmount || 0);
+
+            // Hiển thị tất cả vouchers mà không phân loại
+            container.innerHTML = vouchers.map(voucher => {
                 const typeInfo = getVoucherTypeInfo(voucher);
+                const isBest = bestVoucher && bestVoucher.id === voucher.id;
                 return `
             <div class="card mb-3 voucher-item ${this.selectedVoucher?.id === voucher.id ? 'border-primary bg-light' : ''}"
                  style="cursor: pointer;">
@@ -611,6 +599,77 @@
                                     <i class="fas fa-${typeInfo.icon} me-1"></i>
                                     ${typeInfo.text}
                                 </span>
+                                ${isBest ? '<span class="badge bg-success ms-2">Lựa chọn tốt nhất</span>' : ''}
+                            </div>
+                            <p class="text-muted small mb-2">${voucher.moTa || 'Áp dụng cho đơn hàng'}</p>
+                            <div class="small">
+                                <div class="mb-1">
+                                    <i class="fas fa-shopping-cart text-info me-1"></i>
+                                    <span class="text-success">Đơn tối thiểu: ${this.formatCurrency(voucher.giaTriDonHangToiThieu || 0)}</span>
+                                </div>
+                                ${voucher.giaTriGiamToiDa ? `
+                                    <div class="mb-1">
+                                        <i class="fas fa-arrow-up text-warning me-1"></i>
+                                        <span class="text-warning">Giảm tối đa: ${this.formatCurrency(voucher.giaTriGiamToiDa)}</span>
+                                    </div>
+                                ` : ''}
+                                <div>
+                                    <i class="fas fa-clock text-secondary me-1"></i>
+                                    <span class="text-muted">Còn ${voucher.soLuongConLai || 0} lượt sử dụng</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <button class="btn ${this.selectedVoucher?.id === voucher.id ? 'btn-success' : 'btn-outline-primary'} btn-sm select-voucher"
+                                    data-voucher='${JSON.stringify(voucher)}'>
+                                <i class="fas ${this.selectedVoucher?.id === voucher.id ? 'fa-check' : 'fa-plus'} me-1"></i>
+                                ${this.selectedVoucher?.id === voucher.id ? 'Đã chọn' : 'Chọn'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+            }).join('');
+
+            document.querySelectorAll('.select-voucher').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const voucherData = JSON.parse(e.target.closest('.select-voucher').dataset.voucher);
+                    this.selectVoucher(voucherData);
+                });
+            });
+        }
+
+        renderVoucherGroup(vouchers) {
+            const bestVoucher = this.findBestVoucher(vouchers, this.cartData?.totalAmount || 0);
+
+            return vouchers.map(voucher => {
+                const typeInfo = (voucher.type === 'public' || voucher.loaiPhieu === true) ? { text: 'Công khai', color: 'success', icon: 'globe' } : { text: 'Cá nhân', color: 'warning', icon: 'user' };
+                const isBest = bestVoucher && bestVoucher.id === voucher.id;
+                return `
+            <div class="card mb-3 voucher-item ${this.selectedVoucher?.id === voucher.id ? 'border-primary bg-light' : ''}"
+                 style="cursor: pointer;">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            <div class="bg-gradient bg-primary text-white rounded-3 p-3 shadow-sm">
+                                <div class="h5 mb-0 fw-bold">
+                                    ${voucher.loaiGiam === 'PERCENT' ? voucher.giaTriGiam : this.formatCurrency(voucher.giaTriGiam)}
+                                </div>
+                                <small class="opacity-75">
+                                    ${voucher.loaiGiam === 'PERCENT' ? 'Giảm %' : 'Giảm tiền'}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-2">
+                                <h6 class="mb-0 fw-bold me-2">${voucher.ten}</h6>
+                                <span class="badge bg-${typeInfo.color}">
+                                    <i class="fas fa-${typeInfo.icon} me-1"></i>
+                                    ${typeInfo.text}
+                                </span>
+                                ${isBest ? '<span class="badge bg-success ms-2">Lựa chọn tốt nhất</span>' : ''}
                             </div>
                             <p class="text-muted small mb-2">${voucher.moTa || 'Áp dụng cho đơn hàng'}</p>
                             <div class="small">
@@ -647,13 +706,10 @@
         selectVoucher(voucher) {
             this.selectedVoucher = voucher;
 
-            // Update UI
             document.getElementById('voucherCode').value = voucher.ma;
-
-            // Update summary
+            document.getElementById('bestVoucherInfo').style.display = this.findBestVoucher([voucher], this.cartData?.totalAmount || 0) ? 'block' : 'none';
             this.updateSummary(this.cartData);
 
-            // Update voucher list UI
             document.querySelectorAll('.voucher-item').forEach(item => {
                 item.classList.remove('border-primary', 'bg-light');
             });
@@ -672,23 +728,19 @@
                 }
             });
 
-            // Close modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('voucherModal'));
             modal.hide();
 
-            this.showAlert('Đã chọn phiếu giảm giá thành công!', 'success');
+            this.showAlert(`Đã chọn phiếu giảm giá ${voucher.ten}!`, 'success');
         }
 
         clearVoucher() {
             this.selectedVoucher = null;
 
-            // Clear voucher input
             document.getElementById('voucherCode').value = '';
-
-            // Update summary
+            document.getElementById('bestVoucherInfo').style.display = 'none';
             this.updateSummary(this.cartData);
 
-            // Update voucher list UI
             document.querySelectorAll('.voucher-item').forEach(item => {
                 item.classList.remove('border-primary', 'bg-light');
             });
@@ -699,7 +751,6 @@
                 btn.innerHTML = '<i class="fas fa-plus me-1"></i>Chọn';
             });
 
-            // Close modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('voucherModal'));
             modal.hide();
 
@@ -712,7 +763,6 @@
             const voucher = this.selectedVoucher;
             let discountAmount = 0;
 
-            // ✅ Sửa: Check loại giảm rõ ràng
             if (voucher.loaiGiam === 'PERCENT') {
                 const percent = Number(voucher.giaTriGiam);
                 if (isNaN(percent)) {
@@ -720,15 +770,12 @@
                     return 0;
                 }
                 discountAmount = originalAmount * (percent / 100);
-                console.log(`PERCENT: originalAmount=${originalAmount}, giaTriGiam=${percent}, discountAmount=${discountAmount}`);
             } else {
                 discountAmount = Number(voucher.giaTriGiam);
-                console.log(`FIXED: discountAmount=${discountAmount}`);
             }
 
             if (voucher.giaTriGiamToiDa && discountAmount > voucher.giaTriGiamToiDa) {
                 discountAmount = voucher.giaTriGiamToiDa;
-                console.log(`Applied max discount: ${discountAmount}`);
             }
 
             return discountAmount;
@@ -765,25 +812,20 @@
                 });
 
                 const result = await response.json();
-                console.log('Process order response:', result); // Thêm log để kiểm tra
+                console.log('Process order response:', result);
 
                 if (result.success) {
-                    // Cập nhật UI
-                    document.getElementById('discount').textContent = -result.discountAmount; // Cập nhật giảm giá
-                    document.getElementById('totalAmount').textContent = result.finalAmount; // Cập nhật tổng cộng
+                    document.getElementById('discount').textContent = -result.discountAmount;
+                    document.getElementById('totalAmount').textContent = result.finalAmount;
 
-                    // Xử lý theo phương thức thanh toán
                     if (result.paymentMethod === 'MOMO') {
-                        // Thanh toán MoMo
                         this.handleMomoPayment(result);
                     } else {
-                        // Thanh toán COD
                         this.showAlert('Đặt hàng thành công!', 'success');
                         setTimeout(() => {
                             window.location.href = result.redirectUrl || '/checkout/success?id=' + result.orderId;
                         }, 2000);
                     }
-
                 } else {
                     this.showAlert(result.message || 'Có lỗi xảy ra', 'danger');
                 }
@@ -794,35 +836,26 @@
 
         handleMomoPayment(result) {
             if (result.payUrl) {
-                // Hiển thị modal xác nhận chuyển hướng
                 const confirmed = confirm('Bạn sẽ được chuyển hướng đến trang thanh toán MoMo. Bạn có muốn tiếp tục?');
                 if (confirmed) {
-                    // Lưu thông tin đơn hàng để kiểm tra sau
                     sessionStorage.setItem('pending_momo_order', result.orderId);
                     sessionStorage.setItem('return_url', window.location.href);
-                    
-                    // Chuyển hướng đến trang thanh toán MoMo
                     window.location.href = result.payUrl;
                 } else {
-                    // Người dùng từ chối, có thể hủy đơn hàng hoặc chuyển về COD
                     this.showAlert('Thanh toán bị hủy', 'warning');
                 }
             } else {
-                // Không có payUrl, có thể là QR code hoặc lỗi
                 this.showAlert('Không thể tạo liên kết thanh toán MoMo', 'danger');
             }
         }
 
-        // Kiểm tra trạng thái thanh toán MoMo khi trang load
         checkMomoPaymentStatus() {
             const pendingOrderId = sessionStorage.getItem('pending_momo_order');
             if (pendingOrderId) {
-                // Kiểm tra trạng thái thanh toán
                 fetch(`/checkout/check-momo-status?orderId=${pendingOrderId}`)
                     .then(response => response.json())
                     .then(result => {
                         if (result.success) {
-                            // Thanh toán thành công
                             sessionStorage.removeItem('pending_momo_order');
                             sessionStorage.removeItem('return_url');
                             this.showAlert('Thanh toán MoMo thành công!', 'success');
@@ -830,10 +863,8 @@
                                 window.location.href = '/checkout/success?id=' + pendingOrderId;
                             }, 2000);
                         } else if (result.status === 0) {
-                            // Vẫn đang chờ thanh toán
                             this.showAlert('Đơn hàng đang chờ thanh toán MoMo', 'info');
                         } else {
-                            // Thanh toán thất bại
                             sessionStorage.removeItem('pending_momo_order');
                             sessionStorage.removeItem('return_url');
                             this.showAlert('Thanh toán MoMo thất bại: ' + result.message, 'danger');
@@ -848,7 +879,7 @@
         showAlert(message, type) {
             Swal.fire({
                 position: 'top-end',
-                icon: type, // success, info, warning, error (maps to danger)
+                icon: type,
                 title: message,
                 showConfirmButton: false,
                 timer: 2000,
@@ -860,10 +891,7 @@
         }
     }
 
-    // Initialize
     const checkoutPage = new CheckoutPage();
-    
-    // Kiểm tra trạng thái thanh toán MoMo khi trang load
     checkoutPage.checkMomoPaymentStatus();
 </script>
 </body>

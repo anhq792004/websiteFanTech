@@ -35,4 +35,7 @@ public interface PhieuGiamGiaKhachHangRepo extends JpaRepository<PhieuGiamGiaKha
 
     List<PhieuGiamGiaKhachHang> findByKhachHang(KhachHang khachHang);
 
+    // Tìm phiếu giảm giá theo khách hàng và trạng thái hoạt động
+    List<PhieuGiamGiaKhachHang> findByKhachHangIdAndTrangThaiTrue(Long khachHangId);
+
 }

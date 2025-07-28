@@ -1,9 +1,6 @@
 package com.example.datn.service.Implements;
 
-import com.example.datn.dto.request.AddKHToHDCTRequest;
-import com.example.datn.dto.request.AddSPToHDCTRequest;
-import com.example.datn.dto.request.TrangThaiHoaDonRequest;
-import com.example.datn.dto.request.UpdateSoLuongRequest;
+import com.example.datn.dto.request.*;
 import com.example.datn.dto.response.LichSuHoaDonResponse;
 import com.example.datn.dto.response.LichSuThanhToanResponse;
 import com.example.datn.entity.HoaDon.HoaDon;
@@ -11,6 +8,7 @@ import com.example.datn.entity.HoaDon.HoaDonChiTiet;
 import com.example.datn.entity.HoaDon.LichSuHoaDon;
 import com.example.datn.entity.HoaDon.PhuongThucThanhToan;
 import com.example.datn.entity.KhachHang;
+import com.example.datn.entity.PhieuGiamGia;
 import com.example.datn.entity.SanPham.SanPhamChiTiet;
 import com.example.datn.repository.HoaDonRepo.HoaDonChiTietRepo;
 import com.example.datn.repository.HoaDonRepo.HoaDonRepo;
@@ -323,6 +321,63 @@ public class HoaDonServiceImpl implements HoaDonService {
         }
     }
 
+    private void updateTongTienHoaDon(Long hoaDonId) {
+        Optional<HoaDon> hoaDonOpt = hoaDonRepo.findById(hoaDonId);
+        if (hoaDonOpt.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy hóa đơn với ID: " + hoaDonId);
+        }
+
+        HoaDon hoaDon = hoaDonOpt.get();
+        List<HoaDonChiTiet> listHDCT = hoaDonChiTietRepo.findByHoaDon_Id(hoaDonId);
+
+        // Tính tổng tiền từ tất cả các sản phẩm
+        BigDecimal tongTien = listHDCT.stream()
+                .map(HoaDonChiTiet::getThanhTien)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        hoaDon.setTongTien(tongTien);
+
+        // Tính tổng tiền sau giảm giá
+        BigDecimal tongTienSauGiamGia = tinhTongTienSauGiamGia(hoaDon, tongTien);
+        hoaDon.setTongTienSauGiamGia(tongTienSauGiamGia);
+
+        hoaDonRepo.save(hoaDon);
+    }
+
+     //Tính tổng tiền sau khi áp dụng phiếu giảm giá
+    private BigDecimal tinhTongTienSauGiamGia(HoaDon hoaDon, BigDecimal tongTien) {
+        if (hoaDon.getPhieuGiamGia() == null) {
+            return tongTien;
+        }
+
+        PhieuGiamGia phieuGiamGia = hoaDon.getPhieuGiamGia();
+        BigDecimal giaTriGiam = BigDecimal.ZERO;
+
+        // Kiểm tra điều kiện áp dụng phiếu giảm giá
+        if (phieuGiamGia.getGiaTriDonHangToiThieu() != null &&
+                tongTien.compareTo(phieuGiamGia.getGiaTriDonHangToiThieu()) < 0) {
+            return tongTien; // Không đủ điều kiện áp dụng
+        }
+
+        if (phieuGiamGia.getLoaiGiamGia()) {
+            // Giảm theo phần trăm
+            giaTriGiam = tongTien.multiply(phieuGiamGia.getGiaTriGiam())
+                    .divide(BigDecimal.valueOf(100));
+
+            // Kiểm tra giá trị giảm tối đa
+            if (phieuGiamGia.getGiaTriGiamToiDa() != null &&
+                    giaTriGiam.compareTo(phieuGiamGia.getGiaTriGiamToiDa()) > 0) {
+                giaTriGiam = phieuGiamGia.getGiaTriGiamToiDa();
+            }
+        } else {
+            // Giảm theo số tiền cố định
+            giaTriGiam = phieuGiamGia.getGiaTriGiam();
+        }
+
+        BigDecimal tongTienSauGiam = tongTien.subtract(giaTriGiam);
+        return tongTienSauGiam.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : tongTienSauGiam;
+    }
+
     @Override
     public void addSPToHDCT(AddSPToHDCTRequest addSPToHDCTRequest) {
         Optional<SanPhamChiTiet> sanPhamChiTietOptional = sanPhamChiTietRepo.findById(addSPToHDCTRequest.getIdSP());
@@ -335,6 +390,7 @@ public class HoaDonServiceImpl implements HoaDonService {
         if (hoaDonOptional.isEmpty()) {
             throw new RuntimeException("Không tìm thấy hóa đơn với ID: " + addSPToHDCTRequest.getIdHD());
         }
+
         SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietOptional.get();
         HoaDon hoaDon = hoaDonOptional.get();
 
@@ -343,7 +399,7 @@ public class HoaDonServiceImpl implements HoaDonService {
             throw new RuntimeException("Sản phẩm " + sanPhamChiTiet.getSanPham().getTen() + " đã hết hàng!");
         }
 
-        //check sp tồn tại trong hóa đơn
+        // Check sp tồn tại trong hóa đơn
         Optional<HoaDonChiTiet> existingHDCT = hoaDonChiTietRepo.
                 findByHoaDonIdAndSanPhamChiTietId(hoaDon.getId(), sanPhamChiTiet.getId());
 
@@ -379,6 +435,9 @@ public class HoaDonServiceImpl implements HoaDonService {
 
             hoaDonChiTietRepo.save(hoaDonChiTiet);
         }
+
+        // **QUAN TRỌNG: Cập nhật tổng tiền hóa đơn sau khi thêm sản phẩm**
+        updateTongTienHoaDon(addSPToHDCTRequest.getIdHD());
     }
 
     @Override
@@ -440,6 +499,7 @@ public class HoaDonServiceImpl implements HoaDonService {
         HoaDonChiTiet hdct = hoaDonChiTietRepo.findByHoaDon_IdAndSanPhamChiTiet_Id(idHD, idSPCT);
         Optional<HoaDon> hoaDonOptional = hoaDonRepo.findById(idHD);
         HoaDon hoaDon = hoaDonOptional.get();
+
         if (hdct != null) {
             // Lấy thông tin sản phẩm chi tiết
             SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepo.findById(idSPCT)
@@ -462,8 +522,12 @@ public class HoaDonServiceImpl implements HoaDonService {
                 sanPhamChiTiet.setSoLuong(sanPhamChiTiet.getSoLuong() - 1);
                 sanPhamChiTietRepo.save(sanPhamChiTiet);
             }
+
             // Lưu lại bản ghi HoaDonChiTiet đã cập nhật
             hoaDonChiTietRepo.save(hdct);
+
+            // **Cập nhật tổng tiền hóa đơn**
+            updateTongTienHoaDon(idHD);
         } else {
             throw new RuntimeException("Không tìm thấy hóa đơn chi tiết với ID sản phẩm chi tiết.");
         }
@@ -471,12 +535,10 @@ public class HoaDonServiceImpl implements HoaDonService {
 
     @Override
     public void giamSoLuong(Long idHD, Long idSPCT) {
-        // Lấy HoaDonChiTiet theo idHoaDon và idSanPhamChiTiet
         HoaDonChiTiet hdct = hoaDonChiTietRepo.findByHoaDon_IdAndSanPhamChiTiet_Id(idHD, idSPCT);
         Optional<HoaDon> hoaDonOptional = hoaDonRepo.findById(idHD);
         HoaDon hoaDon = hoaDonOptional.get();
 
-        // Kiểm tra nếu không có bản ghi nào tìm thấy
         if (hdct != null) {
             // Kiểm tra nếu số lượng hiện tại bằng 1, không cho giảm nữa
             if (hdct.getSoLuong() <= 1) {
@@ -501,6 +563,9 @@ public class HoaDonServiceImpl implements HoaDonService {
 
             // Lưu lại bản ghi HoaDonChiTiet đã cập nhật
             hoaDonChiTietRepo.save(hdct);
+
+            // **Cập nhật tổng tiền hóa đơn**
+            updateTongTienHoaDon(idHD);
         } else {
             throw new RuntimeException("Không tìm thấy hóa đơn chi tiết với ID sản phẩm chi tiết.");
         }
@@ -510,6 +575,21 @@ public class HoaDonServiceImpl implements HoaDonService {
     public Integer tongSoLuong(Long idHD) {
         Integer tongSoLuong = hoaDonChiTietRepo.sumSoLuong(idHD);
         return tongSoLuong != null ? tongSoLuong : 0;
+    }
+
+    @Override
+    public void updateInfor(UpdateInforRequest request) {
+        Optional<HoaDon> hoaDonOptional = hoaDonRepo.findById(request.getIdHD());
+        if (hoaDonOptional.isPresent()) {
+            HoaDon hoaDon = hoaDonOptional.get();
+            hoaDon.setTenNguoiNhan(request.getTenNguoiNhan());
+            hoaDon.setSdtNguoiNhan(request.getSdtNguoiNhan());
+            hoaDon.setTinh(request.getTinh());
+            hoaDon.setHuyen(request.getHuyen());
+            hoaDon.setXa(request.getXa());
+            hoaDon.setSoNhaNgoDuong(request.getSoNhaNgoDuong());
+            hoaDonRepo.save(hoaDon);
+        }
     }
 
 

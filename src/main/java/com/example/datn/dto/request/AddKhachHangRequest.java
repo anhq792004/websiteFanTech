@@ -15,22 +15,22 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AddKhachHangRequest {
 
-    private String ten;
+    String ten;
 
-    private String email;
+    String email;
 
-    private String soDienThoai;
+    String soDienThoai;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date ngaySinh;
+    Date ngaySinh;
 
-    private String gioiTinh;
+    String gioiTinh;
 
-    private String tinhThanhPho;
+    String tinhThanhPho;
 
-    private String quanHuyen;
+    String quanHuyen;
 
-    private String xaPhuong;
+    String xaPhuong;
 
-    private String soNhaNgoDuong;
+    String soNhaNgoDuong;
 }

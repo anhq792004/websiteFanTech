@@ -72,9 +72,6 @@
                                                     <h6 th:id="'city' + ${stat.index}">Tỉnh: </h6>
                                                     <h6 th:id="'district' + ${stat.index}">Quận / Huyện: </h6>
                                                     <h6 th:id="'ward' + ${stat.index}">Xã / Phường: </h6>
-                                                    <script>
-                                                        console.log('city' + '${stat.index}')
-                                                    </script>
                                                     <h6 th:text="${diaChi.soNhaNgoDuong}">Chi tiết địa chỉ</h6>
                                                 </div>
                                             </form>
@@ -101,31 +98,25 @@
     <script th:replace="/admin/fragments/script :: script"></script>
 
     <script th:src="@{/admin/assets/compiled/js/diaChi.js}"></script>
-    <!-- hienthitendangnhap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplePagination.js/1.6/jquery.simplePagination.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script th:inline="javascript">
         // Lấy danh sách địa chỉ từ Thymeleaf (chuyển từ dạng Thymeleaf sang JSON)
 
-        var listDiaChi = /*[[${listDiaChi}]]*/ [];
+        const listDiaChi = /*[[${listDiaChi}]]*/ [];
 
         listDiaChi.forEach(function (diaChi, index) {
             // Lấy giá trị từ các trường input dựa theo chỉ số
-            var idTinh = document.getElementById('tinh' + index).value;
-            var idHuyen = document.getElementById('huyen' + index).value;
-            var idXa = document.getElementById('xa' + index).value;
+            const idTinh = document.getElementById('tinh' + index).value;
+            const idHuyen = document.getElementById('huyen' + index).value;
+            const idXa = document.getElementById('xa' + index).value;
 
             // Phần tử hiển thị kết quả
-            var citis = document.getElementById('city' + index);
-            var districts = document.getElementById('district' + index);
-            var wards = document.getElementById('ward' + index);
+            const citis = document.getElementById('city' + index);
+            const districts = document.getElementById('district' + index);
+            const wards = document.getElementById('ward' + index);
 
             // Cấu hình Axios để lấy dữ liệu từ GitHub
-            var Parameter = {
+            const Parameter = {
                 url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",
                 method: "GET",
                 responseType: "application/json",
@@ -138,15 +129,15 @@
 
             // Hàm xử lý dữ liệu địa giới hành chính
             function renderCity(data, idTinh, idHuyen, idXa, citis, districts, wards) {
-                var selectedCity = data.find(city => city.Id == idTinh);
+                const selectedCity = data.find(city => city.Id == idTinh);
                 if (selectedCity) {
                     citis.textContent = "Tỉnh: " + selectedCity.Name;
 
-                    var selectedDistrict = selectedCity.Districts.find(district => district.Id == idHuyen);
+                    const selectedDistrict = selectedCity.Districts.find(district => district.Id == idHuyen);
                     if (selectedDistrict) {
                         districts.textContent = "Quận / Huyện: " + selectedDistrict.Name;
 
-                        var selectedWard = selectedDistrict.Wards.find(ward => ward.Id == idXa);
+                        const selectedWard = selectedDistrict.Wards.find(ward => ward.Id == idXa);
                         if (selectedWard) {
                             wards.textContent = "Xã / Phường: " + selectedWard.Name;
                         } else {

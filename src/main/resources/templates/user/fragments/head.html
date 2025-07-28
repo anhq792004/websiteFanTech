@@ -1,10 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<head th:fragment="head" xmlns:th="http://www.thymeleaf.org">
     <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FanTech Shop</title>
+    <link rel="icon" type="image/png"
+          href="https://png.pngtree.com/png-vector/20221011/ourmid/pngtree-letter-v-logo-icon-vector-png-image_6295820.png">
 
-</body>
-</html>
+    <link rel="stylesheet" th:href="@{/admin/assets/compiled/svg/favicon.svg}" type="image/x-icon">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/admin/assets/extensions/choices.js/public/assets/styles/choices.css}">
+    <link rel="stylesheet" th:href="@{/admin/assets/extensions/choices.js/public/assets/styles/base.css}">
+</head>

@@ -35,26 +35,22 @@ public class giaoDienController {
     @GetMapping("/detail")
     public String detail(@RequestParam("id") Long id, Model model) {
         try {
-            // Tìm sản phẩm theo ID
             Optional<SanPham> sanPhamOpt = sanPhamRepo.findById(id);
-
             if (sanPhamOpt.isPresent()) {
                 SanPham sanPham = sanPhamOpt.get();
                 model.addAttribute("sanPham", sanPham);
-
-                // Lấy chi tiết sản phẩm đầu tiên (nếu có)
                 if (sanPham.getSanPhamChiTiet() != null && !sanPham.getSanPhamChiTiet().isEmpty()) {
                     SanPhamChiTiet chiTietDauTien = sanPham.getSanPhamChiTiet().get(0);
+                    System.out.println("Sản phẩm: " + sanPham.getTen() + ", Ảnh: " +
+                            (chiTietDauTien.getHinhAnh() != null ? chiTietDauTien.getHinhAnh().getHinhAnh() : "Không có ảnh"));
                     model.addAttribute("chiTietDauTien", chiTietDauTien);
                 }
-
                 return "user/detail";
             } else {
-                // Nếu không tìm thấy sản phẩm, redirect về trang chủ
                 return "redirect:/fanTech/index";
             }
         } catch (Exception e) {
-            // Xử lý lỗi, redirect về trang chủ
+            System.err.println("Lỗi khi load chi tiết sản phẩm: " + e.getMessage());
             return "redirect:/fanTech/index";
         }
     }

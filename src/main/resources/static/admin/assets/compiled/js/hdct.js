@@ -213,7 +213,11 @@ $(".btn-add-sanPham").click(function () {
                 timer: 500,
                 timerProgressBar: true
             }).then(() => {
+                // Reload trang để cập nhật đầy đủ
                 location.reload();
+
+                // Hoặc có thể cập nhật động (nâng cao hơn)
+                // updateTongTienDisplay();
             });
         },
         error: function (xhr) {
@@ -270,8 +274,8 @@ $(".btn-xoa-sanPham").click(function () {
 });
 
 $(".quantity-btn").click(function () {
-    const idSP = $(this).closest("form").data("idsp");  // lấy từ data-idsp
-    const idHD = $(this).closest("form").data("idhd");  // lấy từ data-idhd
+    const idSP = $(this).closest("form").data("idsp");
+    const idHD = $(this).closest("form").data("idhd");
 
     $.ajax({
         url: '/hoa-don/tangSoLuong',
@@ -288,7 +292,9 @@ $(".quantity-btn").click(function () {
                 position: 'top-end',
                 showConfirmButton: false,
                 timer: 1000
-            }).then(() => location.reload());
+            }).then(() => {
+                location.reload(); // Reload để cập nhật tổng tiền
+            });
         },
         error: function (xhr) {
             Swal.fire({
@@ -304,8 +310,8 @@ $(".quantity-btn").click(function () {
 });
 
 $(".quantity-btn-1").click(function () {
-    const idSP = $(this).closest("form").data("idsp");  // lấy từ data-idsp
-    const idHD = $(this).closest("form").data("idhd");  // lấy từ data-idhd
+    const idSP = $(this).closest("form").data("idsp");
+    const idHD = $(this).closest("form").data("idhd");
 
     $.ajax({
         url: '/hoa-don/giamSoLuong',
@@ -322,7 +328,9 @@ $(".quantity-btn-1").click(function () {
                 position: 'top-end',
                 showConfirmButton: false,
                 timer: 1000
-            }).then(() => location.reload());
+            }).then(() => {
+                location.reload(); // Reload để cập nhật tổng tiền
+            });
         },
         error: function (xhr) {
             Swal.fire({
@@ -336,8 +344,138 @@ $(".quantity-btn-1").click(function () {
         }
     });
 });
+// update infor khach hang
+$(document).ready(function () {
+    $(".btn-update-infor").click(function () {
+        let formData = {
+            idHD: $("#idHD").val(),
+            tenNguoiNhan: $("#tenNguoiNhan").val(),
+            sdtNguoiNhan: $("#sdtNguoiNhan").val(),
+            soNhaNgoDuong: $("#soNhaNgoDuong").val(),
+            xa: $("#ward").val(),
+            huyen: $("#district").val(),
+            tinh: $("#city").val()
+        };
 
+        $.ajax({
+            url: "/hoa-don/updateInfor",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(formData),
+            success: function (response) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: response,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 500
+                }).then(() => location.reload());
+            },
+            error: function (xhr) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    title: xhr.responseText,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+            }
+        });
+    });
+});
 
+function updateTongTienDisplay() {
+    // Tính toán lại tổng tiền từ các sản phẩm hiện có
+    let tongTien = 0;
+    $('.product-total').each(function() {
+        let thanhTien = parseFloat($(this).text().replace(/[^\d]/g, '')) || 0;
+        tongTien += thanhTien;
+    });
+
+    // Cập nhật hiển thị tổng tiền
+    $('.order-total').text(formatCurrency(tongTien));
+
+    // Tính toán tổng tiền sau giảm giá (cần gọi API để lấy thông tin phiếu giảm giá)
+    updateTongTienSauGiamGia(tongTien);
+}
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND'
+    }).format(amount);
+}
+
+function updateTongTienSauGiamGia(tongTien) {
+    // Gọi API để tính toán tổng tiền sau giảm giá
+    const hoaDonId = $('form[data-id]').first().data('id');
+
+    $.ajax({
+        url: '/hoa-don/tinh-tong-tien-sau-giam',
+        type: 'POST',
+        data: {
+            idHD: hoaDonId,
+            tongTien: tongTien
+        },
+        success: function(response) {
+            // Cập nhật hiển thị tổng tiền sau giảm giá
+            $('.order-total:last').text(formatCurrency(response.tongTienSauGiamGia));
+        },
+        error: function() {
+            console.log('Lỗi khi tính toán tổng tiền sau giảm giá');
+        }
+    });
+}
+
+$(document).ready(function () {
+    $('.update-so-luong-form').on('submit', function (e) {
+        e.preventDefault();
+
+        const form = $(this);
+        const idsp = form.data('idsp');
+        const idhd = form.data('idhd');
+        const soLuong = form.find('.quantity-input').val();
+        const gia = form.data('gia');
+
+        $.ajax({
+            url: `/hoa-don/updateSoLuong`,
+            type: 'POST',
+            data: JSON.stringify({
+                idSP: idsp,
+                idHD: idhd,
+                soLuong: soLuong,
+                gia: gia
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: response,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    timerProgressBar: true
+                }).then(() => {
+                    location.reload();
+                });
+            },
+            error: function (xhr) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    title: xhr.responseText,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            }
+        });
+    });
+});
 
 
 

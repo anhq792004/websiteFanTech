@@ -866,11 +866,15 @@ $(document).ready(function () {
     formatCurrency();
 });
 
+
 // Khởi tạo biến cho phiếu giảm giá
 let selectedPhieuGiamGia = null;
+let currentCustomerId = null; // Biến lưu ID khách hàng hiện tại
 
 // Tải danh sách phiếu giảm giá khi mở modal
 $(document).on('show.bs.modal', '#modalPhieuGiamGia', function () {
+    // Lấy thông tin khách hàng hiện tại từ form
+    getCurrentCustomerInfo();
     loadPhieuGiamGia();
 });
 
@@ -882,16 +886,51 @@ $(document).on('hidden.bs.modal', '#modalPhieuGiamGia', function () {
     $('body').css('padding-right', '');
 });
 
+// Hàm lấy thông tin khách hàng hiện tại
+function getCurrentCustomerInfo() {
+    const hoaDon = window.hoaDon || {};
+    const tenKhachHang = $('#name').val() || $('#tenHienThi').text() || 'Khách Lẻ';
+
+    // Cập nhật hiển thị thông tin khách hàng trong modal
+    if (tenKhachHang && tenKhachHang !== 'Khách Lẻ') {
+        $('#customerInfo').show();
+        $('#currentCustomerName').text(tenKhachHang);
+
+        // Lấy ID khách hàng từ hóa đơn hoặc từ form hidden nếu có
+        if (hoaDon.khachHang && hoaDon.khachHang.id) {
+            currentCustomerId = hoaDon.khachHang.id;
+        } else {
+            // Tìm ID khách hàng từ danh sách khách hàng đã load trước đó
+            const khachHangList = window.khachHangList || [];
+            const foundCustomer = khachHangList.find(kh => kh.ten === tenKhachHang);
+            currentCustomerId = foundCustomer ? foundCustomer.id : null;
+        }
+    } else {
+        $('#customerInfo').hide();
+        $('#currentCustomerName').text('Khách Lẻ');
+        currentCustomerId = null;
+    }
+
+    console.log('Current customer ID:', currentCustomerId);
+}
+
 // Hàm tải danh sách phiếu giảm giá từ API
 function loadPhieuGiamGia() {
+    // Lấy tổng tiền hóa đơn từ UI
+    const tongTienDonHang = parseFloat($('#tongTienSauGiam').attr('data-value') || $('#tienThanhToan').attr('data-value')) || 0;
+    const requestData = currentCustomerId ? { idKH: currentCustomerId, tongTienDonHang: tongTienDonHang } : { tongTienDonHang: tongTienDonHang };
+    console.log('Requesting PGG with data:', requestData);
+
     $.ajax({
         url: '/sale/api/phieu-giam-gia/active',
         type: 'GET',
+        data: requestData,
         success: function (data) {
+            console.log('Received PGG data:', data);
             renderPhieuGiamGia(data);
         },
         error: function (xhr) {
-            console.error('Lỗi khi tải phiếu giảm giá:', xhr);
+            console.error('Error loading PGG:', xhr.responseText);
             Swal.fire({
                 toast: true,
                 icon: 'error',
@@ -913,30 +952,64 @@ function renderPhieuGiamGia(data) {
         data.forEach(function (item, index) {
             const row = $('<tr>');
             row.append($('<td>').text(index + 1));
-            row.append($('<td>').text(item.ma));
-            row.append($('<td>').text(item.ten));
+            row.append($('<td>').text(item.ma || ''));
+            row.append($('<td>').text(item.ten || ''));
 
-            // Hiển thị giá trị giảm theo loại (% hoặc tiền mặt)
-            const giaTriGiam = item.loaiGiamGia ?
-                item.giaTriGiam + ' %' :
-                formatNumberToVND(item.giaTriGiam);
+            const giaTriGiam = item.loaiGiamGia ? item.giaTriGiam + '%' : formatNumberToVND(item.giaTriGiam);
             row.append($('<td>').text(giaTriGiam));
 
-            row.append($('<td>').text(item.loaiGiamGia ? 'Phần trăm' : 'Tiền mặt'));
+            const loaiGiam = item.loaiGiamGia ? 'Phần trăm' : 'Tiền mặt';
+            row.append($('<td>').text(loaiGiam));
 
+            // Thêm cột giá trị đơn hàng tối thiểu
+            const giaTriDonHangToiThieu = item.giaTriDonHangToiThieu ?
+                formatNumberToVND(item.giaTriDonHangToiThieu) : 'Không có';
+            row.append($('<td>').text(giaTriDonHangToiThieu));
+
+            // Thêm cột giá trị giảm tối đa
+            const giaTriGiamToiDa = item.giaTriGiamToiDa ?
+                formatNumberToVND(item.giaTriGiamToiDa) : 'Không có';
+            row.append($('<td>').text(giaTriGiamToiDa));
+
+            // Ngày kết thúc
+            const ngayKetThuc = item.ngayKetThuc ?
+                new Date(item.ngayKetThuc).toLocaleDateString('vi-VN') : 'N/A';
+            row.append($('<td>').text(ngayKetThuc));
+
+            const loaiPhieuCell = $('<td>');
+            const loaiPhieuText = item.isPersonal ? 'Cá nhân' : 'Công khai';
+            loaiPhieuCell.html(`<span class="badge ${item.isPersonal ? 'bg-primary' : 'bg-success'}">${loaiPhieuText}</span>`);
+            row.append(loaiPhieuCell);
+
+            // Tạo nút áp dụng và kiểm tra điều kiện hợp lệ
             const btnApDung = $('<button>')
                 .addClass('btn btn-outline-success btn-sm')
                 .text('Áp dụng')
                 .attr('data-id', item.id)
                 .attr('data-loai', item.loaiGiamGia)
                 .attr('data-giatri', item.giaTriGiam)
-                .attr('data-ten', item.ten);
+                .attr('data-giatri-giam-toi-da', item.giaTriGiamToiDa || '')
+                .attr('data-ten', item.ten)
+                .attr('data-is-personal', item.isPersonal || false)
+                .attr('data-pggkh-id', item.pggkhId || '');
+
+            // Vô hiệu hóa nút nếu không đủ điều kiện
+            if (!item.isEligible) {
+                btnApDung
+                    .prop('disabled', true)
+                    .addClass('btn-outline-secondary')
+                    .removeClass('btn-outline-success')
+                    .attr('title', 'Đơn hàng chưa đạt giá trị tối thiểu để áp dụng phiếu này');
+            }
 
             row.append($('<td>').append(btnApDung));
             tbody.append(row);
         });
     } else {
-        tbody.append('<tr><td colspan="6" class="text-center">Không có phiếu giảm giá nào</td></tr>');
+        const noDataMessage = currentCustomerId ?
+            'Không có phiếu giảm giá nào cho khách hàng này' :
+            'Không có phiếu giảm giá nào';
+        tbody.append(`<tr><td colspan="10" class="text-center">${noDataMessage}</td></tr>`);
     }
 }
 
@@ -946,6 +1019,8 @@ $(document).on('click', '#phieuGiamGiaList button', function () {
     const loaiGiamGia = $(this).data('loai'); // true: phần trăm, false: tiền mặt
     const giaTriGiam = $(this).data('giatri');
     const tenPGG = $(this).data('ten');
+    const isPersonal = $(this).data('is-personal');
+    const pggkhId = $(this).data('pggkh-id');
     const idHD = $('#btnThanhToan').data('id');
 
     // Lưu thông tin phiếu giảm giá đã chọn
@@ -953,11 +1028,13 @@ $(document).on('click', '#phieuGiamGiaList button', function () {
         id: idPGG,
         loaiGiamGia: loaiGiamGia,
         giaTriGiam: giaTriGiam,
-        ten: tenPGG
+        ten: tenPGG,
+        isPersonal: isPersonal,
+        pggkhId: pggkhId
     };
 
     // Áp dụng giảm giá vào hóa đơn
-    applyDiscount(idHD, idPGG);
+    applyDiscount(idHD, idPGG, isPersonal, pggkhId);
 
     // Đóng modal đúng cách
     const modalElement = document.getElementById('modalPhieuGiamGia');
@@ -973,14 +1050,21 @@ $(document).on('click', '#phieuGiamGiaList button', function () {
 });
 
 // Áp dụng phiếu giảm giá vào hóa đơn
-function applyDiscount(idHD, idPGG) {
+function applyDiscount(idHD, idPGG, isPersonal = false, pggkhId = null) {
+    const requestData = {
+        idHD: idHD,
+        idPGG: idPGG,
+        isPersonal: isPersonal
+    };
+
+    if (isPersonal && pggkhId) {
+        requestData.pggkhId = pggkhId;
+    }
+
     $.ajax({
         url: '/sale/apply-discount',
         type: 'POST',
-        data: {
-            idHD: idHD,
-            idPGG: idPGG
-        },
+        data: requestData,
         success: function (response) {
             Swal.fire({
                 toast: true,
@@ -991,21 +1075,41 @@ function applyDiscount(idHD, idPGG) {
                 timer: 1500
             });
 
-            // Cập nhật UI
-            updateDiscountDisplay();
+            // Lấy lại dữ liệu hóa đơn từ server để cập nhật UI
+            $.ajax({
+                url: '/sale/api/get-hoa-don',
+                type: 'GET',
+                data: { idHD: idHD },
+                success: function (hoaDonData) {
+                    if (hoaDonData) {
+                        const tongTienSauGiamGia = hoaDonData.tongTienSauGiamGia || hoaDonData.tongTien || 0;
+                        $('#tongTienSauGiam').text(formatNumberToVND(tongTienSauGiamGia));
+                        $('#tongTienSauGiam').attr('data-value', tongTienSauGiamGia);
+
+                        const giaTriGiamGia = hoaDonData.giaTriGiamGia || 0;
+                        $('#giaTriGiamGia').text(formatNumberToVND(giaTriGiamGia));
+                        $('#giaTriGiamGia').attr('data-value', giaTriGiamGia);
+
+                        $('#tenPhieuGiamGia').text(hoaDonData.phieuGiamGia?.ten || 'Chưa chọn');
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Lỗi khi lấy dữ liệu hóa đơn:', xhr);
+                }
+            });
+
+            // Reload trang sau khi cập nhật UI
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
         },
         error: function (xhr) {
             console.error("Lỗi khi áp dụng phiếu giảm giá:", xhr);
-
-            // Đảm bảo modal được đóng và backdrop được xóa
             const modalElement = document.getElementById('modalPhieuGiamGia');
             const modal = bootstrap.Modal.getInstance(modalElement);
-            if (modal) {
-                modal.hide();
-            }
+            if (modal) modal.hide();
             $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open').css('overflow', '');
-            $('body').css('padding-right', '');
+            $('body').removeClass('modal-open').css('overflow', '').css('padding-right', '');
 
             Swal.fire({
                 toast: true,
@@ -1015,8 +1119,6 @@ function applyDiscount(idHD, idPGG) {
                 showConfirmButton: false,
                 timer: 3000
             });
-
-            // Reset phiếu giảm giá đã chọn
             selectedPhieuGiamGia = null;
         }
     });
@@ -1033,6 +1135,12 @@ function updateDiscountDisplay() {
     if (selectedPhieuGiamGia.loaiGiamGia) {
         // Loại phần trăm
         giaTriGiamGia = (tongTien * selectedPhieuGiamGia.giaTriGiam) / 100;
+
+        // Kiểm tra giá trị giảm tối đa nếu có
+        if (selectedPhieuGiamGia.giaTriGiamToiDa &&
+            giaTriGiamGia > selectedPhieuGiamGia.giaTriGiamToiDa) {
+            giaTriGiamGia = selectedPhieuGiamGia.giaTriGiamToiDa;
+        }
     } else {
         // Loại tiền mặt
         giaTriGiamGia = parseFloat(selectedPhieuGiamGia.giaTriGiam);
@@ -1050,8 +1158,184 @@ function updateDiscountDisplay() {
     $('#tongTienSauGiam').text(formatNumberToVND(tongTienSauGiam));
     $('#tongTienSauGiam').attr('data-value', tongTienSauGiam);
 
-    console.log("Tổng tiền:", tongTien, "Giảm giá:", giaTriGiamGia, "Tổng sau giảm:", tongTienSauGiam);
+    // Cập nhật lại tiền thừa nếu người dùng đã nhập tiền khách trả
+    const tienKhachTra = parseFloat($('#tienKhachTra').val()) || 0;
+    if (tienKhachTra > 0) {
+        const tienThua = tienKhachTra - tongTienSauGiam;
+        $('#tienThua').text(formatNumberToVND(tienThua));
+
+        // Cập nhật màu sắc cho tiền thừa
+        if (tienThua < 0) {
+            $('#tienThua').addClass("text-danger");
+            // Cập nhật trạng thái nút thanh toán
+            $('#btnThanhToan').removeClass('btn-success').addClass('btn-outline-warning');
+        } else {
+            $('#tienThua').removeClass("text-danger");
+            $('#btnThanhToan').removeClass('btn-outline-warning').addClass('btn-success');
+        }
+    }
+
+    console.log("Cập nhật UI - Tổng tiền:", tongTien, "Giảm giá:", giaTriGiamGia, "Tổng sau giảm:", tongTienSauGiam);
 }
+
+// Sự kiện khi khách hàng được chọn - cập nhật danh sách phiếu giảm giá
+$(document).on('click', '#phieuGiamGiaList button', function () {
+    const idPGG = $(this).data('id');
+    const loaiGiamGia = $(this).data('loai'); // true: phần trăm, false: tiền mặt
+    const giaTriGiam = $(this).data('giatri');
+    const tenPGG = $(this).data('ten');
+    const isPersonal = $(this).data('is-personal');
+    const pggkhId = $(this).data('pggkh-id');
+    const idHD = $('#btnThanhToan').data('id');
+
+    // Lấy thêm thông tin giá trị giảm tối đa từ data attribute
+    const giaTriGiamToiDa = $(this).data('giatri-giam-toi-da') || null;
+
+    // Lưu thông tin phiếu giảm giá đã chọn
+    selectedPhieuGiamGia = {
+        id: idPGG,
+        loaiGiamGia: loaiGiamGia,
+        giaTriGiam: giaTriGiam,
+        giaTriGiamToiDa: giaTriGiamToiDa, // Thêm thông tin này
+        ten: tenPGG,
+        isPersonal: isPersonal,
+        pggkhId: pggkhId
+    };
+
+    // Áp dụng giảm giá vào hóa đơn
+    applyDiscount(idHD, idPGG, isPersonal, pggkhId);
+
+    // Đóng modal đúng cách
+    const modalElement = document.getElementById('modalPhieuGiamGia');
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    if (modal) {
+        modal.hide();
+    }
+
+    // Xóa backdrop nếu còn
+    $('.modal-backdrop').remove();
+    $('body').removeClass('modal-open').css('overflow', '');
+    $('body').css('padding-right', '');
+});
+
+// Hàm tìm kiếm phiếu giảm giá
+$(document).on('input', '#searchPGG', function() {
+    const searchTerm = $(this).val().toLowerCase();
+
+    $('#phieuGiamGiaList tr').each(function() {
+        const row = $(this);
+        const ma = row.find('td:eq(1)').text().toLowerCase();
+        const ten = row.find('td:eq(2)').text().toLowerCase();
+
+        if (ma.includes(searchTerm) || ten.includes(searchTerm)) {
+            row.show();
+        } else {
+            row.hide();
+        }
+    });
+});
+
+// Sự kiện cho nút tìm kiếm phiếu giảm giá
+$(document).on('click', '#searchButtonPGG', function() {
+    const searchTerm = $('#searchPGG').val();
+    if (searchTerm.trim()) {
+        // Thực hiện tìm kiếm
+        $('#searchPGG').trigger('input');
+    } else {
+        // Hiển thị tất cả nếu không có từ khóa
+        $('#phieuGiamGiaList tr').show();
+    }
+});
+
+// Hàm mở modal phiếu giảm giá
+function openDiscountModal(hoaDonId) {
+    // Lưu ID hóa đơn để sử dụng trong modal
+    window.currentHoaDonId = hoaDonId;
+
+    // Lấy thông tin khách hàng hiện tại
+    getCurrentCustomerInfo();
+
+    // Tải danh sách phiếu giảm giá
+    loadPhieuGiamGia();
+
+    // Mở modal phiếu giảm giá
+    const modalElement = document.getElementById('modalPhieuGiamGia');
+    if (modalElement) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+
+        // Thêm event listener cho sự kiện đóng modal
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            // Khi modal đóng, hiển thị dialog hỏi có muốn thử lại thanh toán không
+            Swal.fire({
+                title: 'Thử lại thanh toán?',
+                text: 'Bạn có muốn thử lại thanh toán với Momo không?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Thử lại',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Thử lại thanh toán
+                    retryMomoPayment(hoaDonId);
+                } else {
+                    // Hủy thanh toán
+                    cancelMomoPayment(hoaDonId);
+                }
+            });
+
+            // Xóa event listener sau khi đã xử lý
+            modalElement.removeEventListener('hidden.bs.modal', arguments.callee);
+        }, {once: true});
+    } else {
+        console.error("Không tìm thấy modal phiếu giảm giá");
+        // Nếu không tìm thấy modal, hiển thị dialog thử lại ngay
+        Swal.fire({
+            title: 'Thử lại thanh toán?',
+            text: 'Không thể mở modal phiếu giảm giá. Bạn có muốn thử lại thanh toán với Momo không?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Thử lại',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Thử lại thanh toán
+                retryMomoPayment(hoaDonId);
+            } else {
+                // Hủy thanh toán
+                cancelMomoPayment(hoaDonId);
+            }
+        });
+    }
+}
+
+// Khởi tạo khi trang load
+$(document).ready(function () {
+    // Định dạng tiền tệ ban đầu
+    formatCurrency();
+
+    // Khởi tạo tổng tiền sau giảm
+    const tongTien = parseFloat($('#tienThanhToan').attr('data-value')) || 0;
+    $('#tongTienSauGiam').text(formatNumberToVND(tongTien));
+    $('#tongTienSauGiam').attr('data-value', tongTien);
+
+    console.log("Đã khởi tạo định dạng tiền tệ cho trang");
+
+    // Kiểm tra thông báo thanh toán từ flash attribute
+    checkPaymentStatus();
+
+    // Lưu danh sách khách hàng vào window object để sử dụng sau
+    const khachHangElements = $('.btn-add-khachHang');
+    window.khachHangList = [];
+    khachHangElements.each(function() {
+        const kh = {
+            id: $(this).data('id-sp'),
+            ten: $(this).data('ten'),
+            sdt: $(this).data('sdt')
+        };
+        window.khachHangList.push(kh);
+    });
+});
 
 // Chức năng chọn địa chỉ từ danh sách tỉnh thành Việt Nam
 document.addEventListener("DOMContentLoaded", function () {

@@ -6,8 +6,10 @@ import com.example.datn.entity.HoaDon.HoaDonChiTiet;
 import com.example.datn.entity.KhachHang;
 import com.example.datn.entity.MomoTransaction;
 import com.example.datn.entity.PhieuGiamGia;
+import com.example.datn.entity.PhieuGiamGiaKhachHang;
 import com.example.datn.entity.SanPham.SanPhamChiTiet;
 import com.example.datn.repository.KhachHangRepo.KhachHangRepo;
+import com.example.datn.repository.PhieuGiamGiaKhachHangRepo;
 import com.example.datn.repository.PhieuGiamGiaRepo;
 import com.example.datn.repository.SanPhamRepo.SanPhamChiTietRepo;
 import com.example.datn.service.BanHang.BanHangService;
@@ -22,12 +24,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.HashMap;
 
 @Controller
 @RequestMapping("/sale")
@@ -39,6 +37,7 @@ public class BanHangTaiQuayController {
     private final KhachHangRepo khachHangRepo;
     private final SanPhamChiTietRepo sanPhamChiTietRepo;
     private final PhieuGiamGiaRepo phieuGiamGiaRepo;
+    private final PhieuGiamGiaKhachHangRepo phieuGiamGiaKhachHangRepo;
     private final MomoService momoService;
 
 
@@ -52,48 +51,39 @@ public class BanHangTaiQuayController {
     }
 
     @GetMapping("/hdct")
-    public String viewHDCT(Model model, @RequestParam("idHD") Long idHD, 
+    public String viewHDCT(Model model, @RequestParam("idHD") Long idHD,
                            @ModelAttribute("paymentStatus") String paymentStatus,
                            @ModelAttribute("paymentMessage") String paymentMessage) {
-        // Thêm thông báo thanh toán vào model nếu có
+        Optional<HoaDon> hoaDonOptional = hoaDonService.findHoaDonById(idHD);
+        HoaDon hoaDon = hoaDonOptional.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hóa đơn"));
+        model.addAttribute("hoaDon", hoaDon);
+
+        // Đảm bảo nạp đầy đủ thông tin, bao gồm tongTienSauGiamGia
+        model.addAttribute("tongTienSauGiamGia", hoaDon.getTongTienSauGiamGia() != null ? hoaDon.getTongTienSauGiamGia() : hoaDon.getTongTien());
+
+        // Các thuộc tính khác
         if (paymentStatus != null && !paymentStatus.isEmpty()) {
             model.addAttribute("paymentStatus", paymentStatus);
             model.addAttribute("paymentMessage", paymentMessage);
         }
-        
-        Optional<HoaDon> hoaDonOptional = hoaDonService.findHoaDonById(idHD);
-        HoaDon hoaDon = hoaDonOptional.orElseThrow(()
-                -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hóa đơn"));
-        model.addAttribute("hoaDon", hoaDon);
-        // Hiển thị thông tin khách hàng
+
         KhachHang khachHang = hoaDon.getKhachHang();
         model.addAttribute("khachHang", khachHang);
-        //List khách hàng
-        model.addAttribute("listsKhachhang", khachHangRepo.findAll());
-        // Hiển thị danh sách hóa đơn chờ
-        List<HoaDon> listHoaDon = banHangService.findHoaDon();
-        model.addAttribute("listHoaDon", listHoaDon);
-        
-        // Hiển thị danh sách sản phẩm
-        List<SanPhamChiTiet> findSPCTByIdSanPham = sanPhamChiTietRepo.findByTrangThaiTrue();
-        // Lọc các sản phẩm còn trong kho (số lượng > 0)
-        findSPCTByIdSanPham = findSPCTByIdSanPham.stream()
-            .filter(sp -> sp.getSoLuong() > 0)
-            .collect(Collectors.toList());
-        
-        System.out.println("Số lượng sản phẩm có trạng thái true và còn hàng: " + findSPCTByIdSanPham.size());
-        for (SanPhamChiTiet sp : findSPCTByIdSanPham) {
-            System.out.println("ID: " + sp.getId() + 
-                ", Tên: " + (sp.getSanPham() != null ? sp.getSanPham().getTen() : "null") + 
-                ", Giá: " + sp.getGia() + 
-                ", Số lượng: " + sp.getSoLuong());
+
+        PhieuGiamGia phieuGiamGia = hoaDon.getPhieuGiamGia();
+        if (phieuGiamGia != null) {
+            model.addAttribute("phieuGiamGia", phieuGiamGia);
+            model.addAttribute("giaTriGiamGia", hoaDon.getTongTien().subtract(hoaDon.getTongTienSauGiamGia()));
+        } else {
+            model.addAttribute("giaTriGiamGia", BigDecimal.ZERO);
         }
-        model.addAttribute("findSPCTByIdSanPham", findSPCTByIdSanPham);
-        
-        //Hiển thị danh sách hdct theo id hóa đơn
-        List<HoaDonChiTiet> listHDCT = hoaDonService.listHoaDonChiTiets(idHD);
-        model.addAttribute("listHDCT", listHDCT);
-        // Thêm ID hóa đơn được chọn vào model
+
+        // Các đoạn còn lại (list khách hàng, sản phẩm, hdct, etc.)
+        model.addAttribute("listsKhachhang", khachHangRepo.findAll());
+        model.addAttribute("listHoaDon", banHangService.findHoaDon());
+        model.addAttribute("findSPCTByIdSanPham", sanPhamChiTietRepo.findByTrangThaiTrue()
+                .stream().filter(sp -> sp.getSoLuong() > 0).collect(Collectors.toList()));
+        model.addAttribute("listHDCT", hoaDonService.listHoaDonChiTiets(idHD));
         model.addAttribute("idHD", idHD);
 
         return "admin/sale/index";
@@ -274,62 +264,162 @@ public class BanHangTaiQuayController {
     // API để lấy danh sách phiếu giảm giá đang hoạt động
     @GetMapping("/api/phieu-giam-gia/active")
     @ResponseBody
-    public ResponseEntity<List<PhieuGiamGia>> getActivePhieuGiamGia() {
-        // Lấy ngày hiện tại
+    public ResponseEntity<List<Map<String, Object>>> getActivePhieuGiamGia(
+            @RequestParam(value = "idKH", required = false) Long idKH,
+            @RequestParam(value = "tongTienDonHang", required = false) BigDecimal tongTienDonHang) {
         Date currentDate = new Date();
-        
-        // Lọc phiếu giảm giá còn hoạt động, còn hạn sử dụng và còn số lượng
-        List<PhieuGiamGia> activePhieuGiamGia = phieuGiamGiaRepo.findAll().stream()
-            .filter(pgg -> pgg.isTrangThai() && 
-                          (pgg.getNgayBatDau().before(currentDate) || pgg.getNgayBatDau().equals(currentDate)) && 
-                          (pgg.getNgayKetThuc().after(currentDate) || pgg.getNgayKetThuc().equals(currentDate)) &&
-                          (pgg.getSoLuong() == null || pgg.getSoLuong() > 0))
-            .collect(Collectors.toList());
-        
-        return ResponseEntity.ok(activePhieuGiamGia);
+        System.out.println("Current date: " + currentDate);
+        System.out.println("idKH received: " + idKH + ", tongTienDonHang: " + tongTienDonHang);
+
+        try {
+            List<PhieuGiamGia> allPhieuGiamGia = phieuGiamGiaRepo.findAll();
+            System.out.println("Total PGG records: " + allPhieuGiamGia.size());
+
+            List<PhieuGiamGia> activePublicPhieuGiamGia = allPhieuGiamGia.stream()
+                    .filter(pgg -> pgg.isTrangThai() &&
+                            pgg.getLoaiPhieu() &&
+                            (pgg.getNgayBatDau().before(currentDate) || pgg.getNgayBatDau().equals(currentDate)) &&
+                            (pgg.getNgayKetThuc().after(currentDate) || pgg.getNgayKetThuc().equals(currentDate)) &&
+                            (pgg.getSoLuong() == null || pgg.getSoLuong() > 0))
+                    .collect(Collectors.toList());
+            System.out.println("Found active public PGG count: " + activePublicPhieuGiamGia.size());
+
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (PhieuGiamGia pgg : activePublicPhieuGiamGia) {
+                Map<String, Object> pggMap = new HashMap<>();
+                pggMap.put("id", pgg.getId());
+                pggMap.put("ma", pgg.getMa());
+                pggMap.put("ten", pgg.getTen());
+                pggMap.put("loaiGiamGia", pgg.getLoaiGiamGia());
+                pggMap.put("giaTriGiam", pgg.getGiaTriGiam());
+                pggMap.put("giaTriGiamToiDa", pgg.getGiaTriGiamToiDa());
+                pggMap.put("giaTriDonHangToiThieu", pgg.getGiaTriDonHangToiThieu());
+                pggMap.put("ngayKetThuc", pgg.getNgayKetThuc());
+                pggMap.put("loaiPhieu", "Công khai");
+                pggMap.put("isPersonal", false);
+                // Kiểm tra điều kiện đủ để áp dụng phiếu giảm giá
+                boolean isEligible = tongTienDonHang != null && pgg.getGiaTriDonHangToiThieu() != null
+                        ? tongTienDonHang.compareTo(pgg.getGiaTriDonHangToiThieu()) >= 0
+                        : true; // Nếu không có yêu cầu tối thiểu, mặc định hợp lệ
+                pggMap.put("isEligible", isEligible);
+                result.add(pggMap);
+                System.out.println("Added active public PGG: " + pgg.getTen() + ", isEligible: " + isEligible);
+            }
+
+            if (idKH != null) {
+                List<PhieuGiamGiaKhachHang> activePersonalPhieuGiamGia = phieuGiamGiaKhachHangRepo.findByKhachHangIdAndTrangThaiTrue(idKH)
+                        .stream()
+                        .filter(pggkh -> !pggkh.getPhieuGiamGia().getLoaiPhieu() &&
+                                (pggkh.getPhieuGiamGia().getNgayBatDau().before(currentDate) ||
+                                        pggkh.getPhieuGiamGia().getNgayBatDau().equals(currentDate)) &&
+                                (pggkh.getPhieuGiamGia().getNgayKetThuc().after(currentDate) ||
+                                        pggkh.getPhieuGiamGia().getNgayKetThuc().equals(currentDate)) &&
+                                (pggkh.getPhieuGiamGia().getSoLuong() == null || pggkh.getPhieuGiamGia().getSoLuong() > 0))
+                        .collect(Collectors.toList());
+                System.out.println("Found active personal PGG count: " + activePersonalPhieuGiamGia.size());
+
+                for (PhieuGiamGiaKhachHang pggkh : activePersonalPhieuGiamGia) {
+                    PhieuGiamGia pgg = pggkh.getPhieuGiamGia();
+                    Map<String, Object> pggMap = new HashMap<>();
+                    pggMap.put("id", pgg.getId());
+                    pggMap.put("ma", pgg.getMa());
+                    pggMap.put("ten", pgg.getTen());
+                    pggMap.put("loaiGiamGia", pgg.getLoaiGiamGia());
+                    pggMap.put("giaTriGiam", pgg.getGiaTriGiam());
+                    pggMap.put("giaTriGiamToiDa", pgg.getGiaTriGiamToiDa());
+                    pggMap.put("giaTriDonHangToiThieu", pgg.getGiaTriDonHangToiThieu());
+                    pggMap.put("ngayKetThuc", pgg.getNgayKetThuc());
+                    pggMap.put("loaiPhieu", "Cá nhân");
+                    pggMap.put("isPersonal", true);
+                    pggMap.put("pggkhId", pggkh.getId());
+                    // Kiểm tra điều kiện đủ để áp dụng phiếu giảm giá
+                    boolean isEligible = tongTienDonHang != null && pgg.getGiaTriDonHangToiThieu() != null
+                            ? tongTienDonHang.compareTo(pgg.getGiaTriDonHangToiThieu()) >= 0
+                            : true; // Nếu không có yêu cầu tối thiểu, mặc định hợp lệ
+                    pggMap.put("isEligible", isEligible);
+                    result.add(pggMap);
+                    System.out.println("Added active personal PGG: " + pgg.getTen() + ", isEligible: " + isEligible);
+                }
+            }
+
+            System.out.println("Final result size: " + result.size());
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error in getActivePhieuGiamGia: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
+        }
     }
-    
-    // API để áp dụng phiếu giảm giá vào hóa đơn
+
+    @GetMapping("/api/get-hoa-don")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getHoaDon(@RequestParam("idHD") Long idHD) {
+        Optional<HoaDon> hoaDonOpt = hoaDonService.findHoaDonById(idHD);
+        if (!hoaDonOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        HoaDon hoaDon = hoaDonOpt.get();
+        Map<String, Object> response = new HashMap<>();
+        response.put("tongTienSauGiamGia", hoaDon.getTongTienSauGiamGia());
+        response.put("giaTriGiamGia", hoaDon.getTongTien().subtract(hoaDon.getTongTienSauGiamGia()));
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/apply-discount")
     @ResponseBody
-    public ResponseEntity<String> applyDiscount(@RequestParam("idHD") Long idHD, 
-                                               @RequestParam("idPGG") Long idPGG) {
+    public ResponseEntity<String> applyDiscount(@RequestParam("idHD") Long idHD,
+                                                @RequestParam("idPGG") Long idPGG,
+                                                @RequestParam(value = "isPersonal", required = false, defaultValue = "false") Boolean isPersonal,
+                                                @RequestParam(value = "pggkhId", required = false) Long pggkhId) {
         try {
             // Tìm hóa đơn
             Optional<HoaDon> hoaDonOpt = hoaDonService.findHoaDonById(idHD);
             if (!hoaDonOpt.isPresent()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy hóa đơn");
             }
-            
+
             // Tìm phiếu giảm giá
             Optional<PhieuGiamGia> phieuGiamGiaOpt = phieuGiamGiaRepo.findById(idPGG);
             if (!phieuGiamGiaOpt.isPresent()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy phiếu giảm giá");
             }
-            
+
             HoaDon hoaDon = hoaDonOpt.get();
             PhieuGiamGia phieuGiamGia = phieuGiamGiaOpt.get();
-            
+
             // Kiểm tra tính hợp lệ của phiếu giảm giá
             Date currentDate = new Date();
-            if (!phieuGiamGia.isTrangThai() || 
-                phieuGiamGia.getNgayBatDau().after(currentDate) || 
-                phieuGiamGia.getNgayKetThuc().before(currentDate) ||
-                (phieuGiamGia.getSoLuong() != null && phieuGiamGia.getSoLuong() <= 0)) {
+            if (!phieuGiamGia.isTrangThai() ||
+                    phieuGiamGia.getNgayBatDau().after(currentDate) ||
+                    phieuGiamGia.getNgayKetThuc().before(currentDate)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Phiếu giảm giá không hợp lệ hoặc đã hết hạn");
             }
-            
+
+            // Kiểm tra điều kiện riêng cho từng loại phiếu
+            if (isPersonal && pggkhId != null) {
+                Optional<PhieuGiamGiaKhachHang> pggkhOpt = phieuGiamGiaKhachHangRepo.findById(pggkhId);
+                if (!pggkhOpt.isPresent()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Phiếu giảm giá cá nhân không hợp lệ");
+                }
+            }
+
             // Áp dụng phiếu giảm giá vào hóa đơn
             hoaDon.setPhieuGiamGia(phieuGiamGia);
-            
+
             // Tính toán tổng tiền sau giảm giá
             BigDecimal tongTien = hoaDon.getTongTien();
             BigDecimal giaTriGiam;
-            
+
             if (phieuGiamGia.getLoaiGiamGia()) {
                 // Giảm theo phần trăm
                 giaTriGiam = tongTien.multiply(phieuGiamGia.getGiaTriGiam())
-                                    .divide(new BigDecimal(100), 0, BigDecimal.ROUND_HALF_UP);
+                        .divide(new BigDecimal(100), 0, BigDecimal.ROUND_HALF_UP);
+
+                // Kiểm tra giá trị giảm tối đa nếu có
+                if (phieuGiamGia.getGiaTriGiamToiDa() != null &&
+                        giaTriGiam.compareTo(phieuGiamGia.getGiaTriGiamToiDa()) > 0) {
+                    giaTriGiam = phieuGiamGia.getGiaTriGiamToiDa();
+                }
             } else {
                 // Giảm theo số tiền cố định
                 giaTriGiam = phieuGiamGia.getGiaTriGiam();
@@ -338,21 +428,16 @@ public class BanHangTaiQuayController {
                     giaTriGiam = tongTien;
                 }
             }
-            
+
             BigDecimal tongTienSauGiam = tongTien.subtract(giaTriGiam);
             hoaDon.setTongTienSauGiamGia(tongTienSauGiam);
-            
+
             // Lưu hóa đơn
             hoaDonService.saveHoaDon(hoaDon);
-            
-            // Giảm số lượng phiếu giảm giá nếu có giới hạn
-            if (phieuGiamGia.getSoLuong() != null && phieuGiamGia.getSoLuong() > 0) {
-                phieuGiamGia.setSoLuong(phieuGiamGia.getSoLuong() - 1);
-                phieuGiamGiaRepo.save(phieuGiamGia);
-            }
-            
+
             return ResponseEntity.ok("Áp dụng phiếu giảm giá thành công");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Lỗi khi áp dụng phiếu giảm giá: " + e.getMessage());
         }

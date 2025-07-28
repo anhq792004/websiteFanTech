@@ -145,7 +145,7 @@ public class PhieuGiamGiaController {
                 model.addAttribute("dsKhachHangDaCoPhieu", dsKhachHangDaCoPhieu);
             }
 
-            return "admin/phieu_giam_gia/create";
+            return "admin/phieu_giam_gia/update";
         } else {
             return "redirect:/admin/phieu-giam-gia/index";
         }

@@ -1,110 +1,663 @@
-<!--<!DOCTYPE html>-->
-<!--<html xmlns:th="http://www.thymeleaf.org">-->
-<!--<head th:insert="~{/admin/fragments/head :: head}"></head>-->
-<!--<body>-->
-<!--&lt;!&ndash; Site wrapper &ndash;&gt;-->
-<!--<div class="wrapper">-->
-<!--    &lt;!&ndash; Sidebar &ndash;&gt;-->
-<!--    <div>-->
-<!--        <aside th:replace="/admin/fragments/sidebar :: sidebar"></aside>-->
-<!--    </div>-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:insert="~{/admin/fragments/head :: head}"></head>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<body>
+<!-- Site wrapper -->
+<div class="wrapper">
+    <!-- Sidebar -->
+    <div>
+        <aside th:replace="/admin/fragments/sidebar :: sidebar"></aside>
+    </div>
 
-<!--    &lt;!&ndash; Main&ndash;&gt;-->
-<!--    <div id="main">-->
-<!--        <header th:replace="/admin/fragments/header :: header"></header>-->
-<!--        <div class="page-content">-->
-<!--            &lt;!&ndash; Card tiêu đề &ndash;&gt;-->
-<!--            <section class="row">-->
-<!--                <div class="card">-->
-<!--                    <div class="card-header">-->
-<!--                        <h1>Chỉnh sửa phiếu giảm giá</h1>-->
-<!--                    </div>-->
-<!--                    <div class="card-body">-->
-<!--                        <form th:action="@{/phieu-giam-gia/update}" method="post" th:object="${phieuGiamGia}">-->
-<!--                            &lt;!&ndash; Trường ẩn để giữ ID &ndash;&gt;-->
-<!--                            <input type="hidden" th:field="*{id}" />-->
+    <!-- Main-->
+    <div id="main">
+        <header th:replace="/admin/fragments/header :: header"></header>
+        <div class="page-content">
+            <section class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Sửa phiếu giảm giá</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="phieuGiamGiaForm" th:action="@{/admin/phieu-giam-gia/update}" method="post" th:object="${phieuGiamGia}" novalidate>
+                                <input type="hidden" th:field="*{id}"/>
 
-<!--                            <div class="mb-3">-->
-<!--                                <label for="ma" class="form-label">Mã phiếu giảm giá</label>-->
-<!--                                <input type="text" class="form-control" id="ma" th:field="*{ma}" required>-->
-<!--                            </div>-->
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <label for="ma">Mã phiếu giảm giá</label>
+                                            <input type="text" class="form-control" id="ma" th:field="*{ma}" readonly/>
+                                            <small class="text-muted">Mã không thể thay đổi</small>
+                                        </div>
+                                    </div>
 
-<!--                            <div class="mb-3">-->
-<!--                                <label for="ten" class="form-label">Tên phiếu giảm giá</label>-->
-<!--                                <input type="text" class="form-control" id="ten" th:field="*{ten}" required>-->
-<!--                            </div>-->
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <label for="ten">Tên <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="ten" th:field="*{ten}"/>
+                                        </div>
+                                    </div>
+                                </div>
 
-<!--                            <div class="mb-3">-->
-<!--                                <label for="ngayBatDau" class="form-label">Ngày bắt đầu</label>-->
-<!--                                <input type="date" class="form-control" id="ngayBatDau" th:field="*{ngayBatDau}" required>-->
-<!--                            </div>-->
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <label for="ngayBatDau">Ngày bắt đầu <span class="text-danger">*</span></label>
+                                            <input type="date" class="form-control" id="ngayBatDau" th:field="*{ngayBatDau}"/>
+                                        </div>
+                                    </div>
 
-<!--                            <div class="mb-3">-->
-<!--                                <label for="ngayKetThuc" class="form-label">Ngày kết thúc</label>-->
-<!--                                <input type="date" class="form-control" id="ngayKetThuc" th:field="*{ngayKetThuc}" required>-->
-<!--                            </div>-->
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <label for="ngayKetThuc">Ngày kết thúc <span class="text-danger">*</span></label>
+                                            <input type="date" class="form-control" id="ngayKetThuc" th:field="*{ngayKetThuc}"/>
+                                        </div>
+                                    </div>
+                                </div>
 
-<!--                            <div class="mb-3">-->
-<!--                                <label for="soLuong" class="form-label">Số lượng</label>-->
-<!--                                <input type="number" class="form-control" id="soLuong" th:field="*{soLuong}" min="0">-->
-<!--                            </div>-->
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="soLuong">Số lượng <span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" id="soLuong" th:field="*{soLuong}"/>
+                                        </div>
+                                    </div>
 
-<!--                            <div class="mb-3">-->
-<!--                                <label class="form-label">Loại giảm giá</label>-->
-<!--                                <div class="form-check">-->
-<!--                                    <input class="form-check-input" type="radio" id="loaiPhanTram" th:field="*{loaiGiamGia}" th:value="true">-->
-<!--                                    <label class="form-check-label" for="loaiPhanTram">Phần trăm (%)</label>-->
-<!--                                </div>-->
-<!--                                <div class="form-check">-->
-<!--                                    <input class="form-check-input" type="radio" id="loaiTienMat" th:field="*{loaiGiamGia}" th:value="false">-->
-<!--                                    <label class="form-check-label" for="loaiTienMat">Tiền mặt (VND)</label>-->
-<!--                                </div>-->
-<!--                            </div>-->
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="giaTriGiam">Giá trị giảm <span class="text-danger">*</span></label>
+                                            <input type="number" step="0.01" class="form-control" id="giaTriGiam" th:field="*{giaTriGiam}"/>
+                                        </div>
+                                    </div>
 
-<!--                            <div class="mb-3">-->
-<!--                                <label for="giaTriGiam" class="form-label">Giá trị giảm</label>-->
-<!--                                <input type="number" class="form-control" id="giaTriGiam" th:field="*{giaTriGiam}" min="0" step="any" required>-->
-<!--                            </div>-->
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="loaiGiamGia">Loại giảm giá</label>
+                                            <select class="form-select" id="loaiGiamGia" th:field="*{loaiGiamGia}">
+                                                <option th:value="true">Phần trăm</option>
+                                                <option th:value="false">Tiền mặt</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
 
-<!--                            <div class="mb-3 form-check">-->
-<!--                                <input type="checkbox" class="form-check-input" id="trangThai" th:field="*{trangThai}">-->
-<!--                                <label class="form-check-label" for="trangThai">Hoạt động</label>-->
-<!--                            </div>-->
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="giaTriDonHangToiThieu">Giá trị đơn hàng tối thiểu <span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" id="giaTriDonHangToiThieu" th:field="*{giaTriDonHangToiThieu}" step="0.01"/>
+                                        </div>
+                                    </div>
 
-<!--                            &lt;!&ndash; Nếu có trường sanPhamChiTiet, thêm xử lý ở đây &ndash;&gt;-->
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="loaiPhieu">Loại phiếu</label>
+                                            <select class="form-select" id="loaiPhieu" th:field="*{loaiPhieu}">
+                                                <option th:value="true">Công khai</option>
+                                                <option th:value="false">Cá nhân</option>
+                                            </select>
+                                        </div>
+                                    </div>
 
-<!--                            <div class="mb-3">-->
-<!--                                <button type="submit" class="btn btn-primary">Cập nhật</button>-->
-<!--                                <a th:href="@{/phieu-giam-gia/index}" class="btn btn-secondary">Hủy</a>-->
-<!--                            </div>-->
-<!--                        </form>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </section>-->
-<!--        </div>-->
-<!--    </div>-->
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="trangThai">Trạng thái</label>
+                                            <select class="form-select" id="trangThai" th:field="*{trangThai}">
+                                                <option th:value="true">Hoạt động</option>
+                                                <option th:value="false">Không hoạt động</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
 
-<!--    &lt;!&ndash; Footer&ndash;&gt;-->
-<!--    <div>-->
-<!--        <footer th:replace="/admin/fragments/footer :: footer"></footer>-->
-<!--    </div>-->
-<!--</div>-->
+                                <div class="row">
+                                    <div class="col-md-6 mb-3" id="giaTriGiamToiDaGroup">
+                                        <div class="form-group">
+                                            <label for="giaTriGiamToiDa">Giá trị giảm tối đa (VNĐ) <span class="text-danger" id="giaTriGiamToiDaRequired">*</span></label>
+                                            <input type="number" step="0.01" class="form-control" id="giaTriGiamToiDa" th:field="*{giaTriGiamToiDa}" placeholder="Chỉ áp dụng với giảm phần trăm"/>
+                                            <small class="text-muted">Áp dụng nếu loại giảm là phần trăm (%)</small>
+                                        </div>
+                                    </div>
+                                </div>
 
-<!--<div>-->
-<!--    <script th:replace="/admin/fragments/script :: script"></script>-->
-<!--</div>-->
+                                <!-- Phần chọn khách hàng cho phiếu cá nhân -->
+                                <div class="row" id="khachHangSelection" style="display: none;">
+                                    <div class="col-12">
+                                        <div class="card border-info">
+                                            <div class="card-header bg-info text-white">
+                                                <h5 class="mb-0">
+                                                    <i class="fas fa-users"></i> Chọn khách hàng nhận phiếu giảm giá
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <!-- Thanh công cụ -->
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6">
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">
+                                                                <i class="fas fa-search"></i>
+                                                            </span>
+                                                            <input type="text" class="form-control" id="searchKhachHang" placeholder="Tìm kiếm khách hàng theo tên, email, SĐT...">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="btn-group" role="group">
+                                                            <button type="button" class="btn btn-outline-primary btn-sm" id="selectAllKhachHang">
+                                                                <i class="fas fa-check-square"></i> Chọn tất cả
+                                                            </button>
+                                                            <button type="button" class="btn btn-outline-secondary btn-sm" id="clearAllKhachHang">
+                                                                <i class="fas fa-times"></i> Bỏ chọn
+                                                            </button>
+                                                        </div>
+                                                        <span class="badge bg-primary ms-2">
+                                                            <i class="fas fa-user-check"></i>
+                                                            Đã chọn: <span id="selectedCount">0</span>
+                                                        </span>
+                                                    </div>
+                                                </div>
 
-<!--<script>-->
-<!--    // Thêm xử lý JavaScript nếu cần-->
-<!--    document.addEventListener('DOMContentLoaded', function() {-->
-<!--        // Format ngày từ yyyy-MM-dd đến dd/MM/yyyy nếu cần-->
-<!--        // Chuyển đổi giá trị tiền tệ nếu cần-->
-<!--    });-->
-<!--</script>-->
-<!--&lt;!&ndash; hienthitendangnhap &ndash;&gt;-->
-<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>-->
-<!--<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/simplePagination.js/1.6/jquery.simplePagination.min.js"></script>-->
+                                                <!-- Bảng danh sách khách hàng -->
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover table-striped">
+                                                        <thead class="table-dark">
+                                                        <tr>
+                                                            <th width="50">
+                                                                <input type="checkbox" class="form-check-input" id="selectAllHeader">
+                                                            </th>
+                                                            <th>Tên khách hàng</th>
+                                                            <th>Số điện thoại</th>
+                                                            <th>Email</th>
+                                                            <th>Trạng thái</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody id="khachHangTableBody">
+                                                        <tr th:each="kh : ${dsKhachHang}" class="khach-hang-row">
+                                                            <td>
+                                                                <input class="form-check-input khach-hang-checkbox" type="checkbox" th:id="'kh_' + ${kh.id}" th:value="${kh.id}" name="selectedKhachHang" th:checked="${dsKhachHangDaCoPhieu != null && #lists.contains(dsKhachHangDaCoPhieu.![khachHang.id], kh.id)}">
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                                        <i class="fas fa-user"></i>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="fw-bold khach-hang-name" th:text="${kh.ten}"></div>
+                                                                        <small class="text-muted">ID: <span th:text="${kh.id}"></span></small>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <span class="khach-hang-phone" th:text="${kh.soDienThoai}"></span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge bg-success" th:if="${kh.trangThai}">
+                                                                    <i class="fas fa-check-circle"></i> Hoạt động
+                                                                </span>
+                                                                <span class="badge bg-secondary" th:unless="${kh.trangThai}">
+                                                                    <i class="fas fa-pause-circle"></i> Tạm dừng
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
 
-<!--</body>-->
-<!--</html>-->
+                                                <!-- Pagination -->
+                                                <nav aria-label="Customer pagination">
+                                                    <ul class="pagination justify-content-center" id="customerPagination">
+                                                        <!-- Pagination will be generated by JavaScript -->
+                                                    </ul>
+                                                </nav>
+
+                                                <!-- Thông tin thống kê -->
+                                                <div class="row mt-3">
+                                                    <div class="col-md-6">
+                                                        <div class="alert alert-info mb-0">
+                                                            <i class="fas fa-info-circle"></i>
+                                                            <strong>Thống kê:</strong>
+                                                            Hiển thị <span id="showingCount">0</span> / <span id="totalCount">0</span> khách hàng
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="alert alert-success mb-0">
+                                                            <i class="fas fa-user-check"></i>
+                                                            <strong>Đã chọn:</strong> <span id="selectedCountDetail">0</span> khách hàng
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-save"></i> Lưu
+                                    </button>
+                                    <a th:href="@{/admin/phieu-giam-gia/index}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Hủy
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Footer-->
+    <div>
+        <footer th:replace="/admin/fragments/footer :: footer"></footer>
+    </div>
+</div>
+
+<div>
+    <script th:replace="/admin/fragments/script :: script"></script>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('phieuGiamGiaForm');
+        const ngayBatDau = document.getElementById('ngayBatDau');
+        const ngayKetThuc = document.getElementById('ngayKetThuc');
+        const loaiPhieu = document.getElementById('loaiPhieu');
+        const khachHangSelection = document.getElementById('khachHangSelection');
+        const searchKhachHang = document.getElementById('searchKhachHang');
+        const selectAllBtn = document.getElementById('selectAllKhachHang');
+        const clearAllBtn = document.getElementById('clearAllKhachHang');
+        const selectAllHeader = document.getElementById('selectAllHeader');
+        const selectedCount = document.getElementById('selectedCount');
+        const selectedCountDetail = document.getElementById('selectedCountDetail');
+        const ten = document.getElementById('ten');
+        const soLuong = document.getElementById('soLuong');
+        const giaTriGiam = document.getElementById('giaTriGiam');
+        const giaTriDonHangToiThieu = document.getElementById('giaTriDonHangToiThieu');
+        const giaTriGiamToiDa = document.getElementById('giaTriGiamToiDa');
+        const loaiGiamGia = document.getElementById('loaiGiamGia');
+
+        // Pagination variables
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let filteredRows = [];
+        let allRows = [];
+
+        // Initialize
+        initializeCustomerData();
+
+        // Validate form khi submit
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            // Kiểm tra các trường bắt buộc theo thứ tự
+            let hasErrors = false;
+
+            if (!ten.value.trim()) {
+                hasErrors = true;
+                await Swal.fire({
+                    text: 'Tên phiếu giảm giá không được để trống',
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    toast: true
+                });
+                return;
+            }
+
+            if (!ngayBatDau.value) {
+                hasErrors = true;
+                await Swal.fire({
+                    text: 'Ngày bắt đầu không được để trống',
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    toast: true
+                });
+                return;
+            }
+
+            if (!ngayKetThuc.value) {
+                hasErrors = true;
+                await Swal.fire({
+                    text: 'Ngày kết thúc không được để trống',
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    toast: true
+                });
+                return;
+            }
+
+            if (!soLuong.value || soLuong.value < 0) {
+                hasErrors = true;
+                await Swal.fire({
+                    text: 'Số lượng phải là số không âm',
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    toast: true
+                });
+                return;
+            }
+
+            if (!giaTriGiam.value || giaTriGiam.value <= 0) {
+                hasErrors = true;
+                await Swal.fire({
+                    text: 'Giá trị giảm phải lớn hơn 0',
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    toast: true
+                });
+                return;
+            }
+
+            if (!giaTriDonHangToiThieu.value || giaTriDonHangToiThieu.value < 0) {
+                hasErrors = true;
+                await Swal.fire({
+                    text: 'Giá trị đơn hàng tối thiểu phải là số không âm',
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    toast: true
+                });
+                return;
+            }
+
+            if (loaiGiamGia.value === 'true' && (!giaTriGiamToiDa.value || giaTriGiamToiDa.value <= 0)) {
+                hasErrors = true;
+                await Swal.fire({
+                    text: 'Giá trị giảm tối đa phải lớn hơn 0 khi chọn loại giảm giá phần trăm',
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    toast: true
+                });
+                return;
+            }
+
+            if (loaiPhieu.value === 'false') {
+                const selectedKhachHang = document.querySelectorAll('input[name="selectedKhachHang"]:checked');
+                if (selectedKhachHang.length === 0) {
+                    hasErrors = true;
+                    await Swal.fire({
+                        text: 'Vui lòng chọn ít nhất 1 khách hàng cho phiếu giảm giá cá nhân',
+                        icon: 'error',
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                        toast: true
+                    });
+                    return;
+                }
+            }
+
+            if (ngayBatDau.value && ngayKetThuc.value) {
+                const startDate = new Date(ngayBatDau.value);
+                const endDate = new Date(ngayKetThuc.value);
+                if (startDate > endDate) {
+                    hasErrors = true;
+                    await Swal.fire({
+                        text: 'Ngày bắt đầu không thể sau ngày kết thúc',
+                        icon: 'error',
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                        toast: true
+                    });
+                    return;
+                }
+            }
+
+            // Nếu không có lỗi, submit form và hiển thị thông báo thành công
+            if (!hasErrors) {
+                form.submit();
+                await Swal.fire({
+                    text: 'Cập nhật phiếu giảm giá thành công!',
+                    icon: 'success',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    toast: true
+                });
+            }
+        });
+
+        // Xử lý hiển thị/ẩn phần chọn khách hàng
+        function toggleKhachHangSelection() {
+            if (loaiPhieu.value === 'false') { // Cá nhân
+                khachHangSelection.style.display = 'block';
+                initializeCustomerData();
+            } else { // Công khai
+                khachHangSelection.style.display = 'none';
+            }
+        }
+
+        loaiPhieu.addEventListener('change', toggleKhachHangSelection);
+        toggleKhachHangSelection();
+
+        // Initialize customer data
+        function initializeCustomerData() {
+            allRows = Array.from(document.querySelectorAll('.khach-hang-row'));
+            filteredRows = [...allRows];
+            updatePagination();
+            updateSelectedCount();
+        }
+
+        // Search functionality
+        searchKhachHang.addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+
+            filteredRows = allRows.filter(row => {
+                const name = row.querySelector('.khach-hang-name').textContent.toLowerCase();
+                const phone = row.querySelector('.khach-hang-phone').textContent.toLowerCase();
+                const email = row.querySelector('.khach-hang-email') ?
+                    row.querySelector('.khach-hang-email').textContent.toLowerCase() : '';
+
+                return name.includes(searchTerm) ||
+                    phone.includes(searchTerm) ||
+                    email.includes(searchTerm);
+            });
+
+            currentPage = 1;
+            updatePagination();
+            displayCurrentPage();
+        });
+
+        // Pagination
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+            const pagination = document.getElementById('customerPagination');
+            pagination.innerHTML = '';
+
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" data-page="${currentPage - 1}">
+                <i class="fas fa-chevron-left"></i>
+            </a>`;
+            pagination.appendChild(prevLi);
+
+            // Page numbers
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" data-page="${i}">${i}</a>`;
+                pagination.appendChild(li);
+            }
+
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" data-page="${currentPage + 1}">
+                <i class="fas fa-chevron-right"></i>
+            </a>`;
+            pagination.appendChild(nextLi);
+
+            // Add event listeners to pagination links
+            pagination.querySelectorAll('a[data-page]').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const page = parseInt(this.dataset.page);
+                    if (page >= 1 && page <= totalPages) {
+                        currentPage = page;
+                        updatePagination();
+                        displayCurrentPage();
+                    }
+                });
+            });
+
+            displayCurrentPage();
+        }
+
+        // Display current page
+        function displayCurrentPage() {
+            allRows.forEach(row => row.style.display = 'none');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentRows = filteredRows.slice(startIndex, endIndex);
+            currentRows.forEach(row => row.style.display = '');
+            document.getElementById('showingCount').textContent = currentRows.length;
+            document.getElementById('totalCount').textContent = filteredRows.length;
+        }
+
+        // Select all functionality
+        selectAllBtn.addEventListener('click', function () {
+            const visibleCheckboxes = document.querySelectorAll('.khach-hang-row:not([style*="display: none"]) .khach-hang-checkbox');
+            visibleCheckboxes.forEach(checkbox => checkbox.checked = true);
+            updateSelectedCount();
+            updateSelectAllHeaderState();
+        });
+
+        // Clear all functionality
+        clearAllBtn.addEventListener('click', function () {
+            const checkboxes = document.querySelectorAll('.khach-hang-checkbox');
+            checkboxes.forEach(checkbox => checkbox.checked = false);
+            updateSelectedCount();
+            updateSelectAllHeaderState();
+        });
+
+        // Header select all
+        selectAllHeader.addEventListener('change', function () {
+            const visibleCheckboxes = document.querySelectorAll('.khach-hang-row:not([style*="display: none"]) .khach-hang-checkbox');
+            visibleCheckboxes.forEach(checkbox => checkbox.checked = this.checked);
+            updateSelectedCount();
+        });
+
+        // Update selected count
+        function updateSelectedCount() {
+            const selectedCheckboxes = document.querySelectorAll('.khach-hang-checkbox:checked');
+            const count = selectedCheckboxes.length;
+            selectedCount.textContent = count;
+            selectedCountDetail.textContent = count;
+        }
+
+        // Update header select all state
+        function updateSelectAllHeaderState() {
+            const visibleCheckboxes = document.querySelectorAll('.khach-hang-row:not([style*="display: none"]) .khach-hang-checkbox');
+            const checkedVisibleCheckboxes = document.querySelectorAll('.khach-hang-row:not([style*="display: none"]) .khach-hang-checkbox:checked');
+
+            if (visibleCheckboxes.length === 0) {
+                selectAllHeader.indeterminate = false;
+                selectAllHeader.checked = false;
+            } else if (checkedVisibleCheckboxes.length === visibleCheckboxes.length) {
+                selectAllHeader.indeterminate = false;
+                selectAllHeader.checked = true;
+            } else if (checkedVisibleCheckboxes.length > 0) {
+                selectAllHeader.indeterminate = true;
+                selectAllHeader.checked = false;
+            } else {
+                selectAllHeader.indeterminate = false;
+                selectAllHeader.checked = false;
+            }
+        }
+
+        // Listen for checkbox changes
+        document.addEventListener('change', function (event) {
+            if (event.target.classList.contains('khach-hang-checkbox')) {
+                updateSelectedCount();
+                updateSelectAllHeaderState();
+            }
+        });
+
+        // Xử lý hiển thị ô giá trị giảm dựa trên loại giảm giá
+        const giaTriGiamToiDaRequired = document.getElementById('giaTriGiamToiDaRequired');
+
+        function updateGiaTriGiamLabel() {
+            const isPercent = loaiGiamGia.value === 'true';
+
+            if (isPercent) {
+                giaTriGiam.setAttribute('max', '100');
+                giaTriGiam.setAttribute('placeholder', 'Nhập giá trị từ 0-100');
+                document.querySelector('label[for="giaTriGiam"]').textContent = 'Giá trị giảm (%)';
+                giaTriGiamToiDaGroup.style.display = 'block';
+                giaTriGiamToiDaRequired.style.display = 'inline';
+            } else {
+                giaTriGiam.removeAttribute('max');
+                giaTriGiam.setAttribute('placeholder', 'Nhập số tiền');
+                document.querySelector('label[for="giaTriGiam"]').textContent = 'Giá trị giảm (VNĐ)';
+                giaTriGiamToiDaGroup.style.display = 'none';
+                giaTriGiamToiDaRequired.style.display = 'none';
+            }
+        }
+
+        loaiGiamGia.addEventListener('change', updateGiaTriGiamLabel);
+        updateGiaTriGiamLabel();
+    });
+</script>
+
+<style>
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+
+    .table-responsive {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .khach-hang-row:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .pagination {
+        margin-bottom: 0;
+    }
+
+    .alert {
+        padding: 0.75rem;
+        font-size: 0.875rem;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/simplePagination.js/1.6/jquery.simplePagination.min.js"></script>
+</body>
+</html>

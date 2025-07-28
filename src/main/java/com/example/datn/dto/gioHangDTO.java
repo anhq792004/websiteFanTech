@@ -21,6 +21,8 @@ public class gioHangDTO {
     String hinhAnh;
     Integer soLuongTon; // Số lượng tồn kho
 
+
+
     // Tính tổng tiền cho item này
     public BigDecimal getTongTien() {
         if (gia != null && soLuong != null) {

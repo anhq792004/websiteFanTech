@@ -48,8 +48,17 @@
                 <!-- Hình ảnh sản phẩm -->
                 <div class="col-md-6 mb-4">
                     <div class="card">
+                        <!-- Hiển thị ảnh từ chiTietDauTien nếu có -->
                         <img id="productImage"
-                             src="https://konachan.com/jpeg/1e4f4728045e2f08b85f7f1529551a7b/Konachan.com%20-%20177633%20animal_ears%20bunny_ears%20bunnygirl%20cherry_blossoms%20flowers%20long_hair%20pink_hair%20reisen_udongein_inaba%20school_uniform%20shiki.%20touhou.jpg"
+                             th:if="${chiTietDauTien != null and chiTietDauTien.hinhAnh != null and chiTietDauTien.hinhAnh.hinhAnh != null}"
+                             th:src="@{${chiTietDauTien.hinhAnh.hinhAnh}}"
+                             class="card-img-top"
+                             style="height: 400px; object-fit: cover;"
+                             th:alt="${sanPham.ten}">
+                        <!-- Hiển thị ảnh mặc định nếu không có ảnh -->
+                        <img id="productImage1"
+                             th:unless="${chiTietDauTien != null and chiTietDauTien.hinhAnh != null and chiTietDauTien.hinhAnh.hinhAnh != null}"
+                             src="/user/assets/images/default_product.jpg"
                              class="card-img-top"
                              style="height: 400px; object-fit: cover;"
                              th:alt="${sanPham.ten}">
@@ -381,8 +390,10 @@
 
     function updateProductImage(detail) {
         const productImage = document.getElementById('productImage');
-        if (detail.hinhAnh) {
-            productImage.src = detail.hinhAnh;
+        if (detail.hinhAnh && detail.hinhAnh.hinhAnh) {
+            productImage.src = detail.hinhAnh.hinhAnh;
+        } else {
+            productImage.src = '/user/assets/images/default_product.jpg';
         }
     }
 

@@ -70,7 +70,8 @@ public class gioHangService {
                 newItem.setGia(sanPhamChiTiet.getGia());
                 newItem.setSoLuong(soLuong);
                 newItem.setSoLuongTon(sanPhamChiTiet.getSoLuong());
-//                newItem.setHinhAnh(sanPhamChiTiet.getHinhAnh() != null ? sanPhamChiTiet.getHinhAnh());
+                // Sửa dòng này để gán hình ảnh
+                newItem.setHinhAnh(sanPhamChiTiet.getHinhAnh() != null ? sanPhamChiTiet.getHinhAnh().getHinhAnh() : "/images/default-product.jpg");
 
                 cart.add(newItem);
             }
@@ -82,7 +83,7 @@ public class gioHangService {
         }
     }
 
-    // Cập nhật số lượng sản phẩm trong giỏ hàng
+    // Các phương thức khác giữ nguyên
     public boolean updateQuantity(HttpSession session, Long sanPhamChiTietId, Integer soLuong) {
         try {
             List<gioHangDTO> cart = getCart(session);
@@ -108,7 +109,6 @@ public class gioHangService {
         }
     }
 
-    // Xóa sản phẩm khỏi giỏ hàng
     public boolean removeFromCart(HttpSession session, Long sanPhamChiTietId) {
         try {
             List<gioHangDTO> cart = getCart(session);
@@ -120,12 +120,10 @@ public class gioHangService {
         }
     }
 
-    // Xóa toàn bộ giỏ hàng
     public void clearCart(HttpSession session) {
         session.removeAttribute(CART_SESSION_KEY);
     }
 
-    // Tính tổng tiền giỏ hàng
     public BigDecimal getTotalAmount(HttpSession session) {
         List<gioHangDTO> cart = getCart(session);
         return cart.stream()
@@ -133,7 +131,6 @@ public class gioHangService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // Đếm số lượng sản phẩm trong giỏ hàng
     public int getCartItemCount(HttpSession session) {
         List<gioHangDTO> cart = getCart(session);
         return cart.stream()
@@ -141,12 +138,11 @@ public class gioHangService {
                 .sum();
     }
 
-    // Kiểm tra giỏ hàng có rỗng không
     public boolean isEmpty(HttpSession session) {
         List<gioHangDTO> cart = getCart(session);
         return cart.isEmpty();
     }
-    // Thêm method getCartInfo để sử dụng trong checkout
+
     public Map<String, Object> getCartInfo(HttpSession session) {
         Map<String, Object> cartInfo = new HashMap<>();
         List<gioHangDTO> cart = getCart(session);
@@ -159,7 +155,6 @@ public class gioHangService {
             return cartInfo;
         }
 
-        // Chuyển đổi gioHangDTO thành Map để frontend dễ sử dụng
         List<Map<String, Object>> items = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
 
@@ -175,7 +170,6 @@ public class gioHangService {
             itemMap.put("soLuongTon", item.getSoLuongTon());
             itemMap.put("tongTien", item.getTongTien());
             itemMap.put("hinhAnh", item.getHinhAnh());
-
             items.add(itemMap);
             totalAmount = totalAmount.add(item.getTongTien());
         }

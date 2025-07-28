@@ -1,9 +1,6 @@
 package com.example.datn.service.HoaDonService;
 
-import com.example.datn.dto.request.AddKHToHDCTRequest;
-import com.example.datn.dto.request.AddSPToHDCTRequest;
-import com.example.datn.dto.request.TrangThaiHoaDonRequest;
-import com.example.datn.dto.request.UpdateSoLuongRequest;
+import com.example.datn.dto.request.*;
 import com.example.datn.dto.response.LichSuHoaDonResponse;
 import com.example.datn.dto.response.LichSuThanhToanResponse;
 import com.example.datn.entity.HoaDon.HoaDon;
@@ -64,6 +61,7 @@ public interface HoaDonService {
 
     Integer tongSoLuong(Long idHD);
 
+    void updateInfor(UpdateInforRequest request);
 
     //lichSuHoaDon
     List<LichSuHoaDon> lichSuHoaDonList(Long id);

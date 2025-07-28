@@ -68,7 +68,15 @@
                             <div class="card h-100 shadow-sm">
                                 <!-- Hình ảnh sản phẩm -->
                                 <div class="position-relative">
-                                    <img src="https://konachan.com/jpeg/1e4f4728045e2f08b85f7f1529551a7b/Konachan.com%20-%20177633%20animal_ears%20bunny_ears%20bunnygirl%20cherry_blossoms%20flowers%20long_hair%20pink_hair%20reisen_udongein_inaba%20school_uniform%20shiki.%20touhou.jpg"
+                                    <!-- Hiển thị ảnh sản phẩm từ database -->
+                                    <img th:if="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty() and sanPham.sanPhamChiTiet[0].hinhAnh != null and sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh != null}"
+                                         th:src="@{${sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh}}"
+                                         class="card-img-top"
+                                         style="height: 250px; object-fit: cover;"
+                                         th:alt="${sanPham.ten}">
+                                    <!-- Hiển thị ảnh mặc định nếu không có ảnh -->
+                                    <img th:unless="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty() and sanPham.sanPhamChiTiet[0].hinhAnh != null and sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh != null}"
+                                         src="/user/assets/images/default_product.jpg"
                                          class="card-img-top"
                                          style="height: 250px; object-fit: cover;"
                                          th:alt="${sanPham.ten}">
