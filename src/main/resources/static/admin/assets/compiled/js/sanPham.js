@@ -28,6 +28,8 @@ $(document).ready(function() {
     function fillEditForm(data) {
         $("#editProductCode").val(data.ma);
         $("#editProductName").val(data.ten);
+        $("#editProductDescription").val(data.moTa || '');
+        $("#editProductStatus").val(data.trangThai ? 'true' : 'false');
         if (data.kieuQuat && data.kieuQuat.id) {
             $("#editFanType").val(data.kieuQuat.id);
         }
@@ -43,10 +45,17 @@ $(document).ready(function() {
             id: productId,
             ma: productRow.find("td:eq(1)").text().trim(),
             ten: productRow.find("td:eq(2)").text().trim(),
+            moTa: '', // Sẽ lấy từ API
+            trangThai: productRow.find("td:eq(5) .badge").hasClass('bg-success'),
             kieuQuat: {
-                id: productRow.find("td:eq(3)").data("kieu-quat-id")
+                id: productRow.find("td:eq(3)").attr("data-kieu-quat-id")
             }
         };
+        
+        console.log("Product data:", productData);
+        
+        // Hiển thị modal trước
+        $("#editProductModal").modal("show");
         
         // Load kiểu quạt và điền form
         loadFanTypes()
@@ -57,9 +66,10 @@ $(document).ready(function() {
                 });
                 $("#editFanType").html(options);
                 
-                // Điền dữ liệu vào form
-                fillEditForm(productData);
-                $("#editProductModal").modal("show");
+                // Điền dữ liệu vào form SAU KHI đã load options
+                setTimeout(function() {
+                    fillEditForm(productData);
+                }, 100);
             })
             .catch(function(error) {
                 console.error("Lỗi khi tải danh sách kiểu quạt:", error);
@@ -69,21 +79,20 @@ $(document).ready(function() {
 
     // Xử lý khi submit form chỉnh sửa
     $("#updateProductBtn").click(function() {
-        const kieuQuatId = $("#editFanType").val();
-        
-        if (!kieuQuatId) {
-            showToast("error", "Vui lòng chọn kiểu quạt");
-            return;
-        }
+        const kieuQuatId = $("#editFanType").val() || productData.kieuQuat.id;
 
         const data = {
             id: productData.id,
             ma: $("#editProductCode").val(),
             ten: $("#editProductName").val(),
+            moTa: $("#editProductDescription").val(),
+            trangThai: $("#editProductStatus").val() === 'true',
             kieuQuat: {
                 id: kieuQuatId
             }
         };
+
+        console.log("Sending update data:", data);
 
         $.ajax({
             url: "/admin/san-pham/sua",

@@ -153,50 +153,26 @@ public class SanPhamServiceImpl implements SanPhamService {
             sanPhamRepo.save(sanPham);
 
             try {
-                // Sử dụng FileUploadService để lưu file
                 String imagePath = fileUploadService.saveFile(imageFile);
-                // Kiểm tra xem sản phẩm đã có hình ảnh chưa
-                boolean hasImage = false;
-                HinhAnh existingImage = null;
-
+                
                 if (existingSanPham.getSanPhamChiTiet() != null && !existingSanPham.getSanPhamChiTiet().isEmpty()) {
-                    for (SanPhamChiTiet spct : existingSanPham.getSanPhamChiTiet()) {
-                        if (spct.getHinhAnh() != null) {
-                            hasImage = true;
-                            existingImage = spct.getHinhAnh();
-                            
-                            // Xóa hình ảnh cũ và cập nhật hình ảnh mới
-                            String oldImagePath = existingImage.getHinhAnh();
-                            if (oldImagePath != null && !oldImagePath.isEmpty()) {
-                                fileUploadService.deleteFile(oldImagePath);
-                            }
-                            
-                            existingImage.setHinhAnh(imagePath);
-                            hinhAnhRepo.save(existingImage);
-                            break;
+                    SanPhamChiTiet firstVariant = existingSanPham.getSanPhamChiTiet().get(0);
+                    
+                    if (firstVariant.getHinhAnh() != null) {
+                        // Cập nhật hình ảnh hiện có
+                        String oldImagePath = firstVariant.getHinhAnh().getHinhAnh();
+                        if (oldImagePath != null && !oldImagePath.isEmpty()) {
+                            fileUploadService.deleteFile(oldImagePath);
                         }
+                        firstVariant.getHinhAnh().setHinhAnh(imagePath);
+                        hinhAnhRepo.save(firstVariant.getHinhAnh());
+                    } else {
+                        HinhAnh hinhAnh = new HinhAnh();
+                        hinhAnh.setHinhAnh(imagePath);
+                        HinhAnh savedHinhAnh = hinhAnhRepo.save(hinhAnh);
+                        firstVariant.setHinhAnh(savedHinhAnh);
+                        sanPhamChiTietRepo.save(firstVariant);
                     }
-                }
-
-                // Nếu không có hình ảnh, tạo mới
-                if (!hasImage) {
-                    // Tạo đối tượng HinhAnh mới
-                    HinhAnh hinhAnh = new HinhAnh();
-                    hinhAnh.setHinhAnh(imagePath);
-                    HinhAnh savedHinhAnh = hinhAnhRepo.save(hinhAnh);
-
-                    // Tạo SanPhamChiTiet mới với ảnh
-                    SanPhamChiTiet spct = new SanPhamChiTiet();
-                    spct.setSanPham(sanPham);
-                    spct.setHinhAnh(savedHinhAnh);
-                    spct.setTrangThai(true);
-
-                    // Khởi tạo danh sách nếu chưa có
-                    if (sanPham.getSanPhamChiTiet() == null) {
-                        sanPham.setSanPhamChiTiet(new ArrayList<>());
-                    }
-
-                    sanPhamChiTietRepo.save(spct);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
