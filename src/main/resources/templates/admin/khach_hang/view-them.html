@@ -15,96 +15,104 @@
     <div id="main">
         <header th:replace="/admin/fragments/header :: header"></header>
         <div class="page-content">
-            <section class="row">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="container mt-4">
-                            <form id="addKHForm">
-                                <div class="container">
-                                    <div class="row justify-content-around">
-                                        <div class="col-md-5 gap-3">
-                                            <div class="col floating-group">
-                                                <input type="text" class="form-control" placeholder="" aria-label="name"
-                                                       id="name">
-                                                <label for="name">Tên khách hàng</label>
-                                            </div>
-                                            <div class="col floating-group">
-                                                <input type="text" class="form-control" placeholder=""
-                                                       aria-label="email"
-                                                       id="email">
-                                                <label for="email">Email</label>
-                                            </div>
-                                            <div class="col floating-group">
-                                                <input type="text" class="form-control" placeholder=""
-                                                       aria-label="soDienThoai"
-                                                       id="soDienThoai">
-                                                <label for="soDienThoai">Số điện thoại</label>
-                                            </div>
-                                            <div class="col floating-group">
-                                                <input type="date" class="form-control" placeholder=""
-                                                       aria-label="ngaySinh"
-                                                       id="ngaySinh">
-                                                <label for="ngaySinh">mm/dd/yyyy</label>
-                                            </div>
-                                            <div class="col">
-                                                <label for="gioiTinh" class="form-label">Giới tính</label>
-                                                <select class="form-select" id="gioiTinh" name="gioiTinh" required>
-                                                    <option value="Nam">Nam</option>
-                                                    <option value="Nữ">Nữ</option>
-                                                    <option value="Khác">Khác</option>
-                                                </select>
-                                            </div>
+            <form id="addKHForm">
+                <section class="row">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2>Thông tin khách hàng</h2>
+                                <button type="submit" class="btn btn-outline-success">
+                                    <i class="bi bi-patch-plus-fill"></i> Thêm
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="row justify-content-around">
+                                <div class="col-md-5 gap-3">
+                                    <div class="mb-3">
+                                        Ảnh
+                                        <!--                      <img th:src="@{${nhanVien.anhUrl}}" alt="Ảnh nhân viên" width="100" />-->
+                                    </div>
+                                    <div class="col mb-3">
+                                        <label for="name" class="form-label fw-bold"><span
+                                                class="text-danger">*</span> Tên khách hàng</label>
+                                        <input type="text" class="form-control" placeholder="Nhập tên" aria-label="name"
+                                               id="name">
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="email" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span> Email</label>
+                                            <input type="text" class="form-control" placeholder="Email"
+                                                   aria-label="email"
+                                                   id="email">
                                         </div>
-
-                                        <div class="col-md-7">
-                                            <div class=" row align-items-start">
-                                                <div class="col">
-                                                    <label for="city" class="form-label"><span
-                                                            class="text-danger">*</span>Tỉnh/Thành phố</label>
-                                                    <select class="form-select" id="city" name="tinhThanhPho" required>
-                                                        <option value="" selected>Chọn Tỉnh/Thành phố</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col">
-                                                    <label for="district" class="form-label"><span
-                                                            class="text-danger">*</span>Quận/Huyện </label>
-                                                    <select class="form-select" id="district" name="diaChi" required>
-                                                        <option value="" selected>Chọn Quận/Huyện</option>
-                                                    </select>
-                                                </div>
-
-                                                <div class="col">
-                                                    <label for="ward" class="form-label">Xã/Phường <span
-                                                            class="text-danger">*</span></label>
-                                                    <select class="form-select" id="ward" name="diaChi" required>
-                                                        <option value="" selected>Chọn Xã/Phường</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col floating-group mt-3">
-                                                <input type="text" class="form-control" placeholder=""
-                                                       aria-label="diaChiCuThe"
-                                                       id="diaChiCuThe">
-                                                <label for="diaChiCuThe">Địa chỉ cụ thể</label>
-                                            </div>
-
-                                            <div class="mt-3">
-                                                <button type="submit" class="btn btn-primary m-1">
-                                                    <i class="bi bi-save"></i> Lưu
-                                                </button>
-                                                <a th:href="@{/khach-hang/index}" class="btn btn-secondary m-1">
-                                                    <i class="bi bi-arrow-left"></i> Quay lại
-                                                </a>
-                                            </div>
+                                        <div class="col-md-6">
+                                            <label for="soDienThoai" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span> Số điện thoại</label>
+                                            <input type="text" class="form-control" placeholder="Nhập số điện thoại"
+                                                   aria-label="soDienThoai"
+                                                   id="soDienThoai">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="ngaySinh" class="form-label fw-bold">Ngày sinh</label>
+                                            <input type="date" class="form-control" placeholder="Nhập ngày sinh"
+                                                   aria-label="ngaySinh" id="ngaySinh">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="gioiTinh" class="form-label fw-bold">Giới tính</label>
+                                            <select class="form-select" id="gioiTinh" name="gioiTinh" required>
+                                                <option value="Nam">Nam</option>
+                                                <option value="Nữ">Nữ</option>
+                                                <option value="Khác">Khác</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
-                            </form>
+
+                                <div class="col-md-7">
+                                    <div class=" row align-items-start">
+                                        <div class="col">
+                                            <label for="city" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span> Tỉnh/Thành phố</label>
+                                            <select class="form-select" id="city" name="tinhThanhPho" required>
+                                                <option value="" selected>Chọn Tỉnh/Thành phố</option>
+                                            </select>
+                                        </div>
+                                        <div class="col">
+                                            <label for="district" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span> Quận/Huyện </label>
+                                            <select class="form-select" id="district" name="diaChi" required>
+                                                <option value="" selected>Chọn Quận/Huyện</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col">
+                                            <label for="ward" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span>
+                                                Xã/Phường </label>
+                                            <select class="form-select" id="ward" name="diaChi" required>
+                                                <option value="" selected>Chọn Xã/Phường</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col fw-bold mt-3">
+                                        <label for="diaChiCuThe" class="form-label fw-bold">Địa chỉ cụ thể</label>
+                                        <input type="text" class="form-control" placeholder="Nhập địa chỉ chi tiết"
+                                               aria-label="diaChiCuThe"
+                                               id="diaChiCuThe">
+                                    </div>
+
+
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="card-body"></div>
-            </section>
+                </section>
+            </form>
         </div>
     </div>
 
