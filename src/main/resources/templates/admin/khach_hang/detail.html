@@ -15,39 +15,54 @@
     <div id="main">
         <header th:replace="/admin/fragments/header :: header"></header>
         <div class="page-content">
-            <!--        dữ liệu thực hiện trong secsion-->
-            <section class="row">
-                <div class="card">
-                    <div class="card-header">
-                        <form id="formUpdateKH" th:object="${khachHang}">
-                            <div class="container">
-                                <div class="row justify-content-around">
-                                    <div class="col-md-6">
-                                        <input type="hidden" name="idKH" id="idKH" th:value="${khachHang.id}">
-                                        <div class="mb-3">
-                                            <label for="name" class="form-label fw-bold">Tên khách hàng</label>
-                                            <input type="text" class="form-control" placeholder="" aria-label="name"
-                                                   id="name" th:field="*{ten}">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="email" class="form-label fw-bold"><span class="text-danger">*</span> Email</label>
-                                            <input type="text" class="form-control" placeholder=""
+            <form id="formUpdateKH" th:object="${khachHang}">
+                <section class="row">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2>Thông tin khách hàng</h2>
+
+                                <button type="submit" class="btn btn-outline-warning">
+                                    <i class="bi bi-pencil-square"></i> Lưu
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row justify-content-around">
+                                <div class="col-md-7">
+                                    <input type="hidden" name="idKH" id="idKH" th:value="${khachHang.id}">
+                                    <div class="mb-3"> Image</div>
+
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label fw-bold"><span
+                                                class="text-danger">*</span> Tên khách hàng</label>
+                                        <input type="text" class="form-control" placeholder="Nhập tên" aria-label="name"
+                                               id="name" th:field="*{ten}">
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="email" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span> Email</label>
+                                            <input type="text" class="form-control" placeholder="Email"
                                                    aria-label="email" disabled
                                                    id="email" th:field="*{taiKhoan.email}">
                                         </div>
-                                        <div class="mb-3">
-                                            <label for="soDienThoai" class="form-label fw-bold">Số điện thoại</label>
+                                        <div class="col-md-6">
+                                            <label for="soDienThoai" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span> Số điện thoại</label>
                                             <input type="text" class="form-control" placeholder=""
                                                    aria-label="soDienThoai"
                                                    id="soDienThoai" th:field="*{soDienThoai}">
                                         </div>
-                                        <div class="mb-3">
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
                                             <label for="ngaySinh" class="form-label fw-bold">Ngày sinh</label>
                                             <input type="date" class="form-control" placeholder=""
                                                    aria-label="ngaySinh"
                                                    id="ngaySinh" th:field="*{ngaySinh}">
                                         </div>
-                                        <div class="mb-3">
+                                        <div class="col-md-6">
                                             <label for="gioiTinh" class="form-label fw-bold">Giới tính</label>
                                             <select class="form-select" id="gioiTinh" name="gioiTinh" required
                                                     th:field="*{gioiTinh}">
@@ -56,76 +71,69 @@
                                                 <option value="Khác">Khác</option>
                                             </select>
                                         </div>
-                                        <div class="mt-4">
-                                            <button type="submit" class="btn btn-outline-warning me-2">
-                                                <i class="bi bi-pencil-square"></i> Lưu
-                                            </button>
-                                        </div>
                                     </div>
+                                </div>
 
-                                    <div class="col-md-6">
-                                        <div class="mb-3 d-flex justify-content-end">
-                                            <!-- Nút mở modal -->
-                                            <button type="button" class="btn btn-outline-success"
-                                                    data-bs-toggle="modal" data-bs-target="#themModal">
-                                                <i class="bi bi-patch-plus-fill"></i> Thêm
-                                            </button>
-                                        </div>
-                                        <div th:each="diaChi, stat : ${listDiaChi}">
-                                            <form>
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <!-- Phần hiển thị địa chỉ -->
-                                                    <div>
-                                                        <input type="hidden" name="khachHangId"
-                                                               th:value="${khachHang.id}"/>
-                                                        <input type="hidden" name="diaChiId" th:value="${diaChi.id}"/>
-                                                        <input type="hidden" th:id="'tinh' + ${stat.index}"
-                                                               th:value="${diaChi.tinh}"/>
-                                                        <input type="hidden" th:id="'huyen' + ${stat.index}"
-                                                               th:value="${diaChi.huyen}"/>
-                                                        <input type="hidden" th:id="'xa' + ${stat.index}"
-                                                               th:value="${diaChi.xa}"/>
+                                <div class="col-md-5">
+                                    <div class="d-flex justify-content-end mb-3">
+                                        <button type="button" class="btn btn-outline-success"
+                                                data-bs-toggle="modal" data-bs-target="#themModal">
+                                            <i class="bi bi-patch-plus-fill"></i> Thêm địa chỉ
+                                        </button>
+                                    </div>
+                                    <div th:each="diaChi, stat : ${listDiaChi}">
+                                        <form>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <!-- Phần hiển thị địa chỉ -->
+                                                <div>
+                                                    <input type="hidden" name="khachHangId"
+                                                           th:value="${khachHang.id}"/>
+                                                    <input type="hidden" name="diaChiId" th:value="${diaChi.id}"/>
+                                                    <input type="hidden" th:id="'tinh' + ${stat.index}"
+                                                           th:value="${diaChi.tinh}"/>
+                                                    <input type="hidden" th:id="'huyen' + ${stat.index}"
+                                                           th:value="${diaChi.huyen}"/>
+                                                    <input type="hidden" th:id="'xa' + ${stat.index}"
+                                                           th:value="${diaChi.xa}"/>
 
-                                                        <h6 th:id="'city' + ${stat.index}" class="mb-1">Địa chỉ: </h6>
-                                                        <!--                                                        <h6 th:id="'district' + ${stat.index}" class="mb-1">Quận /-->
-                                                        <!--                                                            Huyện: </h6>-->
-                                                        <!--                                                        <h6 th:id="'ward' + ${stat.index}" class="mb-1">Xã /-->
-                                                        <!--                                                            Phường: </h6>-->
-                                                        <!--                                                        <h6 th:text="${diaChi.soNhaNgoDuong}" class="mb-0">Chi tiết địa-->
-                                                        <!--                                                            chỉ</h6>-->
-                                                    </div>
-                                                    <div>
-                                                        <button
-                                                                type="button"
-                                                                class="btn btn-outline-warning btn-edit-dia-chi"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#myModal"
-                                                                th:attr="data-id=${diaChi.id},
+                                                    <h6 th:id="'city' + ${stat.index}" class="mb-1">Địa chỉ: </h6>
+                                                    <!--                                                        <h6 th:id="'district' + ${stat.index}" class="mb-1">Quận /-->
+                                                    <!--                                                            Huyện: </h6>-->
+                                                    <!--                                                        <h6 th:id="'ward' + ${stat.index}" class="mb-1">Xã /-->
+                                                    <!--                                                            Phường: </h6>-->
+                                                    <!--                                                        <h6 th:text="${diaChi.soNhaNgoDuong}" class="mb-0">Chi tiết địa-->
+                                                    <!--                                                            chỉ</h6>-->
+                                                </div>
+                                                <div>
+                                                    <button
+                                                            type="button"
+                                                            class="btn btn-outline-warning btn-edit-dia-chi"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#myModal"
+                                                            th:attr="data-id=${diaChi.id},
                                                                  data-khachhangid=${khachHang.id},
                                                                  data-tinh=${diaChi.tinh},
                                                                  data-huyen=${diaChi.huyen},
                                                                  data-xa=${diaChi.xa},
                                                                  data-sonha=${diaChi.soNhaNgoDuong}">
-                                                            <i class="bi bi-pencil-square"></i>
-                                                        </button>
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </button>
 
-                                                        <a class="btn btn-outline-danger ms-3 "
-                                                           th:href="@{/khach-hang/xoa/{id}(id=${diaChi.id}, khachHangId=${khachHang.id})}">
-                                                            <i class="bi bi-x-circle"></i>
-                                                        </a>
-                                                    </div>
+                                                    <a class="btn btn-outline-danger ms-3 "
+                                                       th:href="@{/khach-hang/xoa/{id}(id=${diaChi.id}, khachHangId=${khachHang.id})}">
+                                                        <i class="bi bi-x-circle"></i>
+                                                    </a>
                                                 </div>
-                                            </form>
-                                        </div>
-
+                                            </div>
+                                        </form>
                                     </div>
+
                                 </div>
                             </div>
-                        </form>
+                        </div>
                     </div>
-
-                </div>
-            </section>
+                </section>
+            </form>
         </div>
     </div>
     <!-- Footer-->
@@ -168,9 +176,11 @@
                                name="soNhaNgoDuong">
                         <label for="diaChiCuThe">Địa chỉ cụ thể</label>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <i class="bi bi-pencil-square"></i> Lưu
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-patch-plus-fill"></i> Thêm
+                        </button>
+                    </div>
                 </div>
             </div>
         </form>
@@ -205,7 +215,6 @@
                         <input type="text" name="soNhaNgoDuong" id="soNhaNgoDuong" class="form-control" required/>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
                         <button type="submit" class="btn btn-outline-warning">
                             <i class="bi bi-pencil-square"></i> Lưu
                         </button>
