@@ -1,6 +1,7 @@
 package com.example.datn.service.Implements.NhanVienServiceImpl;
 
 import com.example.datn.dto.request.AddNhanVienRequest;
+import com.example.datn.dto.request.UpdateNhanVienRequest;
 import com.example.datn.entity.ChucVu;
 import com.example.datn.entity.DiaChi;
 import com.example.datn.entity.KhachHang;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
 
@@ -41,11 +43,35 @@ public class NhanVienServicelmpl implements NhanVienService {
     public NhanVien findNhanVienById(Long id) {
         return nhanVienRepo.findById(id).orElse(null);    }
 
-
     @Override
-    public void updateNhanVien(NhanVien nhanVien) {
-        nhanVienRepo.save(nhanVien);
+    public void updateNhanVien(UpdateNhanVienRequest request) {
+        Optional<NhanVien> nhanVienOptional = nhanVienRepo.findById(request.getId());
+
+        if (nhanVienOptional.isPresent() ){
+            NhanVien nhanVien = nhanVienOptional.get();
+
+            nhanVien.setTen(request.getTen());
+            nhanVien.setSoDienThoai(request.getSoDienThoai());
+            nhanVien.setNgaySinh(request.getNgaySinh());
+            nhanVien.setGioiTinh(request.getGioiTinh());
+            nhanVien.setCanCuocCongDan(request.getCanCuocCongDan());
+            DiaChi dc = nhanVien.getDiaChi();
+            if (dc == null) {
+                dc = new DiaChi();
+            }
+
+            dc.setTinh(request.getTinhThanhPho());
+            dc.setHuyen(request.getQuanHuyen());
+            dc.setXa(request.getXaPhuong());
+            dc.setSoNhaNgoDuong(request.getSoNhaNgoDuong());
+
+            diaChiRepo.save(dc);
+            nhanVien.setDiaChi(dc);
+
+            nhanVienRepo.save(nhanVien);
+        }
     }
+
 
     @Override
     public boolean thayDoiTrangThaiNhanVien(Long id) {
@@ -60,7 +86,7 @@ public class NhanVienServicelmpl implements NhanVienService {
     }
 
     @Override
-    public void addNhanVien(AddNhanVienRequest nhanVien) {
+    public void addNhanVien(AddNhanVienRequest request) {
         TaiKhoan taiKhoan= new TaiKhoan();
         ChucVu chucVu= chucVuRepo.findByViTri("Employe").orElseGet(() -> {
             ChucVu newChucVu= new ChucVu();
@@ -68,29 +94,30 @@ public class NhanVienServicelmpl implements NhanVienService {
             return chucVuRepo.save(newChucVu);
         });
         taiKhoan.setChucVu(chucVu);
-        taiKhoan.setEmail(nhanVien.getEmail());
+        taiKhoan.setEmail(request.getEmail());
         taiKhoan.setNgayTao(new Date());
         taiKhoanRepo.save(taiKhoan);
 
         DiaChi diaChi= new DiaChi();
-        diaChi.setHuyen(nhanVien.getQuanHuyen());
-        diaChi.setTinh(nhanVien.getTinhThanhPho());
-        diaChi.setXa(nhanVien.getXaPhuong());
-        diaChi.setSoNhaNgoDuong(nhanVien.getSoNhaNgoDuong());
+        diaChi.setHuyen(request.getQuanHuyen());
+        diaChi.setTinh(request.getTinhThanhPho());
+        diaChi.setXa(request.getXaPhuong());
+        diaChi.setSoNhaNgoDuong(request.getSoNhaNgoDuong());
         diaChiRepo.save(diaChi);
 
-        NhanVien newNhanVien = new NhanVien();
-        newNhanVien.setMa(generateCode());
-        newNhanVien.setTaiKhoan(taiKhoan);
-        newNhanVien.setChucVu(chucVu);
-        newNhanVien.setCanCuocCongDan(nhanVien.getCanCuocCongDan());
-        newNhanVien.setTen(nhanVien.getTen());
-        newNhanVien.setGioiTinh(nhanVien.getGioiTinh());
-        newNhanVien.setSoDienThoai(nhanVien.getSoDienThoai());
-        newNhanVien.setNgaySinh(nhanVien.getNgaySinh());
-        newNhanVien.setTrangThai(true);
-        newNhanVien.setDiaChi(diaChi);
-        nhanVienRepo.save(newNhanVien);
+        NhanVien nhanVien = new NhanVien();
+        nhanVien.setMa(generateCode());
+        nhanVien.setTaiKhoan(taiKhoan);
+        nhanVien.setChucVu(chucVu);
+        nhanVien.setCanCuocCongDan(request.getCanCuocCongDan());
+        nhanVien.setTen(request.getTen());
+        nhanVien.setSoDienThoai(request.getSoDienThoai());
+        nhanVien.setNgaySinh(request.getNgaySinh());
+        nhanVien.setGioiTinh(request.getGioiTinh());
+        nhanVien.setNgayTao(LocalDateTime.now());
+        nhanVien.setTrangThai(true);
+        nhanVien.setDiaChi(diaChi);
+        nhanVienRepo.save(nhanVien);
 
     }
     @Override

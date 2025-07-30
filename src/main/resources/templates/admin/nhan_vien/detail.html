@@ -17,94 +17,112 @@
             <!--        dữ liệu thực hiện trong secsion-->
             <section class="row">
                 <div class="card">
-                    <div class="card-header">
-                        <form action="admin/nhan-vien/update" method="post" th:object="${nhanVien}">
-                            <div class="container">
-                                <div class="row justify-content-around">
-                                    <div class="col-md-4">
-                                        Thông tin nhân viên
-                                        <hr>
-                                        <div class="mb-3">
-                                            Ảnh
-                                            <!--                      <img th:src="@{${nhanVien.anhUrl}}" alt="Ảnh nhân viên" width="100" />-->
-                                            <input type="image" name="anh" accept="image/*">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label"><span class="text-danger">*</span>Họ và
-                                                tên</label>
-                                            <input class="form-control" th:field="*{ten}" required>
-
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label"><span class="text-danger">*</span>Email</label>
-                                            <input class="form-control" th:field="*{taiKhoan.email}" type="email"
-                                                   required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label"><span class="text-danger">*</span>Số Điện
+                    <form id="formUpdateNV" th:object="${nhanVien}">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2>Thông tin nhân viên</h2>
+                                <button type="submit" class="btn btn-outline-warning">
+                                    <i class="bi bi-pencil-square"></i> Lưu
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row justify-content-around">
+                                <input type="hidden" name="id" id="id" th:value="${nhanVien.id}">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        Ảnh
+                                        <!--                      <img th:src="@{${nhanVien.anhUrl}}" alt="Ảnh nhân viên" width="100" />-->
+                                        <input type="image" name="anh" accept="image/*">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold"><span class="text-danger">*</span> Tên nhân
+                                            viên</label>
+                                        <input class="form-control" id="name" th:field="*{ten}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold"><span class="text-danger">*</span>
+                                            Email</label>
+                                        <input class="form-control" th:field="*{taiKhoan.email}" type="email"
+                                               disabled required>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold"><span class="text-danger">*</span>Số Điện
                                                 Thoại</label>
-                                            <input class="form-control" th:field="*{soDienThoai}" type="tel" required>
+                                            <input class="form-control" id="soDienThoai" th:field="*{soDienThoai}"
+                                                   type="tel" required>
                                         </div>
-                                        <div class="mb-3">
-                                            <label class="form-label"><span class="text-danger">*</span>Ngày
-                                                sinh</label>
-                                            <input class="form-control" th:field="*{ngaySinh}" type="date" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label"><span class="text-danger">*</span>Giới
-                                                Tính</label>
-                                            <input type="radio" th:field="*{gioiTinh}" th:value="true"> Nam
-                                            <input type="radio" th:field="*{gioiTinh}" th:value="false"> Nữ
+                                        <div class="col-md-6">
+                                            <label for="canCuocCongDan" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span> Số CCCD</label>
+                                            <input type="text" class="form-control" id="canCuocCongDan"
+                                                   th:field="*{canCuocCongDan}" name="soCCCD" required>
                                         </div>
                                     </div>
-                                    <div class="col-md-8">
-                                        Danh sách địa chỉ
-                                        <hr>
+                                    <div class="row">
+                                        <div class="mb-3 col-md-6">
+                                            <label class="form-label fw-bold"><span class="text-danger">*</span> Ngày
+                                                sinh</label>
+                                            <input class="form-control" id="ngaySinh" th:field="*{ngaySinh}" type="date"
+                                                   required>
+                                        </div>
+                                        <div class="mb-3 col-md-6">
+                                            <label for="gioiTinh" class="form-label fw-bold">Giới tính</label>
+                                            <select class="form-select" id="gioiTinh" name="gioiTinh" required
+                                                    th:field="*{gioiTinh}">
+                                                <option value="Nam">Nam</option>
+                                                <option value="Nữ">Nữ</option>
+                                                <option value="Khác">Khác</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
                                         <!-- Tỉnh/Thành phố -->
-                                        <div class="mb-3">
-                                            <label class="form-label" for="city">Tỉnh/Thành phố <span style="color: red">*</span></label>
+                                        <div class="col ">
+                                            <label class="form-label fw-bold" for="city"><span
+                                                    class="text-danger">*</span> Tỉnh/Thành phố</label>
                                             <select class="form-control" id="city" name="tinh_thanh_pho">
                                                 <option value="">Chọn tỉnh thành</option>
                                             </select>
                                         </div>
-
                                         <!-- Quận/Huyện -->
-                                        <div class="mb-3">
-                                            <label class="form-label" for="district">Quận/Huyện <span style="color: red">*</span></label>
+                                        <div class="col ">
+                                            <label class="form-label fw-bold" for="district"><span
+                                                    class="text-danger">*</span> Quận/Huyện</label>
                                             <select class="form-control" id="district" name="quan_huyen">
                                                 <option value="">Chọn quận huyện</option>
                                             </select>
                                         </div>
 
                                         <!-- Phường/Xã -->
-                                        <div class="mb-3">
-                                            <label class="form-label" for="ward">Phường/Xã <span style="color: red">*</span></label>
+                                        <div class="col ">
+                                            <label class="form-label fw-bold" for="ward"><span
+                                                    class="text-danger">*</span> Phường/Xã</label>
                                             <select class="form-control" id="ward" name="xa_phuong">
                                                 <option value="">Chọn phường xã</option>
                                             </select>
                                         </div>
-
-                                        <!-- Dữ liệu ẩn từ Thymeleaf -->
-                                        <input type="hidden" id="tinh" th:value="${nhanVien.diaChi.tinh}" />
-                                        <input type="hidden" id="huyen" th:value="${nhanVien.diaChi.huyen}" />
-                                        <input type="hidden" id="xa" th:value="${nhanVien.diaChi.xa}" />
-
                                     </div>
+                                    <div class="col-md-12">
+                                        <label for="soNhaNgoDuong" class="form-label fw-bold">Địa Chỉ Cụ Thể</label>
+                                        <input type="text" class="form-control" id="soNhaNgoDuong"
+                                               name="soNhaNgoDuong" th:value="${nhanVien.diaChi.soNhaNgoDuong}"
+                                               required>
+                                    </div>
+                                    <!-- Dữ liệu ẩn từ Thymeleaf -->
+                                    <input type="hidden" id="tinh" th:value="${nhanVien.diaChi.tinh}"/>
+                                    <input type="hidden" id="huyen" th:value="${nhanVien.diaChi.huyen}"/>
+                                    <input type="hidden" id="xa" th:value="${nhanVien.diaChi.xa}"/>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <button type="submit" class="btn btn-primary">Cập nhật</button>
-                                <a th:href="@{/admin/nhan-vien/index}" class="btn btn-secondary m-1">
-                                    <i class="bi bi-arrow-left"></i> Hủy
-                                </a>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="card-body">
-                    </div>
-
+                        </div>
+                    </form>
                 </div>
             </section>
+
         </div>
     </div>
     <!-- Footer-->
@@ -114,6 +132,8 @@
 </div>
 <div>
     <script th:replace="/admin/fragments/script :: script"></script>
+    <script th:src="@{/admin/assets/compiled/js/nhanVien.js}"></script>
+
     <script th:inline="javascript">
         document.addEventListener("DOMContentLoaded", function () {
             const idTinh = document.getElementById("tinh").value;
@@ -186,7 +206,6 @@
             }
         });
     </script>
-
 
 </div>
 </body>

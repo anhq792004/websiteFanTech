@@ -13,27 +13,16 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AddNhanVienRequest {
-    private String ten;
+public class UpdateInforKhachHangRequest {
+    Long idKH;
 
-    private String email;
+    String ten;
 
-    private String soDienThoai;
+    String gioiTinh;
 
-    private String chucVu;
-
-    private String canCuocCongDan;
+    String soDienThoai;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date ngaySinh;
+    Date ngaySinh;
 
-    private String gioiTinh;
-
-    private String tinhThanhPho;
-
-    private String quanHuyen;
-
-    private String xaPhuong;
-
-    private String soNhaNgoDuong;
 }

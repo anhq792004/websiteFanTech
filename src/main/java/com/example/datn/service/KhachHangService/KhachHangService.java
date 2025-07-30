@@ -1,6 +1,7 @@
 package com.example.datn.service.KhachHangService;
 
 import com.example.datn.dto.request.AddKhachHangRequest;
+import com.example.datn.dto.request.UpdateInforKhachHangRequest;
 import com.example.datn.entity.KhachHang;
 import com.example.datn.entity.TaiKhoan;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,8 @@ public interface KhachHangService {
     KhachHang findById(Long id);
 
     KhachHang addKH(AddKhachHangRequest request);
+
+    void updateInforKhachHang(UpdateInforKhachHangRequest request);
 
     String generateCode();
 

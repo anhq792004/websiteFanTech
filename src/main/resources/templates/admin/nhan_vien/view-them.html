@@ -13,112 +13,102 @@
     <div id="main">
         <header th:replace="/admin/fragments/header :: header"></header>
         <div class="page-content">
-            <section class="row">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="container mt-4">
+            <form id="addNhanVienForm">
+                <section class="row">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2>Thông tin nhân viên</h2>
+                                <button type="submit" class="btn btn-outline-success">
+                                    <i class="bi bi-save"></i> Thêm
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
                             <!--                            <div th:action="@{|/admin/nhan-vien/them|}" th:object="${nhanVien}" method="post">-->
-                            <form id="addNhanVienForm">
-                                <div class="container">
-                                    <div class="row justify-content-around">
-                                        <div class="col-md-4">
-                                            <h4>Thông tin nhân viên</h4>
-                                            <hr>
-                                            <div class="mb-3"> Image</div>
-                                            <!--                                            <input type="file" class="form-control" name="anh" th:field="*{anh}">-->
-                                            <div class="mb-3">
-                                                <label for="ten" me="hoVaTen" class="form-label"><span
-                                                        class="text-danger">*</span>Họ Và Tên </label>
-                                                <input type="text" class="form-control" id="ten" name="hoVaTen"
-                                                       required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <h4>Thông tin chi tiết</h4>
-                                            <hr>
-                                            <div class="row justify-content-around">
-                                                <div class="col-md-6">
-                                                    <label for="cccd" class="form-label"><span
-                                                            class="text-danger">*</span>Số CCCD</label>
-                                                    <input type="text" class="form-control" id="cccd" name="soCCCD"
-                                                           required>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label"><span class="text-danger">*</span>Giới
-                                                        Tính:</label><br>
-                                                    <input type="radio" name="gioiTinh" value="true" required> Nam
-                                                    <input type="radio" name="gioiTinh" value="false"> Nữ
-                                                </div>
-                                            </div>
-                                            <div class="row justify-content-around">
-                                                <div class="col-md-6">
-                                                    <label for="email" class="form-label"><span
-                                                            class="text-danger">*</span>Email</label>
-                                                    <input type="email" class="form-control" id="email" name="email"
-                                                           required>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="ngaySinh" class="form-label"><span
-                                                            class="text-danger">*</span>Ngày Sinh</label>
-                                                    <input type="date" class="form-control" id="ngaySinh"
-                                                           name="ngaySinh" required>
-                                                </div>
-                                                <hr>
-                                            </div>
-                                            <div class="row align-items-start">
-                                                <div class="col">
-                                                    <label for="city" class="form-label"><span
-                                                            class="text-danger">*</span>Tỉnh/Thành phố </label>
-                                                    <select class="form-select" id="city" name="tinhThanhPho" required>
-                                                        <option value="" selected>-- Chọn Tỉnh/Thành phố --</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col">
-                                                    <label for="district" class="form-label"><span
-                                                            class="text-danger">*</span>Quận/Huyện </label>
-                                                    <select class="form-select" id="district" name="diaChi" required>
-                                                        <option value="" selected>-- Chọn Quận/Huyện --</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col">
-                                                    <label for="ward" class="form-label"><span
-                                                            class="text-danger">*</span>Xã/Phường </label>
-                                                    <select class="form-select" id="ward" name="diaChi" required>
-                                                        <option value="" selected>-- Chọn Xã/Phường --</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="row justify-content-around">
-                                                <div class="col-md-6">
-                                                    <label for="sdt" class="form-label"><span
-                                                            class="text-danger">*</span> Số Điện Thoại</label>
-                                                    <input type="tel" class="form-control" id="sdt" name="soDienThoai"
-                                                           required>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="dcct" class="form-label"><span
-                                                            class="text-danger">*</span> Địa Chỉ Cụ Thể</label>
-                                                    <input type="text" class="form-control" id="dcct"
-                                                           name="soNhaNgoDuong" required>
-                                                </div>
-                                            </div>
-                                            <div class="mt-3">
-                                                <button type="submit" class="btn btn-primary m-1">
-                                                    <i class="bi bi-save"></i> Lưu
-                                                </button>
-                                                <a th:href="@{/admin/nhan-vien/index}" class="btn btn-secondary m-1">
-                                                    <i class="bi bi-arrow-left"></i> Quay lại
-                                                </a>
-                                            </div>
-                                        </div>
+                            <div class="row justify-content-around">
+                                <div class="col-md-4">
+                                    <div class="mb-3"> Image</div>
+                                    <!--                                            <input type="file" class="form-control" name="anh" th:field="*{anh}">-->
+                                    <div class="mb-3">
+                                        <label for="ten" me="hoVaTen" class="form-label fw-bold"><span
+                                                class="text-danger">*</span> Tên nhân viên </label>
+                                        <input type="text" class="form-control" id="ten" name="hoVaTen"
+                                               required>
                                     </div>
                                 </div>
-                            </form>
+                                <div class="col-md-8">
+                                    <div class="col mb-3">
+                                        <label for="email" class="form-label fw-bold"><span
+                                                class="text-danger">*</span> Email</label>
+                                        <input type="email" class="form-control" id="email" name="email"
+                                               required>
+                                    </div>
+                                    <div class="row justify-content-around mb-3">
+                                        <div class="col-md-6">
+                                            <label for="sdt" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span> Số Điện Thoại</label>
+                                            <input type="tel" class="form-control" id="sdt" name="soDienThoai"
+                                                   required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="cccd" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span> Số CCCD</label>
+                                            <input type="text" class="form-control" id="cccd" name="soCCCD"
+                                                   required>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-around mb-3 fw-bold">
+                                        <div class="col-md-6">
+                                            <label for="ngaySinh" class="form-label"><span
+                                                    class="text-danger">*</span> Ngày Sinh</label>
+                                            <input type="date" class="form-control" id="ngaySinh"
+                                                   name="ngaySinh" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="gioiTinh" class="form-label fw-bold">Giới tính</label>
+                                            <select class="form-select" id="gioiTinh" name="gioiTinh" required>
+                                                <option value="Nam">Nam</option>
+                                                <option value="Nữ">Nữ</option>
+                                                <option value="Khác">Khác</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row align-items-start mb-3">
+                                        <div class="col">
+                                            <label for="city" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span> Tỉnh/Thành phố </label>
+                                            <select class="form-select" id="city" name="tinhThanhPho" required>
+                                                <option value="" selected>-- Chọn Tỉnh/Thành phố --</option>
+                                            </select>
+                                        </div>
+                                        <div class="col">
+                                            <label for="district" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span> Quận/Huyện </label>
+                                            <select class="form-select" id="district" name="diaChi" required>
+                                                <option value="" selected>-- Chọn Quận/Huyện --</option>
+                                            </select>
+                                        </div>
+                                        <div class="col">
+                                            <label for="ward" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span> Xã/Phường </label>
+                                            <select class="form-select" id="ward" name="diaChi" required>
+                                                <option value="" selected>-- Chọn Xã/Phường --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <label for="dcct" class="form-label fw-bold">Địa Chỉ Cụ Thể</label>
+                                        <input type="text" class="form-control" id="dcct"
+                                               name="soNhaNgoDuong" required>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="card-body"></div>
-                </div>
-            </section>
+                </section>
+            </form>
         </div>
     </div>
     <!-- Footer-->

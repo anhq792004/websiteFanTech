@@ -1,6 +1,7 @@
 package com.example.datn.service.NhanVienService;
 
 import com.example.datn.dto.request.AddNhanVienRequest;
+import com.example.datn.dto.request.UpdateNhanVienRequest;
 import com.example.datn.entity.NhanVien.NhanVien;
 import com.example.datn.repository.NhanVienRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ public interface NhanVienService {
 
     NhanVien findNhanVienById(Long id);
 
-    void updateNhanVien(NhanVien nhanVien);
+    void updateNhanVien(UpdateNhanVienRequest request);
 
     boolean thayDoiTrangThaiNhanVien(Long id);
 
