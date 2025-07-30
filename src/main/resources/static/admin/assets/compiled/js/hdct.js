@@ -238,6 +238,9 @@ $(".btn-add-sanPham").click(function () {
 $(".btn-xoa-sanPham").click(function () {
     const sanPhamId = $(this).data("id-sp");
     const hoaDonId = $(this).data("id-hd");
+    const idKH = $(this).data("id-kh");
+    const idDC = $(this).data("id-dc");
+    console.log("idKH:", idKH, "idDC:", idDC);
 
     $.ajax({
         url: '/hoa-don/xoa',

@@ -1,15 +1,15 @@
-$(document).ready(function() {
+$(document).ready(function () {
 
-    $('#addNhanVienForm').on('submit', function(event) {
+    $('#addNhanVienForm').on('submit', function (event) {
         event.preventDefault();
 
         const formData = {
             ten: $('#ten').val(),
-            cccd: $('#cccd').val(),
+            canCuocCongDan: $('#cccd').val(),
             email: $('#email').val(),
             soDienThoai: $('#sdt').val(),
             ngaySinh: $('#ngaySinh').val(),
-            gioiTinh: $('input[name="gioiTinh"]:checked').val(),
+            gioiTinh: $('#gioiTinh').val(),
             tinhThanhPho: $('#city').val(),
             quanHuyen: $('#district').val(),
             xaPhuong: $('#ward').val(),
@@ -21,7 +21,7 @@ $(document).ready(function() {
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(formData),
-            success: function(response) {
+            success: function (response) {
                 Swal.fire({
                     toast: true,
                     icon: 'success',
@@ -34,7 +34,7 @@ $(document).ready(function() {
                     window.location.href = '/admin/nhan-vien/index';
                 });
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 Swal.fire({
                     toast: true,
                     icon: 'error',
@@ -65,7 +65,7 @@ $('.changeStatusNhanVien').on('click', function () {
                     title: response,
                     position: 'top-end',
                     showConfirmButton: false,
-                    timer: 1000,
+                    timer: 500,
                     timerProgressBar: true
                 }).then(() => {
                     location.reload();
@@ -77,7 +77,7 @@ $('.changeStatusNhanVien').on('click', function () {
                     title: response,
                     position: 'top-end',
                     showConfirmButton: false,
-                    timer: 3000,
+                    timer: 1000,
                     timerProgressBar: true
                 });
             }
@@ -95,5 +95,57 @@ $('.changeStatusNhanVien').on('click', function () {
         }
     });
 });
+
+$(document).ready(function () {
+    $('#formUpdateNV').submit(function (e) {
+        e.preventDefault();
+
+        const data = {
+            id: $('#id').val(),
+            ten: $('#name').val(),
+            soDienThoai: $('#soDienThoai').val(),
+            canCuocCongDan: $('#canCuocCongDan').val(),
+            ngaySinh: $('#ngaySinh').val(),
+            gioiTinh: $('#gioiTinh').val(),
+            tinhThanhPho: $('#city').val(),
+            quanHuyen: $('#district').val(),
+            xaPhuong: $('#ward').val(),
+            soNhaNgoDuong: $('#soNhaNgoDuong').val()
+        };
+
+        $.ajax({
+            url: '/admin/nhan-vien/update',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: response.message || 'Updatenhân viên thành công',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    timerProgressBar: true
+                }).then(() => {
+                    location.reload();
+                });
+            },
+            error: function (xhr) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    title: xhr.responseText || 'Lỗi khi thêm nhân viên',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    timerProgressBar: true
+                });
+            }
+        });
+    });
+});
+
+
 
 
