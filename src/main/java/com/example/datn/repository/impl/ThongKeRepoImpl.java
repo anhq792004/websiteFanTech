@@ -28,7 +28,7 @@ public class ThongKeRepoImpl implements ThongKeRepo {
             JOIN hdct.sanPhamChiTiet spct
             JOIN spct.sanPham sp
             JOIN hdct.hoaDon hd
-            WHERE hd.trangThai = 3 AND CAST(hd.ngayTao AS DATE) = :date
+            WHERE hd.trangThai = 4 AND CAST(hd.ngayTao AS DATE) = :date
             GROUP BY sp.id, sp.ma, sp.ten
             ORDER BY SUM(hdct.soLuong) DESC
         """;
@@ -48,7 +48,7 @@ public class ThongKeRepoImpl implements ThongKeRepo {
             JOIN hdct.sanPhamChiTiet spct
             JOIN spct.sanPham sp
             JOIN hdct.hoaDon hd
-            WHERE hd.trangThai = 3 AND YEAR(hd.ngayTao) = :year AND MONTH(hd.ngayTao) = :month
+            WHERE hd.trangThai = 4 AND YEAR(hd.ngayTao) = :year AND MONTH(hd.ngayTao) = :month
             GROUP BY sp.id, sp.ma, sp.ten
             ORDER BY SUM(hdct.soLuong) DESC
         """;
@@ -69,7 +69,7 @@ public class ThongKeRepoImpl implements ThongKeRepo {
             JOIN hdct.sanPhamChiTiet spct
             JOIN spct.sanPham sp
             JOIN hdct.hoaDon hd
-            WHERE hd.trangThai = 3 AND CAST(hd.ngayTao AS DATE) >= :from AND CAST(hd.ngayTao AS DATE) <= :to
+            WHERE hd.trangThai = 4 AND CAST(hd.ngayTao AS DATE) >= :from AND CAST(hd.ngayTao AS DATE) <= :to
             GROUP BY sp.id, sp.ma, sp.ten
             ORDER BY SUM(hdct.soLuong) DESC
         """;
@@ -86,7 +86,7 @@ public class ThongKeRepoImpl implements ThongKeRepo {
             SELECT COUNT(DISTINCT hd.id), COALESCE(SUM(hd.tongTienSauGiamGia),0), COALESCE(SUM(hdct.soLuong),0), COUNT(DISTINCT hd.khachHang.id)
             FROM HoaDonChiTiet hdct
             JOIN hdct.hoaDon hd
-            WHERE hd.trangThai = 3 AND CAST(hd.ngayTao AS DATE) >= :from AND CAST(hd.ngayTao AS DATE) <= :to
+            WHERE hd.trangThai = 4 AND CAST(hd.ngayTao AS DATE) >= :from AND CAST(hd.ngayTao AS DATE) <= :to
         """;
         Query query = entityManager.createQuery(sql);
         query.setParameter("from", from);
@@ -105,7 +105,7 @@ public class ThongKeRepoImpl implements ThongKeRepo {
         String sql = """
             SELECT DAY(hd.ngayTao), COALESCE(SUM(hd.tongTienSauGiamGia),0)
             FROM HoaDon hd
-            WHERE hd.trangThai = 3 AND YEAR(hd.ngayTao) = :year AND MONTH(hd.ngayTao) = :month
+            WHERE hd.trangThai = 4 AND YEAR(hd.ngayTao) = :year AND MONTH(hd.ngayTao) = :month
             GROUP BY DAY(hd.ngayTao)
             ORDER BY DAY(hd.ngayTao)
         """;
@@ -121,7 +121,7 @@ public class ThongKeRepoImpl implements ThongKeRepo {
         String sql = """
             SELECT MONTH(hd.ngayTao), COALESCE(SUM(hd.tongTienSauGiamGia),0)
             FROM HoaDon hd
-            WHERE hd.trangThai = 3 AND YEAR(hd.ngayTao) = :year
+            WHERE hd.trangThai = 4 AND YEAR(hd.ngayTao) = :year
             GROUP BY MONTH(hd.ngayTao)
             ORDER BY MONTH(hd.ngayTao)
         """;
@@ -136,7 +136,7 @@ public class ThongKeRepoImpl implements ThongKeRepo {
         String sql = """
             SELECT DAY(hd.ngayTao), COALESCE(SUM(hd.tongTienSauGiamGia),0)
             FROM HoaDon hd
-            WHERE hd.trangThai = 3 AND CAST(hd.ngayTao AS DATE) >= :from AND CAST(hd.ngayTao AS DATE) <= :to
+            WHERE hd.trangThai = 4 AND CAST(hd.ngayTao AS DATE) >= :from AND CAST(hd.ngayTao AS DATE) <= :to
             GROUP BY DAY(hd.ngayTao)
             ORDER BY DAY(hd.ngayTao)
         """;
@@ -149,28 +149,28 @@ public class ThongKeRepoImpl implements ThongKeRepo {
 
     @Override
     public long tongDoanhThuToanHeThong() {
-        String sql = "SELECT COALESCE(SUM(hd.tongTienSauGiamGia),0) FROM HoaDon hd WHERE hd.trangThai = 3";
+        String sql = "SELECT COALESCE(SUM(hd.tongTienSauGiamGia),0) FROM HoaDon hd WHERE hd.trangThai = 4";
         Query query = entityManager.createQuery(sql);
         return ((Number) query.getSingleResult()).longValue();
     }
 
     @Override
     public long doanhThuHomNay() {
-        String sql = "SELECT COALESCE(SUM(hd.tongTienSauGiamGia),0) FROM HoaDon hd WHERE hd.trangThai = 3 AND CAST(hd.ngayTao AS DATE) = CURRENT_DATE";
+        String sql = "SELECT COALESCE(SUM(hd.tongTienSauGiamGia),0) FROM HoaDon hd WHERE hd.trangThai = 4 AND CAST(hd.ngayTao AS DATE) = CURRENT_DATE";
         Query query = entityManager.createQuery(sql);
         return ((Number) query.getSingleResult()).longValue();
     }
 
     @Override
     public long doanhThuTuanNay() {
-        String sql = "SELECT COALESCE(SUM(hd.tongTienSauGiamGia),0) FROM HoaDon hd WHERE hd.trangThai = 3 AND YEAR(hd.ngayTao) = YEAR(CURRENT_DATE) AND DATEPART(week, hd.ngayTao) = DATEPART(week, CURRENT_DATE)";
+        String sql = "SELECT COALESCE(SUM(hd.tongTienSauGiamGia),0) FROM HoaDon hd WHERE hd.trangThai = 4 AND YEAR(hd.ngayTao) = YEAR(CURRENT_DATE) AND DATEPART(week, hd.ngayTao) = DATEPART(week, CURRENT_DATE)";
         Query query = entityManager.createQuery(sql);
         return ((Number) query.getSingleResult()).longValue();
     }
 
     @Override
     public long doanhThuThangNay() {
-        String sql = "SELECT COALESCE(SUM(hd.tongTienSauGiamGia),0) FROM HoaDon hd WHERE hd.trangThai = 3 AND YEAR(hd.ngayTao) = YEAR(CURRENT_DATE) AND MONTH(hd.ngayTao) = MONTH(CURRENT_DATE)";
+        String sql = "SELECT COALESCE(SUM(hd.tongTienSauGiamGia),0) FROM HoaDon hd WHERE hd.trangThai = 4 AND YEAR(hd.ngayTao) = YEAR(CURRENT_DATE) AND MONTH(hd.ngayTao) = MONTH(CURRENT_DATE)";
         Query query = entityManager.createQuery(sql);
         return ((Number) query.getSingleResult()).longValue();
     }

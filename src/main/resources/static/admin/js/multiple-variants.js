@@ -18,6 +18,9 @@ class VariantsManager {
         // Storage cho file ảnh của từng biến thể
         this.variantImages = new Map(); // index -> File object
         
+        // Flag để tránh bind events nhiều lần
+        this.eventsBound = false;
+        
         // Map tên màu thành mã màu hex
         this.colorMap = {
             'đỏ': '#dc3545',
@@ -141,8 +144,13 @@ class VariantsManager {
     }
 
     bindEvents() {
+        if (this.eventsBound) return;
+        this.eventsBound = true;
+        
+        console.log('Binding events...');
+        
         // Click vào nút màu sắc trong modal
-        document.addEventListener('click', (e) => {
+        $(document).off('click.mauSacOption').on('click.mauSacOption', (e) => {
             if (e.target.classList.contains('mau-sac-option')) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -165,12 +173,14 @@ class VariantsManager {
                 e.target.disabled = true;
                 
                 // Đóng modal ngay lập tức
-                this.closeModal('mauSacModal');
+                $('#mauSacModal').modal('hide');
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
             }
         });
 
         // Click vào nút công suất trong modal
-        document.addEventListener('click', (e) => {
+        $(document).off('click.congSuatOption').on('click.congSuatOption', (e) => {
             if (e.target.classList.contains('cong-suat-option')) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -193,57 +203,82 @@ class VariantsManager {
                 e.target.disabled = true;
                 
                 // Đóng modal ngay lập tức
-                this.closeModal('congSuatModal');
+                $('#congSuatModal').modal('hide');
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
             }
+        });
+
+        // Xử lý khi modal đóng để reset trạng thái
+        $('#mauSacModal, #congSuatModal').on('hidden.bs.modal', function() {
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+        });
+
+        // Xử lý khi modal mở để đảm bảo trạng thái sạch
+        $('#mauSacModal, #congSuatModal').on('show.bs.modal', function() {
+            // Đảm bảo không có modal nào khác đang mở
+            $('.modal').not(this).modal('hide');
         });
 
         // Generate variants list button
         const generateBtn = document.getElementById('generateVariantsList');
         if (generateBtn) {
-            generateBtn.addEventListener('click', () => this.generateVariantsList());
+            $(generateBtn).off('click.generateVariants').on('click.generateVariants', () => this.generateVariantsList());
         }
         
         // Save to database button  
         const saveBtn = document.getElementById('saveToDatabase');
         if (saveBtn) {
-            saveBtn.addEventListener('click', () => this.saveToDatabase());
+            $(saveBtn).off('click.saveToDatabase').on('click.saveToDatabase', () => this.saveToDatabase());
         }
         
         // Edit all toggle button
         const editToggleBtn = document.getElementById('editAllToggle');
         if (editToggleBtn) {
-            editToggleBtn.addEventListener('click', () => this.toggleEditMode());
+            $(editToggleBtn).off('click.toggleEdit').on('click.toggleEdit', () => this.toggleEditMode());
         }
+        
+        // Nút mở modal màu sắc
+        $('#openMauSacModal').off('click.openMauSac').on('click.openMauSac', () => {
+            this.openModal('mauSacModal');
+        });
+        
+        // Nút mở modal công suất
+        $('#openCongSuatModal').off('click.openCongSuat').on('click.openCongSuat', () => {
+            this.openModal('congSuatModal');
+        });
+        
+        console.log('Events bound successfully');
+        
+        // Reset modal state ban đầu
+        this.resetModalState();
     }
     
-    // Đóng modal đúng cách  
-    closeModal(modalId) {
-        try {
-        const modalElement = document.getElementById(modalId);
-            if (!modalElement) {
-                console.warn(`Modal element with id "${modalId}" not found`);
-                return;
-            }
-            
-        const modal = bootstrap.Modal.getInstance(modalElement);
+    // Method để mở modal an toàn
+    openModal(modalId) {
+        // Đóng tất cả modal khác trước
+        $('.modal').modal('hide');
         
-        if (modal) {
-            modal.hide();
-        } else {
-            // Nếu không có instance, tạo mới và đóng
-            const newModal = new bootstrap.Modal(modalElement);
-            newModal.hide();
-            }
-        } catch (error) {
-            console.error('Error closing modal:', error);
-            // Fallback: đóng modal bằng cách trigger click vào backdrop
-            const modalElement = document.getElementById(modalId);
-            if (modalElement) {
-                modalElement.classList.remove('show');
-                modalElement.style.display = 'none';
-                this.cleanupModal();
-            }
-        }
+        // Đợi một chút rồi mở modal mới
+        setTimeout(() => {
+            $(`#${modalId}`).modal('show');
+        }, 150);
+    }
+    
+    resetModalState() {
+        // Reset trạng thái modal
+        $('body').removeClass('modal-open');
+        $('.modal-backdrop').remove();
+        
+        // Reset các nút đã chọn
+        $('.mau-sac-option').removeClass('btn-primary').addClass('btn-outline-primary').prop('disabled', false);
+        $('.cong-suat-option').removeClass('btn-info').addClass('btn-outline-info').prop('disabled', false);
+        
+        // Xóa dấu ✓
+        $('.mau-sac-option, .cong-suat-option').each(function() {
+            $(this).html($(this).text().replace('✓ ', ''));
+        });
     }
     
     // Lấy mã màu hex từ tên màu
@@ -1126,6 +1161,32 @@ style.textContent = `
         transition: opacity 0.15s linear;
     }
     
+    /* Đảm bảo modal hiển thị đúng */
+    .modal {
+        z-index: 1055 !important;
+    }
+    
+    .modal-backdrop {
+        z-index: 1050 !important;
+    }
+    
+    /* Fix cho modal bị che khuất */
+    body.modal-open {
+        overflow: hidden;
+        padding-right: 0 !important;
+    }
+    
+    /* Đảm bảo modal dialog hiển thị đúng */
+    .modal-dialog {
+        margin: 1.75rem auto;
+        max-width: 500px;
+    }
+    
+    /* Fix cho modal không hiện */
+    .modal.show {
+        display: block !important;
+    }
+    
     /* Button loading state */
     .btn:disabled {
         cursor: not-allowed;
@@ -1136,11 +1197,6 @@ style.textContent = `
     .swal2-small {
         font-size: 14px !important;
         padding: 0.5rem !important;
-    }
-    
-    /* Prevent modal body scroll */
-    body.modal-open {
-        overflow: hidden;
     }
 `;
 document.head.appendChild(style); 
