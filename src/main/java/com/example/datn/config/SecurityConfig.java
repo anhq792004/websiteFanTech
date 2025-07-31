@@ -38,14 +38,14 @@ public class SecurityConfig {
                                 "/forgot-password",
                                 "/request-reset",
                                 "/reset-password",
-                                "/access-denied").permitAll()
+                                "/access-denied",
+                                "/verify-account").permitAll()
 
                         // PHÂN QUYỀN HÓA ĐƠN - CHỈ ADMIN MỚI TRUY CẬP ĐƯỢC
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         // Các trang admin khác - Admin và Employee đều truy cập được
-                        // SỬA LỖI: "EMPLOYE" -> "EMPLOYEE"
-                        .requestMatchers("/hoa-don/**","/khach-hang/**","/sale/**").hasAnyRole("ADMIN", "EMPLOYEE")
+                        .requestMatchers("/hoa-don/**", "/khach-hang/**", "/sale/**").hasAnyRole("ADMIN", "EMPLOYEE")
 
                         .anyRequest().authenticated()
                 )

@@ -40,4 +40,6 @@ public class TaiKhoan {
 
     @Column(name = "trang_thai")
     Boolean trangThai;
+
+    private String verificationCode;
 }
