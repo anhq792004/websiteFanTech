@@ -35,7 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/admin/assets/**", "/", "/home",
                                 "/register",
                                 "/login",
-                                "/forgot-password",
+                                "/forgot-password/**",
                                 "/request-reset",
                                 "/reset-password",
                                 "/access-denied",
@@ -45,7 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         // Các trang admin khác - Admin và Employee đều truy cập được
-                        .requestMatchers("/hoa-don/**", "/khach-hang/**", "/sale/**").hasAnyRole("ADMIN", "EMPLOYEE")
+                        .requestMatchers("/hoa-don/**", "/khach-hang/**", "/sale/**").hasAnyRole("ADMIN", "EMPLOYE")
 
                         .anyRequest().authenticated()
                 )
