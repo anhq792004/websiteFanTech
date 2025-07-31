@@ -1,7 +1,5 @@
-
-
-$(document).ready(function() {
-    $('#addKHForm').on('submit', function(event) {
+$(document).ready(function () {
+    $('#addKHForm').on('submit', function (event) {
         event.preventDefault(); // Ngăn form submit mặc định
 
         // Thu thập dữ liệu từ form
@@ -96,3 +94,6 @@ $('.changeStatusKhachHang').on('click', function () {
         }
     });
 });
+
+
+

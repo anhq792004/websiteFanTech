@@ -25,7 +25,7 @@ public class NhanVien {
 
     @ManyToOne
     @JoinColumn(name = "id_chuc_vu")
-    private ChucVu chucVu;
+    ChucVu chucVu;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tai_khoan")
@@ -42,7 +42,8 @@ public class NhanVien {
     String ten;
 
     @Column(name = "gioi_tinh")
-    Boolean gioiTinh;
+    String gioiTinh;
+
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "ngay_sinh")
     Date ngaySinh;

@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:insert="~{/admin/fragments/head :: head}">
 </head>
+<link rel="stylesheet" th:href="@{/admin/assets/compiled/css/phanTrang.css}">
+
 <body>
 <!-- Site wrapper -->
 <div class="wrapper">
@@ -60,9 +62,9 @@
                                 <h5 class="card-title">Danh sách nhân viên
                                     <!--                                    <span th:text="${listNV.totalElements}"></span> Nhân viên)-->
                                 </h5>
-                                <a th:href="@{/admin/nhan-vien/view-them}" class="btn btn-primary" role="button"
+                                <a th:href="@{/admin/nhan-vien/view-them}" class="btn btn-outline-success" role="button"
                                    aria-label="Thêm nhân viên">
-                                    <i class="bi bi-plus-circle"></i> Thêm nhân viên
+                                    <i class="bi bi-patch-plus-fill"></i> Thêm
                                 </a>
                             </div>
                             <table class="table table-striped dataTable-table">
@@ -71,7 +73,7 @@
                                     <th style="width: 5%;">STT</th>
                                     <th style="width: 5%;">Mã</th>
                                     <th style="width: 5%;">Họ và tên</th>
-<!--                                    <th style="width: 5%;">Email</th>-->
+                                    <!--                                    <th style="width: 5%;">Email</th>-->
                                     <th style="width: 5%;">Ngày sinh</th>
                                     <th style="width: 5%;">Giới tính</th>
                                     <th style="width: 5%;">Trạng thái</th>
@@ -85,7 +87,7 @@
                                     <td th:text="${nhanVien.ten}"></td>
                                     <!-- <td th:text="${nhanVien.taiKhoan.email}"></td>-->
                                     <td th:text="${nhanVien.ngaySinh}"></td>
-                                    <td th:text="${nhanVien.gioiTinh ? 'Nam' : 'Nữ'}"></td>
+                                    <td th:text="${nhanVien.gioiTinh}"></td>
                                     <td th:text="${nhanVien.trangThai ? 'Đang làm việc' : 'Đã nghỉ việc'}"></td>
                                     <td>
                                         <a th:href="@{/admin/nhan-vien/detail(id=${nhanVien.id})}"
@@ -101,18 +103,58 @@
                                 </tbody>
                             </table>
 
-<!--                            <div th:if="${listNV.totalPages > 1}">-->
-<!--                                <nav aria-label="Page navigation">-->
-<!--                                    <ul class="pagination">-->
-<!--                                        <li th:each="i : ${#numbers.sequence(0, listNV.totalPages - 1)}"-->
-<!--                                            th:class="${i == currentPage} ? 'page-item active' : 'page-item'">-->
-<!--                                            <a class="page-link"-->
-<!--                                               th:href="@{/admin/nhan-vien/index(page=${i}, search=${search}, chucVu=${chucVu}, trangThai=${trangThai})}"-->
-<!--                                               th:text="${i + 1}"></a>-->
-<!--                                        </li>-->
-<!--                                    </ul>-->
-<!--                                </nav>-->
-<!--                            </div>-->
+                            <nav class="mt-3">
+                                <ul class="pagination">
+                                    <!-- Nút Previous -->
+                                    <li th:class="${page == 0} ? 'disabled page-item' : 'page-item'">
+                                        <a class="page-link"
+                                           th:href="@{/admin/nhan-vien/index(page=${page - 1}, size=${size}, search=${search}, trangThai=${trangThai})}">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </li>
+
+                                    <!-- Hiển thị trang đầu tiên nếu currentPage > 2 -->
+                                    <li th:if="${page > 2}" class="page-item">
+                                        <a class="page-link"
+                                           th:href="@{/admin/nhan-vien/index(page=0, size=${size}, search=${search}, trangThai=${trangThai})}">1</a>
+                                    </li>
+
+                                    <!-- Dấu ... nếu currentPage > 3 -->
+                                    <li th:if="${page > 3}" class="disabled page-item">
+                                        <span class="page-link">...</span>
+                                    </li>
+
+                                    <!-- Các trang xung quanh currentPage -->
+                                    <li th:each="i : ${#numbers.sequence((page - 2 > 0 ? page - 2 : 0),
+                             (page + 2 < totalPages - 1 ? page + 2 : totalPages - 1))}"
+                                        th:class="${page == i} ? 'active page-item' : 'page-item'">
+                                        <a class="page-link"
+                                           th:href="@{/admin/nhan-vien/index(page=${i}, size=${size}, search=${search}, trangThai=${trangThai})}"
+                                           th:text="${i + 1}"></a>
+                                    </li>
+
+                                    <!-- Dấu ... nếu currentPage < totalPages - 3 -->
+                                    <li th:if="${page < totalPages - 3}" class="disabled page-item">
+                                        <span class="page-link">...</span>
+                                    </li>
+
+                                    <!-- Trang cuối -->
+                                    <li th:if="${page + 2 < totalPages - 1}" class="page-item">
+                                        <a class="page-link"
+                                           th:href="@{/admin/nhan-vien/index(page=${totalPages - 1}, size=${size}, search=${search}, trangThai=${trangThai})}"
+                                           th:text="${totalPages}"></a>
+                                    </li>
+
+                                    <!-- Nút Next -->
+                                    <li th:class="${page + 1 >= totalPages} ? 'disabled page-item' : 'page-item'">
+                                        <a class="page-link"
+                                           th:href="@{/admin/nhan-vien/index(page=${page + 1}, size=${size}, search=${search}, trangThai=${trangThai})}">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+
                         </div>
                     </div>
                     <div class="card-body"></div>

@@ -27,6 +27,10 @@ $(document).ready(function() {
     function loadProductAttributes() {
         console.log("Bắt đầu tải thuộc tính sản phẩm");
         
+        // Kiểm tra xem có đang ở trang edit không
+        const isEditPage = $('#editFanType').length > 0;
+        console.log("Is edit page:", isEditPage);
+        
         // Load kiểu quạt
         $.ajax({
             url: "/admin/san-pham/api/kieu-quat",
@@ -34,8 +38,24 @@ $(document).ready(function() {
             dataType: "json",
             success: function(data) {
                 console.log("Dữ liệu kiểu quạt:", data);
-                addOptionToSelect("#fanType", data, "-- Chọn kiểu quạt --");
-                addOptionToSelect("#editFanType", data, "-- Chọn kiểu quạt --");
+                // Chỉ load cho fanType nếu tồn tại (trang add)
+                if ($('#fanType').length > 0) {
+                    addOptionToSelect("#fanType", data, "-- Chọn kiểu quạt --");
+                }
+                
+                // Nếu ở trang edit, load cho editFanType và set giá trị hiện tại
+                if (isEditPage) {
+                    addOptionToSelect("#editFanType", data, "-- Chọn kiểu quạt --");
+                    
+                    // Lấy giá trị hiện tại từ Thymeleaf
+                    const currentKieuQuatId = $('#editFanType').attr('data-current-value');
+                    if (currentKieuQuatId) {
+                        console.log("Setting current kieu quat ID:", currentKieuQuatId);
+                        setTimeout(function() {
+                            $('#editFanType').val(currentKieuQuatId);
+                        }, 200);
+                    }
+                }
             },
             error: function(error) {
                 console.error("Lỗi khi tải danh sách kiểu quạt:", error);

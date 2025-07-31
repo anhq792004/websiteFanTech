@@ -13,7 +13,9 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AddNhanVienRequest {
+public class UpdateNhanVienRequest {
+    private Long id;
+
     private String ten;
 
     private String email;

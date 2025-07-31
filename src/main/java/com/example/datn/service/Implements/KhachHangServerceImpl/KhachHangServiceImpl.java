@@ -1,6 +1,7 @@
 package com.example.datn.service.Implements.KhachHangServerceImpl;
 
 import com.example.datn.dto.request.AddKhachHangRequest;
+import com.example.datn.dto.request.UpdateInforKhachHangRequest;
 import com.example.datn.entity.ChucVu;
 import com.example.datn.entity.DiaChi;
 import com.example.datn.entity.KhachHang;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -77,6 +79,21 @@ public class KhachHangServiceImpl implements KhachHangService {
         diaChi.setSoNhaNgoDuong(request.getSoNhaNgoDuong());
         diaChiRepo.save(diaChi);
         return null;
+    }
+
+    @Override
+    public void updateInforKhachHang(UpdateInforKhachHangRequest request) {
+        Optional<KhachHang> khachHangOptional = khachHangRepo.findById(request.getIdKH());
+
+        if (khachHangOptional.isPresent() ){
+            KhachHang khachHang = khachHangOptional.get();
+            khachHang.setTen(request.getTen());
+            khachHang.setSoDienThoai(request.getSoDienThoai());
+            khachHang.setNgaySinh(request.getNgaySinh());
+            khachHang.setGioiTinh(request.getGioiTinh());
+
+            khachHangRepo.save(khachHang);
+        }
     }
 
     @Override

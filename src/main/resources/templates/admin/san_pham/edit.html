@@ -42,7 +42,8 @@
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label for="editFanType" class="form-label">Kiểu quạt <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="editFanType" name="kieuQuat.id" required>
+                                    <select class="form-select" id="editFanType" name="kieuQuat.id" required
+                                            th:data-current-value="${sanPham.kieuQuat != null ? sanPham.kieuQuat.id : ''}">
                                         <option value="">-- Chọn kiểu quạt --</option>
                                         <option th:each="kq : ${kieuQuat}" 
                                                 th:value="${kq.id}" 
