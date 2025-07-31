@@ -15,52 +15,79 @@
     <div id="main">
         <header th:replace="/admin/fragments/header :: header"></header>
         <div class="page-content">
-            <!--        dữ liệu thực hiện trong secsion-->
-            <section class="row">
-                <div class="card">
-                    <div class="card-header">
-                        <form id="updateKHForm" th:object="${khachHang}">
-                            <div class="container">
-                                <div class="row justify-content-around">
-                                    <div class="col-md-5 gap-3">
-                                        <div class="col floating-group">
-                                            <input type="text" class="form-control" placeholder="" aria-label="name"
-                                                   id="name" th:field="*{ten}">
-                                            <label for="name">Tên khách hàng</label>
-                                        </div>
-                                        <div class="col floating-group">
-                                            <input type="text" class="form-control" placeholder=""
-                                                   aria-label="email"
+            <form id="formUpdateKH" th:object="${khachHang}">
+                <section class="row">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2>Thông tin khách hàng</h2>
+
+                                <button type="submit" class="btn btn-outline-warning">
+                                    <i class="bi bi-pencil-square"></i> Lưu
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row justify-content-around">
+                                <div class="col-md-7">
+                                    <input type="hidden" name="idKH" id="idKH" th:value="${khachHang.id}">
+                                    <div class="mb-3"> Image</div>
+
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label fw-bold"><span
+                                                class="text-danger">*</span> Tên khách hàng</label>
+                                        <input type="text" class="form-control" placeholder="Nhập tên" aria-label="name"
+                                               id="name" th:field="*{ten}">
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="email" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span> Email</label>
+                                            <input type="text" class="form-control" placeholder="Email"
+                                                   aria-label="email" disabled
                                                    id="email" th:field="*{taiKhoan.email}">
-                                            <label for="email">Email</label>
                                         </div>
-                                        <div class="col floating-group">
+                                        <div class="col-md-6">
+                                            <label for="soDienThoai" class="form-label fw-bold"><span
+                                                    class="text-danger">*</span> Số điện thoại</label>
                                             <input type="text" class="form-control" placeholder=""
                                                    aria-label="soDienThoai"
                                                    id="soDienThoai" th:field="*{soDienThoai}">
-                                            <label for="soDienThoai">Số điện thoại</label>
                                         </div>
-                                        <div class="col floating-group">
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="ngaySinh" class="form-label fw-bold">Ngày sinh</label>
                                             <input type="date" class="form-control" placeholder=""
                                                    aria-label="ngaySinh"
                                                    id="ngaySinh" th:field="*{ngaySinh}">
-                                            <label for="ngaySinh">mm/dd/yyyy</label>
                                         </div>
-                                        <div class="col">
-                                            <label for="gioiTinh" class="form-label">Giới tính</label>
-                                            <select class="form-select" id="gioiTinh" name="gioiTinh" required th:field="*{gioiTinh}">
+                                        <div class="col-md-6">
+                                            <label for="gioiTinh" class="form-label fw-bold">Giới tính</label>
+                                            <select class="form-select" id="gioiTinh" name="gioiTinh" required
+                                                    th:field="*{gioiTinh}">
                                                 <option value="Nam">Nam</option>
                                                 <option value="Nữ">Nữ</option>
                                                 <option value="Khác">Khác</option>
                                             </select>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div class="col-md-7">
-                                        <div th:each="diaChi, stat : ${listDiaChi}">
-                                            <form>
+                                <div class="col-md-5">
+                                    <div class="d-flex justify-content-end mb-3">
+                                        <button type="button" class="btn btn-outline-success"
+                                                data-bs-toggle="modal" data-bs-target="#themModal">
+                                            <i class="bi bi-patch-plus-fill"></i> Thêm địa chỉ
+                                        </button>
+                                    </div>
+                                    <div th:each="diaChi, stat : ${listDiaChi}">
+                                        <form>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <!-- Phần hiển thị địa chỉ -->
                                                 <div>
-                                                    <input type="hidden" name="khachHangId" th:value="${khachHang.id}"/>
+                                                    <input type="hidden" name="khachHangId"
+                                                           th:value="${khachHang.id}"/>
                                                     <input type="hidden" name="diaChiId" th:value="${diaChi.id}"/>
                                                     <input type="hidden" th:id="'tinh' + ${stat.index}"
                                                            th:value="${diaChi.tinh}"/>
@@ -69,24 +96,44 @@
                                                     <input type="hidden" th:id="'xa' + ${stat.index}"
                                                            th:value="${diaChi.xa}"/>
 
-                                                    <h6 th:id="'city' + ${stat.index}">Tỉnh: </h6>
-                                                    <h6 th:id="'district' + ${stat.index}">Quận / Huyện: </h6>
-                                                    <h6 th:id="'ward' + ${stat.index}">Xã / Phường: </h6>
-                                                    <h6 th:text="${diaChi.soNhaNgoDuong}">Chi tiết địa chỉ</h6>
+                                                    <h6 th:id="'city' + ${stat.index}" class="mb-1">Địa chỉ: </h6>
+                                                    <!--                                                        <h6 th:id="'district' + ${stat.index}" class="mb-1">Quận /-->
+                                                    <!--                                                            Huyện: </h6>-->
+                                                    <!--                                                        <h6 th:id="'ward' + ${stat.index}" class="mb-1">Xã /-->
+                                                    <!--                                                            Phường: </h6>-->
+                                                    <!--                                                        <h6 th:text="${diaChi.soNhaNgoDuong}" class="mb-0">Chi tiết địa-->
+                                                    <!--                                                            chỉ</h6>-->
                                                 </div>
-                                            </form>
-                                        </div>
+                                                <div>
+                                                    <button
+                                                            type="button"
+                                                            class="btn btn-outline-warning btn-edit-dia-chi"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#myModal"
+                                                            th:attr="data-id=${diaChi.id},
+                                                                 data-khachhangid=${khachHang.id},
+                                                                 data-tinh=${diaChi.tinh},
+                                                                 data-huyen=${diaChi.huyen},
+                                                                 data-xa=${diaChi.xa},
+                                                                 data-sonha=${diaChi.soNhaNgoDuong}">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </button>
+
+                                                    <a class="btn btn-outline-danger ms-3 "
+                                                       th:href="@{/khach-hang/xoa/{id}(id=${diaChi.id}, khachHangId=${khachHang.id})}">
+                                                        <i class="bi bi-x-circle"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
+
                                 </div>
                             </div>
-                        </form>
-
+                        </div>
                     </div>
-                    <div class="card-body">
-                    </div>
-
-                </div>
-            </section>
+                </section>
+            </form>
         </div>
     </div>
     <!-- Footer-->
@@ -94,10 +141,94 @@
         <footer th:replace="/admin/fragments/footer :: footer"></footer>
     </div>
 </div>
+<!-- Modal -->
+<div class="modal fade" id="themModal" tabindex="-1" aria-labelledby="themModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="addDCForm">
+            <div class="modal-content">
+                <input type="hidden" name="idKH" th:value="${khachHang.id}"/>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="themModalLabel">Thêm mới địa chỉ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row align-items-start mb-3">
+                        <div class="col">
+                            <select class="form-select" id="city2" name="tinh" required>
+                                <option value="" selected>Chọn Tỉnh/Thành phố</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <select class="form-select" id="district2" name="huyen" required>
+                                <option value="" selected>Chọn Quận/Huyện</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <select class="form-select" id="ward2" name="xa" required>
+                            <option value="" selected>Chọn Xã/Phường</option>
+                        </select>
+                    </div>
+                    <div class="col floating-group mt-3">
+                        <input type="text" class="form-control" placeholder=""
+                               aria-label="diaChiCuThe"
+                               id="diaChiCuThe"
+                               name="soNhaNgoDuong">
+                        <label for="diaChiCuThe">Địa chỉ cụ thể</label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-patch-plus-fill"></i> Thêm
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="myModalLabel">Thay đổi thông tin địa chỉ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="px-3">
+                <form th:action="@{/khach-hang/cap-nhat-dia-chi}" method="post">
+                    <input type="hidden" name="id" id="updateDiaChiId">
+                    <input type="hidden" name="khachHangId" id="updateKhachHangId">
+
+                    <!-- Các select tỉnh/huyện/xã -->
+                    <div class="row align-items-start mb-3 mt-3">
+                        <div class="col">
+                            <select name="tinh" id="city" class="form-select" required>...</select>
+                        </div>
+                        <div class="col">
+                            <select name="huyen" id="district" class="form-select" required>...</select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <select name="xa" id="ward" class="form-select" required>...</select>
+                    </div>
+                    <div class="col floating-group mt-3">
+                        <input type="text" name="soNhaNgoDuong" id="soNhaNgoDuong" class="form-control" required/>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-warning">
+                            <i class="bi bi-pencil-square"></i> Lưu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <div>
     <script th:replace="/admin/fragments/script :: script"></script>
 
     <script th:src="@{/admin/assets/compiled/js/diaChi.js}"></script>
+    <script th:src="@{/admin/assets/compiled/js/KhachHang/update.js}"></script>
 
     <script th:inline="javascript">
         // Lấy danh sách địa chỉ từ Thymeleaf (chuyển từ dạng Thymeleaf sang JSON)
@@ -154,11 +285,11 @@
                 }
             }
         });
-        var cities2 = document.getElementById("city2");
-        var districts2 = document.getElementById("district2");
-        var wards2 = document.getElementById("ward2");
+        const cities2 = document.getElementById("city2");
+        const districts2 = document.getElementById("district2");
+        const wards2 = document.getElementById("ward2");
 
-        var parameter = {
+        const parameter = {
             url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",
             method: "GET",
             responseType: "json",
@@ -200,8 +331,6 @@
         }
 
 
-
-
         // function diachiMacDinh() {
         //     var nameButton = document.getElementsByName("checkDiaChiMacDinh")
         //     // var buttonMacDinh = document.getElementsByName("checkDiaChiMacDinh")
@@ -218,6 +347,103 @@
 
         // window.onload = diachiMacDinh
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let jsonData = []; // Lưu toàn bộ JSON vào biến để dùng lại
+
+            document.querySelectorAll('.btn-edit-dia-chi').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const tinh = this.getAttribute('data-tinh');
+                    const huyen = this.getAttribute('data-huyen');
+                    const xa = this.getAttribute('data-xa');
+                    const soNha = this.getAttribute('data-sonha');
+                    const diaChiId = this.getAttribute('data-id');
+                    const khachHangId = this.getAttribute('data-khachhangid');
+
+                    document.getElementById('updateDiaChiId').value = diaChiId || "";
+                    document.getElementById('updateKhachHangId').value = khachHangId || "";
+                    document.getElementById('soNhaNgoDuong').value = soNha;
+
+                    axios.get("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json")
+                        .then(function (res) {
+                            jsonData = res.data;
+                            renderUpdateForm(jsonData, tinh, huyen, xa);
+                        });
+                });
+            });
+
+            function renderUpdateForm(data, idTinh, idHuyen, idXa) {
+                const citySelect = document.getElementById("city");
+                const districtSelect = document.getElementById("district");
+                const wardSelect = document.getElementById("ward");
+
+                citySelect.innerHTML = '<option value="">Chọn Tỉnh/Thành phố</option>';
+                districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
+
+                data.forEach(city => {
+                    const opt = document.createElement("option");
+                    opt.value = city.Id;
+                    opt.textContent = city.Name;
+                    if (city.Id == idTinh) opt.selected = true;
+                    citySelect.appendChild(opt);
+                });
+
+                fillDistricts(idTinh, idHuyen);
+                fillWards(idTinh, idHuyen, idXa);
+            }
+
+            function fillDistricts(idTinh, idHuyen = null) {
+                const districtSelect = document.getElementById("district");
+                districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                const city = jsonData.find(c => c.Id == idTinh);
+                if (city) {
+                    city.Districts.forEach(d => {
+                        const opt = document.createElement("option");
+                        opt.value = d.Id;
+                        opt.textContent = d.Name;
+                        if (d.Id == idHuyen) opt.selected = true;
+                        districtSelect.appendChild(opt);
+                    });
+                }
+                // Tự động render xã lại nếu cần
+                fillWards(idTinh, idHuyen);
+            }
+
+            function fillWards(idTinh, idHuyen, idXa = null) {
+                const wardSelect = document.getElementById("ward");
+                wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
+                const city = jsonData.find(c => c.Id == idTinh);
+                if (city) {
+                    const district = city.Districts.find(d => d.Id == idHuyen);
+                    if (district) {
+                        district.Wards.forEach(w => {
+                            const opt = document.createElement("option");
+                            opt.value = w.Id;
+                            opt.textContent = w.Name;
+                            if (w.Id == idXa) opt.selected = true;
+                            wardSelect.appendChild(opt);
+                        });
+                    }
+                }
+            }
+
+            // ✅ Bắt sự kiện khi chọn lại tỉnh
+            document.getElementById("city").addEventListener("change", function () {
+                const selectedTinh = this.value;
+                fillDistricts(selectedTinh);
+            });
+
+            // ✅ Bắt sự kiện khi chọn lại huyện
+            document.getElementById("district").addEventListener("change", function () {
+                const selectedTinh = document.getElementById("city").value;
+                const selectedHuyen = this.value;
+                fillWards(selectedTinh, selectedHuyen);
+            });
+        });
+    </script>
+
+
 </div>
 </body>
 </html>

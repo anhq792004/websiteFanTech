@@ -1,6 +1,8 @@
 package com.example.datn.controller;
 
 import com.example.datn.dto.request.AddNhanVienRequest;
+import com.example.datn.dto.request.UpdateInforKhachHangRequest;
+import com.example.datn.dto.request.UpdateNhanVienRequest;
 import com.example.datn.entity.ChucVu;
 import com.example.datn.entity.DiaChi;
 import com.example.datn.entity.KhachHang;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,10 +34,8 @@ import java.util.Map;
 @RequestMapping("/admin/nhan-vien")
 public class NhanVienController {
     private final NhanVienService nhanVienService;
-    private final NhanVienRepo nhanVienRepo;
     private final ChucVuService chucVuService;
     private final DiaChiRepo diaChiRepo;
-    private final DiaChiService diaChiService;
 
     @ModelAttribute("listDiaChi")
     List<DiaChi> getListDiaChi() {
@@ -53,6 +54,12 @@ public class NhanVienController {
         }
         PageRequest pageable = PageRequest.of(page, size);
         Page<NhanVien> listNV = nhanVienService.findAll(search, trangThai, pageable);
+        model.addAttribute("page", listNV.getNumber());
+        model.addAttribute("size", listNV.getSize());
+        model.addAttribute("totalPages", listNV.getTotalPages());
+        model.addAttribute("search", search);
+        model.addAttribute("trangThai", trangThai);
+
         model.addAttribute("listNV", listNV);
         return "admin/nhan_vien/index";
     }
@@ -76,16 +83,19 @@ public class NhanVienController {
 
     @PostMapping("/update")
     @ResponseBody
-    public ResponseEntity<String> updateNhanVien(@RequestBody NhanVien nhanVien) {
-        nhanVienService.updateNhanVien(nhanVien);
-        return ResponseEntity.ok("Sửa nhân viên thành công");
+    public ResponseEntity<String> updateNhanVien(@RequestBody UpdateNhanVienRequest request) {
+        try {
+            nhanVienService.updateNhanVien(request);
+            return ResponseEntity.ok("Cập nhật thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Cập nhật thất bại");
+        }
     }
 
     @GetMapping("/detail")
     public String detail(@RequestParam Long id, Model model){
         NhanVien nhanVien=nhanVienService.findNhanVienById(id);
         model.addAttribute("nhanVien",nhanVien);
-
         return "admin/nhan_vien/detail";
     }
 
