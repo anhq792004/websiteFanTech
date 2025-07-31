@@ -1,4 +1,4 @@
-package com.example.datn.controller;
+package com.example.datn.controller.TaiKhoanController;
 
 import com.example.datn.entity.TaiKhoan;
 import com.example.datn.repository.TaiKhoanRepo;
@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
@@ -17,6 +18,8 @@ public class LoginController {
 
     @Autowired
     private TaiKhoanRepo taiKhoanRepo;
+    @Autowired
+    private TaiKhoanService taiKhoanService;
 
     @GetMapping("/login")
     public String login(@RequestParam(required = false) String registered,
@@ -38,7 +41,7 @@ public class LoginController {
                 TaiKhoan taiKhoan = taiKhoanRepo.findByEmail(principal.getName());
                 if (taiKhoan != null) {
                     // ✅ Đồng bộ tên thuộc tính session
-                    session.setAttribute("currentUser", taiKhoan); // ← dùng đúng tên này để khớp với ProfileController
+                    session.setAttribute("currentUser", taiKhoan);
                     session.setAttribute("isLoggedIn", true);
 
                     String viTri = taiKhoan.getChucVu() != null ? taiKhoan.getChucVu().getViTri() : "";

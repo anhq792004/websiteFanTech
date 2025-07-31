@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Đăng ký - VinFan</title>
+    <title>Xác nhận tài khoản - VinFan</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -72,34 +72,19 @@
 <body>
 <div class="login-container">
     <div class="welcome-section">
-        <h2>WELCOME BACK!!!</h2>
-        <div class="d-flex justify-content-center">
-            <a th:href="@{/login}" class="btn btn-outline-light w-auto px-5">Đăng nhập</a>
-        </div>
+        <h2>XÁC NHẬN TÀI KHOẢN</h2>
+        <p th:text="'Vui lòng nhập mã xác nhận đã gửi đến email: ' + ${email}"></p>
     </div>
     <div class="login-form">
-        <h2 class="text-center">Đăng ký</h2>
-        <form id="registerForm" th:action="@{/register}" method="post" th:object="${dangKyDto}">
+        <h2 class="text-center">Nhập mã xác nhận</h2>
+        <form th:action="@{/verify-account}" method="post">
+            <input type="hidden" th:name="email" th:value="${email}">
             <div class="form-group">
-                <label for="email"><span class="text-danger">*</span> Email:</label>
-                <input type="email" class="form-control" th:field="*{email}" id="email">
-                <span class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                <label for="code"><span class="text-danger">*</span> Mã xác nhận:</label>
+                <input type="text" class="form-control" id="code" name="code" required>
                 <span class="text-danger" th:if="${error}" th:text="${error}"></span>
             </div>
-
-            <div class="form-group">
-                <label for="matKhau"><span class="text-danger">*</span> Mật khẩu:</label>
-                <input type="password" class="form-control" th:field="*{matKhau}" id="matKhau">
-                <span class="text-danger" th:if="${#fields.hasErrors('matKhau')}" th:errors="*{matKhau}"></span>
-            </div>
-
-            <div class="form-group">
-                <label for="xacNhanMatKhau"><span class="text-danger">*</span> Xác nhận mật khẩu:</label>
-                <input type="password" class="form-control" th:field="*{xacNhanMatKhau}" id="xacNhanMatKhau">
-                <span class="text-danger" th:if="${#fields.hasErrors('xacNhanMatKhau')}" th:errors="*{xacNhanMatKhau}"></span>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-block">Đăng ký</button>
+            <button type="submit" class="btn btn-primary btn-block">Xác nhận</button>
         </form>
     </div>
 </div>
@@ -116,30 +101,6 @@
         timerProgressBar: true
     });
 
-    document.getElementById("registerForm").addEventListener("submit", function (e) {
-        const email = document.getElementById("email").value.trim();
-        const matKhau = document.getElementById("matKhau").value.trim();
-        const xacNhanMatKhau = document.getElementById("xacNhanMatKhau").value.trim();
-
-        if (!email || !matKhau || !xacNhanMatKhau) {
-            e.preventDefault();
-            Toast.fire({
-                icon: 'warning',
-                title: 'Vui lòng điền đầy đủ Email, Mật khẩu và Xác nhận mật khẩu!'
-            });
-            return;
-        }
-
-        if (matKhau !== xacNhanMatKhau) {
-            e.preventDefault();
-            Toast.fire({
-                icon: 'error',
-                title: 'Xác nhận mật khẩu không khớp.'
-            });
-            return;
-        }
-    });
-
     // Hiển thị thông báo lỗi từ server (nếu có)
     const serverError = /*[[${error}]]*/ null;
     if (serverError) {
@@ -149,12 +110,25 @@
         });
     }
 
-    // Hiển thị thông báo thành công khi chuyển hướng đến trang xác nhận
+    // Hiển thị thông báo thành công khi xác nhận thành công
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('registered')) {
-        Toast.fire({
+    if (urlParams.get('verified')) {
+        Swal.fire({
             icon: 'success',
-            title: 'Đăng ký thành công! Vui lòng kiểm tra email để nhập mã xác nhận.'
+            title: 'Xác nhận tài khoản thành công!',
+            text: 'Vui lòng đăng nhập để tiếp tục',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false
+        }).then((result) => {
+            if (result.dismiss === Swal.DismissReason.timer) {
+                window.location.href = '/login?registrationSuccess=Đăng ký tài khoản thành công!';
+            }
+        }).catch((error) => {
+            console.error('Error during redirect:', error);
+            window.location.href = '/login?registrationSuccess=Đăng ký tài khoản thành công!'; // Fallback
         });
     }
 </script>

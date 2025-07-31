@@ -11,14 +11,20 @@ import com.example.datn.repository.DiaChiRepo;
 import com.example.datn.repository.KhachHangRepo.KhachHangRepo;
 import com.example.datn.repository.TaiKhoanRepo;
 import com.example.datn.service.KhachHangService.KhachHangService;
+import com.example.datn.service.taiKhoanService.EmailService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +37,10 @@ public class KhachHangServiceImpl implements KhachHangService {
     private final ChucVuRepo chucVuRepo;
 
     private final TaiKhoanRepo taiKhoanRepo;
+
+    private final EmailService emailService;
+
+    private final PasswordEncoder passwordEncoder;
 
 
     @Override
@@ -46,20 +56,39 @@ public class KhachHangServiceImpl implements KhachHangService {
         return khachHangRepo.findById(id).orElse(null);
     }
 
+    // Phương thức tạo mật khẩu ngẫu nhiên
+    private String generateRandomPassword(int length) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%";
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            password.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return password.toString();
+    }
+
     @Override
     public KhachHang addKH(AddKhachHangRequest request) {
+        // Tạo tài khoản
         TaiKhoan taiKhoan = new TaiKhoan();
-        ChucVu chucVu = chucVuRepo.findByViTri("User") // Tìm ChucVu có viTri = "User"
+        ChucVu chucVu = chucVuRepo.findByViTri("User")
                 .orElseGet(() -> {
                     ChucVu newChucVu = new ChucVu();
                     newChucVu.setViTri("User");
-                    return chucVuRepo.save(newChucVu); // Tạo mới nếu không tìm thấy
+                    return chucVuRepo.save(newChucVu);
                 });
-        taiKhoan.setChucVu(chucVu); // Gán ChucVu vào TaiKhoan
+        taiKhoan.setMa("TK" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        taiKhoan.setChucVu(chucVu);
         taiKhoan.setEmail(request.getEmail());
         taiKhoan.setNgayTao(new Date());
-        taiKhoanRepo.save(taiKhoan); // Lưu TaiKhoan
+        taiKhoan.setTrangThai(true);
 
+        // Tạo và mã hóa mật khẩu ngẫu nhiên
+        String randomPassword = generateRandomPassword(8);
+        taiKhoan.setMatKhau(passwordEncoder.encode(randomPassword)); // Sử dụng PasswordEncoder
+        taiKhoanRepo.save(taiKhoan);
+
+        // Tạo khách hàng
         KhachHang khachHang = new KhachHang();
         khachHang.setMa(generateCode());
         khachHang.setTaiKhoan(taiKhoan);
@@ -71,6 +100,7 @@ public class KhachHangServiceImpl implements KhachHangService {
         khachHang.setTrangThai(true);
         khachHangRepo.save(khachHang);
 
+        // Tạo địa chỉ
         DiaChi diaChi = new DiaChi();
         diaChi.setKhachHang(khachHang);
         diaChi.setHuyen(request.getQuanHuyen());
@@ -78,7 +108,22 @@ public class KhachHangServiceImpl implements KhachHangService {
         diaChi.setXa(request.getXaPhuong());
         diaChi.setSoNhaNgoDuong(request.getSoNhaNgoDuong());
         diaChiRepo.save(diaChi);
-        return null;
+
+        // Gửi email chứa mật khẩu
+        try {
+            String subject = "Tài khoản của bạn đã được tạo";
+            String content = "Chào " + request.getTen() + ",<br><br>" +
+                    "Tài khoản của bạn đã được tạo thành công. Dưới đây là thông tin đăng nhập:<br>" +
+                    "Email: " + request.getEmail() + "<br>" +
+                    "Mật khẩu: " + randomPassword + "<br><br>" +
+                    "Vui lòng đổi mật khẩu sau khi đăng nhập lần đầu.<br>" +
+                    "Trân trọng,<br>Đội ngũ hỗ trợ";
+            emailService.sendEmail(request.getEmail(), subject, content);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+
+        return khachHang;
     }
 
     @Override

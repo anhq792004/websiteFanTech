@@ -770,7 +770,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Hàm định dạng số thành VND
 function formatNumberToVND(number) {
-    return number.toLocaleString('vi-VN') + ' VND';
+    return number.toLocaleString('vi-VN') + ' đ';
 }
 
 // Hàm định dạng tất cả các giá trị tiền tệ trên trang
@@ -1315,9 +1315,9 @@ $(document).ready(function () {
     formatCurrency();
 
     // Khởi tạo tổng tiền sau giảm
-    const tongTien = parseFloat($('#tienThanhToan').attr('data-value')) || 0;
-    $('#tongTienSauGiam').text(formatNumberToVND(tongTien));
-    $('#tongTienSauGiam').attr('data-value', tongTien);
+    const tongTienSauGiam = parseFloat($('#tongTienSauGiam').attr('data-value')) || 0;
+    $('#tongTienSauGiam').text(formatNumberToVND(tongTienSauGiam));
+    $('#tongTienSauGiam').attr('data-value', tongTienSauGiam);
 
     console.log("Đã khởi tạo định dạng tiền tệ cho trang");
 
@@ -1579,9 +1579,9 @@ $(document).ready(function () {
     formatCurrency();
 
     // Khởi tạo tổng tiền sau giảm
-    const tongTien = parseFloat($('#tienThanhToan').attr('data-value')) || 0;
-    $('#tongTienSauGiam').text(formatNumberToVND(tongTien));
-    $('#tongTienSauGiam').attr('data-value', tongTien);
+    const tongTienSauGiam = parseFloat($('#tongTienSauGiam').attr('data-value')) || 0;
+    $('#tongTienSauGiam').text(formatNumberToVND(tongTienSauGiam));
+    $('#tongTienSauGiam').attr('data-value', tongTienSauGiam);
 
     console.log("Đã khởi tạo định dạng tiền tệ cho trang");
 

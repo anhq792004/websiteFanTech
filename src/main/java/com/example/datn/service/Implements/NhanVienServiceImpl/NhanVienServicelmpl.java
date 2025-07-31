@@ -12,16 +12,22 @@ import com.example.datn.repository.DiaChiRepo;
 import com.example.datn.repository.NhanVienRepo;
 import com.example.datn.repository.TaiKhoanRepo;
 import com.example.datn.service.NhanVienService.NhanVienService;
+import com.example.datn.service.taiKhoanService.EmailService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +36,9 @@ public class NhanVienServicelmpl implements NhanVienService {
     private final ChucVuRepo chucVuRepo;
     private final TaiKhoanRepo taiKhoanRepo;
     private final DiaChiRepo diaChiRepo;
+
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Page<NhanVien> findAll(String keyword, Boolean trangThai, Pageable pageable) {
@@ -84,21 +93,38 @@ public class NhanVienServicelmpl implements NhanVienService {
         }
         return false;
     }
+    // Phương thức tạo mật khẩu ngẫu nhiên
+    private String generateRandomPassword(int length) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%";
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            password.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return password.toString();
+    }
 
     @Override
     public void addNhanVien(AddNhanVienRequest request) {
-        TaiKhoan taiKhoan= new TaiKhoan();
-        ChucVu chucVu= chucVuRepo.findByViTri("Employe").orElseGet(() -> {
-            ChucVu newChucVu= new ChucVu();
-            newChucVu.setViTri("Employe");
-            return chucVuRepo.save(newChucVu);
-        });
+        TaiKhoan taiKhoan = new TaiKhoan();
+        ChucVu chucVu = chucVuRepo.findByViTri("Employe") // Sửa "Employe" thành "Employee"
+                .orElseGet(() -> {
+                    ChucVu newChucVu = new ChucVu();
+                    newChucVu.setViTri("Employe");
+                    return chucVuRepo.save(newChucVu);
+                });
+        taiKhoan.setMa("TK" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         taiKhoan.setChucVu(chucVu);
         taiKhoan.setEmail(request.getEmail());
         taiKhoan.setNgayTao(new Date());
+        taiKhoan.setTrangThai(true);
+
+        // Tạo và mã hóa mật khẩu ngẫu nhiên
+        String randomPassword = generateRandomPassword(8);
+        taiKhoan.setMatKhau(passwordEncoder.encode(randomPassword)); // Mã hóa mật khẩu
         taiKhoanRepo.save(taiKhoan);
 
-        DiaChi diaChi= new DiaChi();
+        DiaChi diaChi = new DiaChi();
         diaChi.setHuyen(request.getQuanHuyen());
         diaChi.setTinh(request.getTinhThanhPho());
         diaChi.setXa(request.getXaPhuong());
@@ -119,6 +145,19 @@ public class NhanVienServicelmpl implements NhanVienService {
         nhanVien.setDiaChi(diaChi);
         nhanVienRepo.save(nhanVien);
 
+        // Gửi email chứa mật khẩu
+        try {
+            String subject = "Tài khoản nhân viên đã được tạo";
+            String content = "Chào " + request.getTen() + ",<br><br>" +
+                    "Tài khoản của bạn đã được tạo thành công. Dưới đây là thông tin đăng nhập:<br>" +
+                    "Email: " + request.getEmail() + "<br>" +
+                    "Mật khẩu: " + randomPassword + "<br><br>" +
+                    "Vui lòng đổi mật khẩu sau khi đăng nhập lần đầu.<br>" +
+                    "Trân trọng,<br>Đội ngũ hỗ trợ";
+            emailService.sendEmail(request.getEmail(), subject, content);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
     }
     @Override
     public String generateCode() {
