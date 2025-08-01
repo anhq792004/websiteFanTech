@@ -2,6 +2,8 @@ $(document).ready(function () {
     $('#addDCForm').on('submit', function (event) {
         event.preventDefault(); // Ngăn form submit mặc định
 
+        $('#addDCForm button[type="submit"]').prop('disabled', true);
+
         // Thu thập dữ liệu từ form
         const formData = {
             idKH: $('input[name="idKH"]').val(),
@@ -40,6 +42,8 @@ $(document).ready(function () {
                     timer: 1000,
                     timerProgressBar: true
                 });
+                $('#addDCForm button[type="submit"]').prop('disabled', false);
+
             }
         });
     });
@@ -47,6 +51,7 @@ $(document).ready(function () {
 
 $('#formUpdateKH').submit(function (e) {
     e.preventDefault();
+    $('#formUpdateKH button[type="submit"]').prop('disabled', true);
 
     const data = {
         idKH: $('#idKH').val(),
@@ -84,6 +89,9 @@ $('#formUpdateKH').submit(function (e) {
                 timer: 1000,
                 timerProgressBar: true
             });
+            $('#formUpdateKH button[type="submit"]').prop('disabled', false);
+
         }
     });
 });
+
