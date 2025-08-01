@@ -40,15 +40,12 @@ public class TaiKhoanService {
     }
 
     public String dangKyTaiKhoan(DangKyDto dangKyDto) {
-        // Kiểm tra email đã tồn tại
         if (emailDaTonTai(dangKyDto.getEmail())) {
             throw new RuntimeException("Email đã được sử dụng");
         }
 
-        // Tạo mã xác nhận ngẫu nhiên
         String verificationCode = generateVerificationCode();
 
-        // Chuẩn bị dữ liệu tài khoản nhưng chưa lưu
         String noidungEmail =
                 "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>" +
                         "<h2 style='color: #333; text-align: center;'>Xác nhận đăng ký tài khoản FanTech</h2>" +
@@ -77,23 +74,20 @@ public class TaiKhoanService {
             return false;
         }
 
-        // Chuẩn bị và lưu tài khoản
         TaiKhoan taiKhoan = new TaiKhoan();
         taiKhoan.setMa("TK" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         taiKhoan.setEmail(dangKyDto.getEmail());
         taiKhoan.setMatKhau(passwordEncoder.encode(dangKyDto.getMatKhau()));
         taiKhoan.setNgayTao(new Date());
-        taiKhoan.setTrangThai(true); // Kích hoạt ngay sau xác nhận
+        taiKhoan.setTrangThai(true);
         taiKhoan.setVerificationCode(null);
 
         ChucVu chucVuUser = chucVuRepository.findByViTri("User")
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy chức vụ mặc định 'User'"));
         taiKhoan.setChucVu(chucVuUser);
 
-        // Lưu tài khoản
         TaiKhoan savedTaiKhoan = taiKhoanRepository.save(taiKhoan);
 
-        // Lưu thông tin khách hàng
         KhachHang khachHang = new KhachHang();
         khachHang.setMa("KH" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         khachHang.setNgayTao(new Date());
@@ -101,7 +95,6 @@ public class TaiKhoanService {
         khachHang.setTaiKhoan(savedTaiKhoan);
         khachHangRepository.save(khachHang);
 
-        // Xóa session sau khi lưu thành công
         session.removeAttribute("verificationCode");
         session.removeAttribute("dangKyDto");
 
@@ -115,8 +108,8 @@ public class TaiKhoanService {
         }
 
         if (taiKhoan.getVerificationCode().equals(code)) {
-            taiKhoan.setTrangThai(true); // Kích hoạt tài khoản
-            taiKhoan.setVerificationCode(null); // Xóa mã xác nhận
+            taiKhoan.setTrangThai(true);
+            taiKhoan.setVerificationCode(null);
             taiKhoanRepository.save(taiKhoan);
             return true;
         }
@@ -125,12 +118,12 @@ public class TaiKhoanService {
 
     private String generateVerificationCode() {
         Random random = new Random();
-        int code = 100000 + random.nextInt(900000); // Tạo mã 6 chữ số
+        int code = 100000 + random.nextInt(900000);
         return String.valueOf(code);
     }
 
     // Gửi mã xác thực cho quên mật khẩu
-    public String sendForgotPasswordCode(String email, String newPassword, HttpSession session) {
+    public void sendForgotPasswordCode(String email, HttpSession session) {
         TaiKhoan taiKhoan = taiKhoanRepository.findByEmail(email);
         if (taiKhoan == null) {
             throw new RuntimeException("Email không tồn tại");
@@ -140,9 +133,8 @@ public class TaiKhoanService {
         taiKhoan.setVerificationCode(verificationCode);
         taiKhoanRepository.save(taiKhoan);
 
-        // Lưu mật khẩu mới vào session
-        session.setAttribute("newPassword", newPassword);
         session.setAttribute("forgotPasswordEmail", email);
+        session.setAttribute("verificationCode", verificationCode);
 
         String noidungEmail =
                 "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>" +
@@ -156,54 +148,60 @@ public class TaiKhoanService {
 
         try {
             emailService.sendEmail(email, "Xác nhận khôi phục mật khẩu FanTech", noidungEmail);
-            System.out.println("Email sent successfully to: " + email + " with code: " + verificationCode); // Debug log
-            return verificationCode;
+            System.out.println("Email sent successfully to: " + email + " with code: " + verificationCode);
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Failed to send email to: " + email + " Error: " + e.getMessage()); // Debug log
+            System.out.println("Failed to send email to: " + email + " Error: " + e.getMessage());
             throw new RuntimeException("Không thể gửi email xác nhận. Vui lòng thử lại.");
         }
     }
 
-    // Xác minh mã và đổi mật khẩu
-    public boolean verifyForgotPasswordCodeAndChangePassword(String email, String code, HttpSession session) {
+    // Xác minh mã xác thực
+    public boolean verifyForgotPasswordCode(String email, String code, HttpSession session) {
         TaiKhoan taiKhoan = taiKhoanRepository.findByEmail(email);
         if (taiKhoan == null || taiKhoan.getVerificationCode() == null) {
             return false;
         }
 
         String storedCode = taiKhoan.getVerificationCode();
-        String newPassword = (String) session.getAttribute("newPassword");
-
-        if (storedCode.equals(code) && newPassword != null) {
-            taiKhoan.setMatKhau(passwordEncoder.encode(newPassword));
-            taiKhoan.setVerificationCode(null); // Xóa mã xác nhận sau khi sử dụng
+        if (storedCode.equals(code)) {
+            taiKhoan.setVerificationCode(null); // Xóa mã xác nhận
             taiKhoanRepository.save(taiKhoan);
-
-            String noidungEmail =
-                    "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>" +
-                            "<h2 style='color: #333; text-align: center;'>Thông báo đổi mật khẩu</h2>" +
-                            "<p>Kính gửi Quý khách,</p>" +
-                            "<p>Mật khẩu tài khoản FanTech của bạn đã được thay đổi thành công.</p>" +
-                            "<p>Nếu bạn không thực hiện thay đổi này, vui lòng liên hệ với chúng tôi ngay lập tức.</p>" +
-                            "<p>Trân trọng,<br/>Đội ngũ FanTech</p>" +
-                            "</div>";
-
-            try {
-                emailService.sendEmail(email, "Thông báo đổi mật khẩu FanTech", noidungEmail);
-                session.removeAttribute("forgotPasswordEmail");
-                session.removeAttribute("newPassword");
-                return true;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return true; // Tiếp tục thành công dù email thất bại
-            }
+            session.setAttribute("verifiedEmail", email);
+            return true;
         }
         return false;
     }
 
+    // Đổi mật khẩu
+    public void changePassword(String email, String newPassword) {
+        TaiKhoan taiKhoan = taiKhoanRepository.findByEmail(email);
+        if (taiKhoan == null) {
+            throw new RuntimeException("Email không tồn tại");
+        }
+
+        taiKhoan.setMatKhau(passwordEncoder.encode(newPassword));
+        taiKhoanRepository.save(taiKhoan);
+
+        String noidungEmail =
+                "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>" +
+                        "<h2 style='color: #333; text-align: center;'>Thông báo đổi mật khẩu</h2>" +
+                        "<p>Kính gửi Quý khách,</p>" +
+                        "<p>Mật khẩu tài khoản FanTech của bạn đã được thay đổi thành công.</p>" +
+                        "<p>Nếu bạn không thực hiện thay đổi này, vui lòng liên hệ với chúng tôi ngay lập tức.</p>" +
+                        "<p>Trân trọng,<br/>Đội ngũ FanTech</p>" +
+                        "</div>";
+
+        try {
+            emailService.sendEmail(email, "Thông báo đổi mật khẩu FanTech", noidungEmail);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Tiếp tục dù email thất bại
+        }
+    }
+
     @Deprecated
     public boolean doiMatKhauVaThongBao(String email, String matKhauCu, String matKhauMoi) {
-        return false; // Đánh dấu deprecated, không sử dụng nữa
+        return false;
     }
 }
