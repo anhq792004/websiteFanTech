@@ -8,8 +8,7 @@ if (typeof jQuery === "undefined") {
 
             axios.get("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json")
                 .then(function (response) {
-                    let
-                        data = response.data;
+                    const data = response.data;
                     renderCity(data);
                 })
                 .catch(function (error) {

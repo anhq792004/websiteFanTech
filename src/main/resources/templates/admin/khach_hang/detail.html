@@ -77,7 +77,8 @@
                                 <div class="col-md-5">
                                     <div class="d-flex justify-content-end mb-3">
                                         <button type="button" class="btn btn-outline-success"
-                                                data-bs-toggle="modal" data-bs-target="#themModal">
+                                                data-bs-toggle="modal" data-bs-target="#themModal"
+                                                th:if="${#lists.size(listDiaChi) < 3}">
                                             <i class="bi bi-patch-plus-fill"></i> Thêm địa chỉ
                                         </button>
                                     </div>
@@ -95,14 +96,7 @@
                                                            th:value="${diaChi.huyen}"/>
                                                     <input type="hidden" th:id="'xa' + ${stat.index}"
                                                            th:value="${diaChi.xa}"/>
-
                                                     <h6 th:id="'city' + ${stat.index}" class="mb-1">Địa chỉ: </h6>
-                                                    <!--                                                        <h6 th:id="'district' + ${stat.index}" class="mb-1">Quận /-->
-                                                    <!--                                                            Huyện: </h6>-->
-                                                    <!--                                                        <h6 th:id="'ward' + ${stat.index}" class="mb-1">Xã /-->
-                                                    <!--                                                            Phường: </h6>-->
-                                                    <!--                                                        <h6 th:text="${diaChi.soNhaNgoDuong}" class="mb-0">Chi tiết địa-->
-                                                    <!--                                                            chỉ</h6>-->
                                                 </div>
                                                 <div>
                                                     <button
@@ -229,25 +223,24 @@
 
     <script th:src="@{/admin/assets/compiled/js/diaChi.js}"></script>
     <script th:src="@{/admin/assets/compiled/js/KhachHang/update.js}"></script>
-
     <script th:inline="javascript">
         // Lấy danh sách địa chỉ từ Thymeleaf (chuyển từ dạng Thymeleaf sang JSON)
 
-        const listDiaChi = /*[[${listDiaChi}]]*/ [];
+        var listDiaChi = /*[[${listDiaChi}]]*/ [];
 
         listDiaChi.forEach(function (diaChi, index) {
             // Lấy giá trị từ các trường input dựa theo chỉ số
-            const idTinh = document.getElementById('tinh' + index).value;
-            const idHuyen = document.getElementById('huyen' + index).value;
-            const idXa = document.getElementById('xa' + index).value;
+            var idTinh = document.getElementById('tinh' + index).value;
+            var idHuyen = document.getElementById('huyen' + index).value;
+            var idXa = document.getElementById('xa' + index).value;
 
             // Phần tử hiển thị kết quả
-            const citis = document.getElementById('city' + index);
-            const districts = document.getElementById('district' + index);
-            const wards = document.getElementById('ward' + index);
+            var citis = document.getElementById('city' + index);
+            var districts = document.getElementById('district' + index);
+            var wards = document.getElementById('ward' + index);
 
             // Cấu hình Axios để lấy dữ liệu từ GitHub
-            const Parameter = {
+            var Parameter = {
                 url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",
                 method: "GET",
                 responseType: "application/json",
@@ -260,15 +253,15 @@
 
             // Hàm xử lý dữ liệu địa giới hành chính
             function renderCity(data, idTinh, idHuyen, idXa, citis, districts, wards) {
-                const selectedCity = data.find(city => city.Id == idTinh);
+                var selectedCity = data.find(city => city.Id == idTinh);
                 if (selectedCity) {
                     citis.textContent = "Tỉnh: " + selectedCity.Name;
 
-                    const selectedDistrict = selectedCity.Districts.find(district => district.Id == idHuyen);
+                    var selectedDistrict = selectedCity.Districts.find(district => district.Id == idHuyen);
                     if (selectedDistrict) {
                         districts.textContent = "Quận / Huyện: " + selectedDistrict.Name;
 
-                        const selectedWard = selectedDistrict.Wards.find(ward => ward.Id == idXa);
+                        var selectedWard = selectedDistrict.Wards.find(ward => ward.Id == idXa);
                         if (selectedWard) {
                             wards.textContent = "Xã / Phường: " + selectedWard.Name;
                         } else {
@@ -285,11 +278,11 @@
                 }
             }
         });
-        const cities2 = document.getElementById("city2");
-        const districts2 = document.getElementById("district2");
-        const wards2 = document.getElementById("ward2");
+        var cities2 = document.getElementById("city2");
+        var districts2 = document.getElementById("district2");
+        var wards2 = document.getElementById("ward2");
 
-        const parameter = {
+        var parameter = {
             url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",
             method: "GET",
             responseType: "json",
@@ -329,24 +322,8 @@
                 }
             };
         }
-
-
-        // function diachiMacDinh() {
-        //     var nameButton = document.getElementsByName("checkDiaChiMacDinh")
-        //     // var buttonMacDinh = document.getElementsByName("checkDiaChiMacDinh")
-        //     for (var i = 0; i < nameButton.length; i++) {
-        //         if (nameButton.values() == null) {
-        //             console.log("khong co dc mac dinh")
-        //         } else if (nameButton.values() == true) {
-        //             buttonMacDinh[i].parentElement.style.color = "red"
-        //         } else {
-        //             buttons[i].parentElement.style.color = "blue";
-        //         }
-        //     }
-        // }
-
-        // window.onload = diachiMacDinh
     </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             let jsonData = []; // Lưu toàn bộ JSON vào biến để dùng lại
@@ -442,6 +419,102 @@
             });
         });
     </script>
+<!--    <script th:inline="javascript">-->
+<!--        // Lấy danh sách địa chỉ từ Thymeleaf (chuyển từ dạng Thymeleaf sang JSON)-->
+
+<!--        const listDiaChi = /*[[${listDiaChi}]]*/ [];-->
+
+<!--        listDiaChi.forEach(function (diaChi, index) {-->
+<!--            // Lấy giá trị từ các trường input dựa theo chỉ số-->
+<!--            const idTinh = document.getElementById('tinh' + index).value;-->
+
+<!--            // Phần tử hiển thị kết quả-->
+<!--            const citis = document.getElementById('city' + index);-->
+
+<!--            // Cấu hình Axios để lấy dữ liệu từ GitHub-->
+<!--            const Parameter = {-->
+<!--                url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",-->
+<!--                method: "GET",-->
+<!--                responseType: "application/json",-->
+<!--            };-->
+
+<!--            // Gọi API để lấy dữ liệu địa giới hành chính-->
+<!--            axios(Parameter).then(function (result) {-->
+<!--                renderCity(result.data, idTinh, citis);-->
+<!--            });-->
+
+<!--            // Hàm xử lý dữ liệu địa giới hành chính-->
+<!--            function renderCity(data, idTinh, citis) {-->
+<!--                const selectedCity = data.find(city => city.Id == idTinh);-->
+<!--                if (selectedCity) {-->
+<!--                    citis.textContent = "Địa chỉ: " + selectedCity.Name;-->
+<!--                } else {-->
+<!--                    citis.textContent = "Địa chỉ: Không tìm thấy";-->
+<!--                }-->
+<!--            }-->
+<!--        });-->
+<!--        const cities2 = document.getElementById("city2");-->
+<!--        const districts2 = document.getElementById("district2");-->
+<!--        const wards2 = document.getElementById("ward2");-->
+
+<!--        const parameter = {-->
+<!--            url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",-->
+<!--            method: "GET",-->
+<!--            responseType: "json",-->
+<!--        };-->
+
+<!--        axios(parameter).then(function (result) {-->
+<!--            renderCity2(result.data);-->
+<!--        });-->
+
+<!--        function renderCity2(data) {-->
+<!--            for (const city of data) {-->
+<!--                cities2.options[cities2.options.length] = new Option(city.Name, city.Id);-->
+<!--            }-->
+<!--            cities2.onchange = function () {-->
+<!--                districts2.length = 1;-->
+<!--                wards2.length = 1;-->
+<!--                if (this.value !== "") {-->
+<!--                    const result = data.find(n => n.Id === this.value);-->
+<!--                    if (result) {-->
+<!--                        for (const district of result.Districts) {-->
+<!--                            districts2.options[districts2.options.length] = new Option(district.Name, district.Id);-->
+<!--                        }-->
+<!--                    }-->
+<!--                }-->
+<!--            };-->
+
+<!--            districts2.onchange = function () {-->
+<!--                wards2.length = 1;-->
+<!--                const selectedCity = data.find(n => n.Id === cities2.value);-->
+<!--                if (this.value !== "") {-->
+<!--                    const result = selectedCity.Districts.find(n => n.Id === this.value);-->
+<!--                    if (result) {-->
+<!--                        for (const ward of result.Wards) {-->
+<!--                            wards2.options[wards2.options.length] = new Option(ward.Name, ward.Id);-->
+<!--                        }-->
+<!--                    }-->
+<!--                }-->
+<!--            };-->
+<!--        }-->
+
+
+<!--        // function diachiMacDinh() {-->
+<!--        //     var nameButton = document.getElementsByName("checkDiaChiMacDinh")-->
+<!--        //     // var buttonMacDinh = document.getElementsByName("checkDiaChiMacDinh")-->
+<!--        //     for (var i = 0; i < nameButton.length; i++) {-->
+<!--        //         if (nameButton.values() == null) {-->
+<!--        //             console.log("khong co dc mac dinh")-->
+<!--        //         } else if (nameButton.values() == true) {-->
+<!--        //             buttonMacDinh[i].parentElement.style.color = "red"-->
+<!--        //         } else {-->
+<!--        //             buttons[i].parentElement.style.color = "blue";-->
+<!--        //         }-->
+<!--        //     }-->
+<!--        // }-->
+
+<!--        // window.onload = diachiMacDinh-->
+<!--    </script>-->
 
 
 </div>

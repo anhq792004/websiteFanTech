@@ -2,6 +2,7 @@ $(document).ready(function () {
     $('#addKHForm').on('submit', function (event) {
         event.preventDefault(); // Ngăn form submit mặc định
 
+        $('#addKHForm button[type="submit"]').prop('disabled', true);
         // Thu thập dữ liệu từ form
         const formData = {
             ten: $('#name').val(),
@@ -42,8 +43,9 @@ $(document).ready(function () {
                     position: 'top-end',
                     showConfirmButton: false,
                     timer: 1000,
-                    timerProgressBar: true
+                    timerProgressBar: true,
                 });
+                $('#addKHForm button[type="submit"]').prop('disabled', false);
             }
         });
     });
