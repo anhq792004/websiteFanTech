@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- Thêm SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
@@ -17,7 +16,6 @@
             align-items: center;
             background-color: #f5f5f5;
         }
-
         .login-container {
             display: flex;
             max-width: 900px;
@@ -26,32 +24,26 @@
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-
         .login-form {
             flex: 1;
             padding: 40px;
             background: #ffffff;
         }
-
         .login-form h2 {
             font-weight: bold;
             margin-bottom: 20px;
         }
-
         .login-form .form-control {
             border-radius: 20px;
         }
-
         .login-form .btn {
             border-radius: 20px;
             background-color: black;
             color: white;
         }
-
         .login-form .btn:hover {
             background-color: #333;
         }
-
         .welcome-section {
             flex: 1;
             background-color: black;
@@ -64,7 +56,6 @@
             border-top-right-radius: 120px;
             border-bottom-right-radius: 120px;
         }
-
         .welcome-section h2 {
             font-weight: bold;
             margin-bottom: 10px;
@@ -80,17 +71,9 @@
     <div class="login-form">
         <h2 class="text-center">Nhập mã xác nhận</h2>
 
-        <!-- Hiển thị thông báo lỗi bằng Bootstrap Alert -->
+        <!-- Hiển thị thông báo lỗi -->
         <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
             <span th:text="${error}"></span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-
-        <!-- Hiển thị thông báo thành công bằng Bootstrap Alert -->
-        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <span th:text="${success}"></span>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -116,16 +99,7 @@
         timerProgressBar: true
     });
 
-    // Hiển thị thông báo thành công từ server (nếu có)
-    const serverSuccess = /*[[${success}]]*/ null;
-    if (serverSuccess) {
-        Toast.fire({
-            icon: 'success',
-            title: serverSuccess
-        });
-    }
-
-    // Hiển thị thông báo lỗi từ server (nếu có)
+    // Hiển thị thông báo lỗi từ server
     const serverError = /*[[${error}]]*/ null;
     if (serverError) {
         Toast.fire({
@@ -134,7 +108,19 @@
         });
     }
 
-    // Xử lý form submit với thông báo loading và success
+    // Hiển thị thông báo thành công từ server
+    const serverSuccess = /*[[${success}]]*/ null;
+    if (serverSuccess) {
+        Swal.fire({
+            icon: 'success',
+            title: serverSuccess,
+            timer: 2000,
+            showConfirmButton: false
+        }).then(() => {
+            window.location.href = '/forgot-password/new-password';
+        });
+    }
+
     document.getElementById('verifyCodeForm').addEventListener('submit', function(e) {
         const code = document.getElementById('code').value.trim();
 
@@ -147,7 +133,6 @@
             return;
         }
 
-        // Hiển thị loading
         Swal.fire({
             title: 'Đang xác thực...',
             text: 'Vui lòng chờ trong giây lát',
@@ -159,12 +144,10 @@
             }
         });
 
-        // Cho phép form submit
         return true;
     });
 </script>
 
-<!-- Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
