@@ -31,122 +31,254 @@
 
     <main>
         <div class="header-video">
-            <div id="hero_video">
-                <div class="opacity-mask d-flex align-items-center" data-opacity-mask="rgba(0, 0, 0, 0.5)">
-                    <div class="container">
-                        <div class="row justify-content-center justify-content-md-start">
-                            <div class="col-lg-6">
-                                <div class="slide-text white">
-                                    <h3>FanTech<br>Bán quạt uy tín</h3>
-                                    <p>giá rẻ</p>
-                                    <a class="btn_1" href="#0" role="button">Mua ngay</a>
-                                </div>
-                            </div>
-                        </div>
+            <div class="slider">
+                <div class="slides">
+                    <div class="slide"><img
+                            src="https://dailyquattran.vn/wp-content/uploads/2022/07/banner-quat-tran-panasonic.jpg"
+                            class="d-block" alt="Slide 1"></div>
+                    <div class="slide"><img
+                            src="https://bizweb.dktcdn.net/100/465/315/products/b8f277f4-38b1-4621-a2d6-f6b9863b0f9a.jpg?v=1676452041187"
+                            class="d-block" alt="Slide 2">
+                        <div class="slide"><img
+                                src="https://thietbipanasonic.com/wp-content/uploads/2022/07/Banner-quat-treo-tuong.jpg"
+                                class="d-block" alt="Slide 3"></div>
+                        <div class="slide"><img src="/uploads/1366161.png" alt=""></div>
+                    </div>
+                    <div class="dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
                     </div>
                 </div>
+
+                <style>
+                    html, body {
+                        margin: 0;
+                        padding: 0;
+                        height: 100%;
+                    }
+
+                    .header-video {
+                        width: 100%;
+                        height: 100vh;
+                        position: relative;
+                    }
+
+                    .slider {
+                        width: 100%;
+                        height: 100%;
+                        overflow: hidden;
+                        position: relative;
+                    }
+
+                    .slides {
+                        display: flex;
+                        width: 100%;
+                        height: 100%;
+                        transition: transform 1s ease-in-out;
+                    }
+
+                    .slide {
+                        flex: 0 0 100%;
+                        height: 100%;
+                    }
+
+                    .slide img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        display: block;
+                    }
+
+                    .dots {
+                        position: absolute;
+                        bottom: 20px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        display: flex;
+                        gap: 10px;
+                        z-index: 10;
+                    }
+
+                    .dot {
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 50%;
+                        background: #fff;
+                        opacity: 0.5;
+                        cursor: pointer;
+                        transition: opacity 0.3s;
+                    }
+
+                    .dot.active {
+                        opacity: 1;
+                    }
+
+                    .line-clamp-2 {
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        min-height: 3em; /* Tùy chỉnh để đảm bảo 2 dòng */
+                    }
+                </style>
+
+                <script>
+                    (function () {
+                        const slides = document.querySelectorAll('.slide');
+                        const dots = document.querySelectorAll('.dot');
+                        const slidesWrapper = document.querySelector('.slides');
+                        let index = 0;
+
+                        function showSlide(i) {
+                            slidesWrapper.style.transform = `translateX(-${i * 100}%)`;
+                            dots.forEach(dot => dot.classList.remove('active'));
+                            dots[i].classList.add('active');
+                            index = i;
+                        }
+
+                        dots.forEach(dot => {
+                            dot.addEventListener('click', () => {
+                                showSlide(+dot.dataset.slide);
+                                resetInterval();
+                            });
+                        });
+
+                        let interval = setInterval(() => {
+                            index = (index + 1) % slides.length;
+                            showSlide(index);
+                        }, 3500);
+
+                        function resetInterval() {
+                            clearInterval(interval);
+                            interval = setInterval(() => {
+                                index = (index + 1) % slides.length;
+                                showSlide(index);
+                            }, 3500);
+                        }
+                    })();
+                </script>
             </div>
-            <img th:src="@{user/assets/images/video_fix.png}" alt="" class="header-video--media" data-video-src="video/intro" data-teaser-source="video/intro" data-provider="" data-video-width="1920" data-video-height="960">
+
         </div>
         <!-- /header-video -->
         <hr class="mb-0">
         <!-- /container -->
         <div class="main_nav Sticky">
             <!-- Phần hiển thị sản phẩm - Thêm vào sau phần "New Arrival" trong file HTML -->
-            <div class="container margin_60_35">
+            <div class="container">
                 <div class="main_title mb-4">
                     <h2>Sản Phẩm Nổi Bật</h2>
                     <span>Sản Phẩm Nổi Bật</span>
                     <p>Khám phá các sản phẩm quạt điện chất lượng cao.</p>
                 </div>
 
-                <!-- Kiểm tra nếu có sản phẩm -->
-                <div th:if="${sanPhamList != null and !sanPhamList.isEmpty()}">
-                    <div class="row">
-                        <!-- Lặp qua danh sách sản phẩm -->
-                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4" th:each="sanPham : ${sanPhamList}">
-                            <div class="card h-100 shadow-sm">
-                                <!-- Hình ảnh sản phẩm -->
-                                <div class="position-relative">
-                                    <!-- Hiển thị ảnh sản phẩm từ database -->
-                                    <img th:if="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty() and sanPham.sanPhamChiTiet[0].hinhAnh != null and sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh != null}"
-                                         th:src="@{${sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh}}"
-                                         class="card-img-top"
-                                         style="height: 250px; object-fit: cover;"
-                                         th:alt="${sanPham.ten}">
-                                    <!-- Hiển thị ảnh mặc định nếu không có ảnh -->
-                                    <img th:unless="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty() and sanPham.sanPhamChiTiet[0].hinhAnh != null and sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh != null}"
-                                         src="/user/assets/images/default_product.jpg"
-                                         class="card-img-top"
-                                         style="height: 250px; object-fit: cover;"
-                                         th:alt="${sanPham.ten}">
+                <div class="row">
+                    <aside class="col-lg-4" id="sidebar_fixed">
+                        ádfasfsdf
+                    </aside>
 
-                                    <!-- Badge trạng thái -->
-                                    <span class="badge bg-success position-absolute top-0 start-0 m-2"
-                                          th:if="${sanPham.trangThai}">Có sẵn</span>
-                                    <span class="badge bg-secondary position-absolute top-0 start-0 m-2"
-                                          th:unless="${sanPham.trangThai}">Hết hàng</span>
-                                </div>
+                    <div class="col-lg-8">
+                        <!-- Kiểm tra nếu có sản phẩm -->
+                        <div th:if="${sanPhamList != null and !sanPhamList.isEmpty()}">
+                            <div class="row">
+                                <!-- Lặp qua danh sách sản phẩm -->
+                                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2"
+                                     th:each="sanPham : ${sanPhamList}">
+                                    <div class="card shadow-sm">
+                                        <!-- Hình ảnh sản phẩm -->
+                                        <div class="position-relative">
+                                            <!-- Hiển thị ảnh sản phẩm từ database -->
+                                            <img th:if="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty() and sanPham.sanPhamChiTiet[0].hinhAnh != null and sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh != null}"
+                                                 th:src="@{${sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh}}"
+                                                 class="card-img-top"
+                                                 style="height: 250px; object-fit: cover;"
+                                                 th:alt="${sanPham.ten}">
+                                            <!-- Hiển thị ảnh mặc định nếu không có ảnh -->
+                                            <img th:unless="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty() and sanPham.sanPhamChiTiet[0].hinhAnh != null and sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh != null}"
+                                                 src="/user/assets/images/default_product.jpg"
+                                                 class="card-img-top"
+                                                 style="height: 250px; object-fit: cover;"
+                                                 th:alt="${sanPham.ten}">
 
-                                <!-- Thông tin sản phẩm -->
-                                <div class="card-body d-flex flex-column">
-                                    <!-- Tên sản phẩm -->
-                                    <h5 class="card-title" th:text="${sanPham.ten}">Tên sản phẩm</h5>
+                                            <!-- Badge trạng thái -->
+                                            <span class="badge bg-success position-absolute top-0 start-0 m-2"
+                                                  th:if="${sanPham.trangThai}">Có sẵn</span>
+                                            <span class="badge bg-secondary position-absolute top-0 start-0 m-2"
+                                                  th:unless="${sanPham.trangThai}">Hết hàng</span>
+                                        </div>
 
-                                    <!-- Mô tả ngắn -->
-                                    <p class="card-text text-muted small"
-                                       th:text="${sanPham.moTa != null ? (sanPham.moTa.length() > 80 ? sanPham.moTa.substring(0, 80) + '...' : sanPham.moTa) : 'Chưa có mô tả'}">
-                                        Mô tả sản phẩm
-                                    </p>
+                                        <!-- Thông tin sản phẩm -->
+                                        <div class="p-3 d-flex flex-column flex-grow-1">
+                                            <!-- Tên sản phẩm -->
+                                            <h5 class="card-title" th:text="${sanPham.ten}">Tên sản phẩm</h5>
 
-                                    <!-- Thông tin chi tiết -->
-                                    <div class="mb-3">
-                                        <!-- Mã sản phẩm -->
-                                        <small class="text-muted d-block">
-                                            <strong>Mã SP:</strong>
-                                            <span th:text="${sanPham.ma != null ? sanPham.ma : 'Chưa có mã'}">SP001</span>
-                                        </small>
+                                            <!-- Mô tả ngắn -->
+                                            <div>
+                                                <p class="text-muted small line-clamp-2"
+                                                   th:text="${sanPham.moTa != null ? (sanPham.moTa.length() > 60 ? sanPham.moTa.substring(0, 60) + '...' : sanPham.moTa) : 'Chưa có mô tả'}">
+                                                </p>
+                                            </div>
 
-                                        <!-- Loại quạt -->
-                                        <small class="text-muted d-block" th:if="${sanPham.kieuQuat != null}">
-                                            <strong>Loại:</strong>
-                                            <span th:text="${sanPham.kieuQuat.ten}">Quạt trần</span>
-                                        </small>
-                                    </div>
+                                            <!-- Thông tin chi tiết -->
+                                            <div class="mb-1">
+                                                <!-- Mã sản phẩm -->
+                                                <small class="text-muted d-block">
+                                                    <strong>Mã SP:</strong>
+                                                    <span th:text="${sanPham.ma != null ? sanPham.ma : 'Chưa có mã'}">SP001</span>
+                                                </small>
 
-                                    <!-- Giá sản phẩm -->
-                                    <div class="mt-auto">
-                                        <h4 class="text-primary mb-3" th:if="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty() and sanPham.sanPhamChiTiet[0].gia != null}">
-                                            <span th:text="${#numbers.formatDecimal(sanPham.sanPhamChiTiet[0].gia, 0, 'COMMA', 0, 'POINT')}">500,000</span>
-                                            <small>đ</small>
-                                        </h4>
-                                    </div>
+                                                <!-- Loại quạt -->
+                                                <small class="text-muted d-block"
+                                                       th:if="${sanPham.kieuQuat != null}">
+                                                    <strong>Loại:</strong>
+                                                    <span th:text="${sanPham.kieuQuat.ten}"></span>
+                                                </small>
+                                            </div>
 
-                                    <!-- Nút hành động -->
-                                    <div class="d-grid gap-2">
-                                        <a th:href="@{/fanTech/detail(id=${sanPham.id})}"
-                                           class="btn btn-primary btn-sm">
-                                            <i class="fas fa-eye me-1"></i>Xem chi tiết
-                                        </a>
+                                            <!-- Giá sản phẩm -->
+                                            <div class="mt-2">
+                                                <h4 class="text-dark-emphasis mb-1"
+                                                    th:if="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty() and sanPham.sanPhamChiTiet[0].gia != null}">
+                                                    <span th:text="${#numbers.formatDecimal(sanPham.sanPhamChiTiet[0].gia, 0, 'COMMA', 0, 'POINT')}">500,000</span>
+                                                    <small>đ</small>
+                                                </h4>
+                                            </div>
+
+                                            <!-- Nút hành động -->
+
+                                            <div class="d-flex justify-content-center gap-2 mt-2">
+                                                <a th:href="@{/fanTech/detail(id=${sanPham.id})}"
+                                                   class="btn btn-outline-dark btn-sm flex-grow-1 text-nowrap text-center"
+                                                   style="font-size: 0.85rem; padding: 0.5rem 0;">
+                                                    Xem chi tiết
+                                                </a>
+                                                <a href="#"
+                                                   class="btn btn-dark btn-sm text-nowrap text-center"
+                                                   style="font-size: 0.85rem; padding: 0.5rem 0.6rem; width: 38px;">
+                                                    <i class="fas fa-cart-plus"></i>
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Thông báo khi không có sản phẩm -->
-                <div th:unless="${sanPhamList != null and !sanPhamList.isEmpty()}" class="text-center py-5">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Hiện tại chưa có sản phẩm nào để hiển thị.
+                    <!-- Thông báo khi không có sản phẩm -->
+                    <div th:unless="${sanPhamList != null and !sanPhamList.isEmpty()}" class="text-center py-5">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Hiện tại chưa có sản phẩm nào để hiển thị.
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="search_mob_wp">
-                <input type="text" class="form-control" placeholder="Search over 10.000 products">
-                <input type="submit" class="btn_1 full-width" value="Search">
-            </div>
+        </div>
+        <div class="search_mob_wp">
+            <input type="text" class="form-control" placeholder="Search over 10.000 products">
+            <input type="submit" class="btn_1 full-width" value="Search">
         </div>
     </main>
 
@@ -166,7 +298,7 @@
     }
 
     // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         const dropdown = document.getElementById('userDropdownMenu');
         const button = document.querySelector('.user-info-btn');
 
@@ -176,7 +308,7 @@
     });
 
     // Close dropdown when pressing Escape
-    document.addEventListener('keydown', function(event) {
+    document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
             const dropdown = document.getElementById('userDropdownMenu');
             if (dropdown) {
@@ -195,13 +327,13 @@
 
 <script>
     // Isotope filter
-    $(window).on('load',function(){
+    $(window).on('load', function () {
         var $container = $('.isotope-wrapper');
-        $container.isotope({ itemSelector: '.isotope-item', layoutMode: 'masonry' });
+        $container.isotope({itemSelector: '.isotope-item', layoutMode: 'masonry'});
     });
-    $('.isotope_filter').on( 'click', 'a', 'change', function(){
+    $('.isotope_filter').on('click', 'a', 'change', function () {
         var selector = $(this).attr('data-filter');
-        $('.isotope-wrapper').isotope({ filter: selector });
+        $('.isotope-wrapper').isotope({filter: selector});
     });
 </script>
 

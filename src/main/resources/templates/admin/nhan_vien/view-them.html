@@ -19,8 +19,10 @@
                         <div class="card-header">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h2>Thông tin nhân viên</h2>
-                                <button type="submit" class="btn btn-outline-success">
-                                    <i class="bi bi-patch-plus-fill"></i> Thêm
+                                <button type="submit" class="btn btn-outline-success" id="btnNV">
+                                    <span class="spinner-border spinner-border-sm me-1 d-none" id="btnSpinner"
+                                          role="status" aria-hidden="true"></span>
+                                    <i class="bi bi-patch-plus-fill" id="btnIcon"></i> Thêm
                                 </button>
                             </div>
                         </div>
@@ -99,7 +101,8 @@
                                         </div>
                                     </div>
                                     <div class="col">
-                                        <label for="dcct" class="form-label fw-bold">Địa Chỉ Cụ Thể</label>
+                                        <label for="dcct" class="form-label fw-bold"><span
+                                                class="text-danger">*</span> Địa Chỉ Cụ Thể</label>
                                         <input type="text" class="form-control" id="dcct"
                                                name="soNhaNgoDuong" required>
                                     </div>

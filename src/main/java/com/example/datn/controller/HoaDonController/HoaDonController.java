@@ -1,6 +1,7 @@
 package com.example.datn.controller.HoaDonController;
 
 import com.example.datn.dto.request.AddSPToHDCTRequest;
+import com.example.datn.dto.request.TrangThaiHoaDonRequest;
 import com.example.datn.dto.request.UpdateInforRequest;
 import com.example.datn.dto.request.UpdateSoLuongRequest;
 import com.example.datn.dto.response.LichSuThanhToanResponse;
@@ -13,6 +14,8 @@ import com.example.datn.service.BanHang.BanHangService;
 import com.example.datn.service.HoaDonService.HoaDonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -20,6 +23,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,20 +40,46 @@ public class HoaDonController {
 
 
     @GetMapping("/index")
-    public String getAllHoaDon(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size,
-            Model model
-    ) {
-        if (page < 0) {
-            page = 0; // Tránh giá trị âm
+    public String getAllHoaDon(@RequestParam(name = "page", defaultValue = "0") int page,
+                               @RequestParam(name = "size", defaultValue = "5") int size,
+                               @RequestParam(name = "query", defaultValue = "") String query,
+                               @RequestParam(name = "loaiHoaDon", defaultValue = "") Boolean loaiHoaDon,
+                               @RequestParam(name = "trangThai", required = false) Integer trangThai,
+                               @RequestParam(name = "startDate", required = false) String startDate,
+                               @RequestParam(name = "endDate", required = false) String endDate,
+                               Model model) {
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+
+        try {
+            if (startDate != null && !startDate.isEmpty()) {
+                start = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay();
+            }
+            if (endDate != null && !endDate.isEmpty()) {
+                end = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atTime(LocalTime.MAX);
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // Hoặc ghi log lỗi để dễ debug
         }
-        Page<HoaDon> listHoaDon = hoaDonService.findAllHoaDonAndSortDay(page, size);
-        model.addAttribute("list", listHoaDon);
+
+        if (page < 0) page = 0;
+
+        Page<HoaDon> list = hoaDonService.searchHoaDon(query.trim(), loaiHoaDon, start, end, trangThai, PageRequest.of(page, size));
+
+        TrangThaiHoaDonRequest trangThaiHoaDon = hoaDonService.getTrangThaiHoaDon();
+        model.addAttribute("trangThaiHoaDon", trangThaiHoaDon);
+        model.addAttribute("list", list);
+        model.addAttribute("query", query);
+        model.addAttribute("loaiHoaDon", loaiHoaDon != null ? loaiHoaDon : "");
+        model.addAttribute("trangThai", trangThai != null ? trangThai : "");
+        model.addAttribute("startDate", startDate != null ? startDate : "");
+        model.addAttribute("endDate", endDate != null ? endDate : "");
         model.addAttribute("page", page);
-        model.addAttribute("totalPages", listHoaDon.getTotalPages());
+        model.addAttribute("totalPages", list.getTotalPages());
+
         return "admin/hoa_don/index";
     }
+
 
     @GetMapping("/detail")
     public String detail(@RequestParam Long id, Model model) {

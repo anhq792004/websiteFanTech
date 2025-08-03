@@ -77,12 +77,13 @@
         <h2 class="text-center">Đăng nhập</h2>
         <form id="loginForm" th:action="@{/login}" method="post">
             <div class="form-group">
-                <label for="username"><span class="text-danger">*</span> Email:</label>
+                <label for="username"><span class="text-danger">*</span> <strong>Email:</strong></label>
                 <input type="email" class="form-control" id="username" name="username">
             </div>
 
             <div class="form-group">
-                <label for="password"><span class="text-danger">*</span> Mật khẩu:</label>
+                <label for="password" class="form-label fw-bold"><span class="text-danger">*</span> <strong>Mật
+                    khẩu:</strong></label>
                 <input type="password" class="form-control" id="password" name="password">
                 <p th:if="${param.error}" class="text-danger small pt-2" data-error="true">
                     Email hoặc mật khẩu không đúng.
@@ -94,7 +95,10 @@
                     Bạn đã đăng xuất thành công.
                 </p>
             </div>
-            <button type="submit" class="btn w-100 btn-login">Đăng nhập</button>
+            <div class="text-center">
+                <button type="submit" class="btn w-100 btn-login">Đăng nhập</button>
+                <p class="mt-2"><a th:href="@{/forgot-password}">Quên mật khẩu?</a></p>
+            </div>
         </form>
     </div>
 
@@ -103,7 +107,6 @@
         <p class="text-center">Đăng kí tài khoản</p>
         <div class="d-flex justify-content-center">
             <a th:href="@{/register}" class="btn btn-outline-light w-auto px-5">Đăng kí</a>
-            <p class="mt-2"><a th:href="@{/forgot-password}" style="color: white;">Quên mật khẩu?</a></p>
         </div>
     </div>
 </div>

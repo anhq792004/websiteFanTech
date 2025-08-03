@@ -43,7 +43,7 @@
                                             th:each="hd : ${listHoaDon}">
                                             <a class="nav-link"
                                                th:classappend="${hd.id == idHD} ? 'active bg-success text-white' : 'text-dark'"
-                                               th:text="${hd.ma + ' - ' + (hd.tongTienSauGiamGia != null ? #numbers.formatDecimal(hd.tongTienSauGiamGia, 0, 'COMMA', 0, 'POINT') + ' VND' : (hd.tongTien != null ? #numbers.formatDecimal(hd.tongTien, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'))}"
+                                               th:text="${hd.ma + ' - ' + (hd.tongTienSauGiamGia != null ? #numbers.formatDecimal(hd.tongTienSauGiamGia, 0, 'COMMA', 0, 'POINT') + ' đ' : (hd.tongTien != null ? #numbers.formatDecimal(hd.tongTien, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'))}"
                                                th:href="@{/sale/hdct(idHD=${hd.id})}">
                                             </a>
                                             <a href="javascript:void(0);" class="text-danger huyHoaDon"
@@ -91,7 +91,7 @@
                                     <div class="product-details ms-3">
                                         <h5 class="mb-2" th:text="${item.sanPhamChiTiet.sanPham.ten}"></h5>
                                         <p class="mb-2">Giá: <span class="product-price"
-                                                                   th:text="${#numbers.formatDecimal(item.gia, 0, 'COMMA', 0, 'POINT')} + ' VND'"
+                                                                   th:text="${#numbers.formatDecimal(item.gia, 0, 'COMMA', 0, 'POINT')} + ' đ'"
                                                                    th:attr="data-value=${item.gia}"></span>
                                         </p>
                                         <p class="mb-2">Hãng: <span class="product-category"
@@ -117,7 +117,7 @@
                                         </form>
                                     </div>
                                     <div class="product-total"
-                                         th:text="${#numbers.formatDecimal(item.thanhTien, 0, 'COMMA', 0, 'POINT')} + ' VND'"
+                                         th:text="${#numbers.formatDecimal(item.thanhTien, 0, 'COMMA', 0, 'POINT')} + ' đ'"
                                          th:attr="data-value=${item.thanhTien}"></div>
 
                                     <a href="javascript:void(0);"
@@ -172,7 +172,7 @@
                                         <p>Tiền hàng:</p>
                                         <p th:if="${hoaDon == null}" id="tt" data-value="0">0</p>
                                         <p th:if="${hoaDon != null}"
-                                           th:text="${#numbers.formatDecimal(hoaDon.tongTien, 0, 'COMMA', 0, 'POINT')} + ' VND'"
+                                           th:text="${#numbers.formatDecimal(hoaDon.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'"
                                            th:attr="data-value=${hoaDon.tongTien}"
                                            id="tienThanhToan">
                                         </p>
@@ -196,8 +196,8 @@
                                             <p id="giaTriGiamGia"
                                                th:attr="data-value=${giaTriGiamGia != null ? giaTriGiamGia : 0}">
                                                 <span th:if="${giaTriGiamGia != null and giaTriGiamGia > 0}"
-                                                      th:text="${#numbers.formatDecimal(giaTriGiamGia, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span>
-                                                <span th:if="${giaTriGiamGia == null or giaTriGiamGia == 0}">0 VND</span>
+                                                      th:text="${#numbers.formatDecimal(giaTriGiamGia, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                                <span th:if="${giaTriGiamGia == null or giaTriGiamGia == 0}">0 đ</span>
                                             </p>
                                         </div>
                                     </div>
@@ -205,7 +205,7 @@
                                         <p>Tổng số tiền: </p>
                                         <p class="fw-bold text-danger" id="tongTienSauGiam"
                                            th:attr="data-value=${hoaDon.tongTienSauGiamGia != null ? hoaDon.tongTienSauGiamGia : hoaDon.tongTien}">
-                                            <span th:text="${#numbers.formatDecimal(hoaDon.tongTienSauGiamGia != null ? hoaDon.tongTienSauGiamGia : hoaDon.tongTien, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span>
+                                            <span th:text="${#numbers.formatDecimal(hoaDon.tongTienSauGiamGia != null ? hoaDon.tongTienSauGiamGia : hoaDon.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
                                         </p>
                                     </div>
                                     <!-- Tiền khách thanh toán -->
@@ -298,7 +298,7 @@
                         <tr th:each="item, iter : ${findSPCTByIdSanPham}">
                             <td th:text="${iter.count}"></td>
                             <td th:text="${item.sanPham != null ? item.sanPham.ten : 'N/A'}"></td>
-                            <td th:text="${#numbers.formatDecimal(item.gia, 0, 'COMMA', 0, 'POINT')} + ' VND'"
+                            <td th:text="${#numbers.formatDecimal(item.gia, 0, 'COMMA', 0, 'POINT')} + ' đ'"
                                 th:attr="data-value=${item.gia}"></td>
                             <td th:text="${item.mauSac != null ? item.mauSac.ten : 'N/A'}"></td>
                             <td th:text="${item.congSuat != null ? item.congSuat.ten : 'N/A'}"></td>
