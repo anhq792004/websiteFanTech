@@ -11,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Date;
@@ -173,8 +170,78 @@ public class ProfileController {
     }
 
     @GetMapping("/change-password")
-    public String changePassword() {
-
+    public String changePassword(Model model, HttpSession session) {
+        TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("showVerificationForm", false);
+        model.addAttribute("showPasswordForm", false);
         return "user/infor/changePassword";
+    }
+
+    @PostMapping("/change-password/request")
+    public String requestVerificationCode(Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            taiKhoanService.sendForgotPasswordCode(currentUser.getEmail(), session);
+            redirectAttributes.addFlashAttribute("message", "Mã xác thực đã được gửi đến email của bạn!");
+            model.addAttribute("showVerificationForm", true);
+            model.addAttribute("showPasswordForm", false);
+            return "user/infor/changePassword";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Không thể gửi mã xác thực. Vui lòng thử lại!");
+            return "redirect:/profile/change-password";
+        }
+    }
+
+    @PostMapping("/change-password/verify")
+    public String verifyCode(@RequestParam("code") String code, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        boolean isVerified = taiKhoanService.verifyForgotPasswordCode(currentUser.getEmail(), code, session);
+        if (isVerified) {
+            model.addAttribute("showVerificationForm", false);
+            model.addAttribute("showPasswordForm", true);
+            return "user/infor/changePassword";
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Mã xác thực không đúng!");
+            model.addAttribute("showVerificationForm", true);
+            model.addAttribute("showPasswordForm", false);
+            return "user/infor/changePassword";
+        }
+    }
+
+    @PostMapping("/change-password/update")
+    public String updatePassword(@RequestParam("newPassword") String newPassword,
+                                 @RequestParam("confirmPassword") String confirmPassword,
+                                 HttpSession session,
+                                 RedirectAttributes redirectAttributes) {
+        TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            redirectAttributes.addFlashAttribute("error", "Mật khẩu xác nhận không khớp!");
+            return "redirect:/profile/change-password";
+        }
+
+        try {
+            taiKhoanService.changePassword(currentUser.getEmail(), newPassword);
+            redirectAttributes.addFlashAttribute("message", "Đổi mật khẩu thành công!");
+            session.removeAttribute("verifiedEmail");
+            return "redirect:/profile/change-password";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi đổi mật khẩu!");
+            return "redirect:/profile/change-password";
+        }
     }
 }
