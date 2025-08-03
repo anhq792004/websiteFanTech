@@ -1,9 +1,22 @@
 $(document).ready(function () {
     $('#addKHForm').on('submit', function (event) {
-        event.preventDefault(); // Ngăn form submit mặc định
+        event.preventDefault();
 
-        $('#addKHForm button[type="submit"]').prop('disabled', true);
-        // Thu thập dữ liệu từ form
+        $('#submitBtn').prop('disabled', true);
+        $('#btnIcon').addClass('d-none');
+        $('#btnSpinner').removeClass('d-none');
+
+        // Hiện loading SweetAlert2
+        Swal.fire({
+            title: 'Đang xử lý...',
+            html: 'Vui lòng chờ trong giây lát',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         const formData = {
             ten: $('#name').val(),
             email: $('#email').val(),
@@ -16,7 +29,6 @@ $(document).ready(function () {
             soNhaNgoDuong: $('#diaChiCuThe').val()
         };
 
-        // Gửi Ajax request
         $.ajax({
             url: '/khach-hang/add',
             type: 'POST',
@@ -36,6 +48,7 @@ $(document).ready(function () {
                 });
             },
             error: function (xhr) {
+                Swal.close(); // Tắt loading
                 Swal.fire({
                     toast: true,
                     icon: 'error',
@@ -45,11 +58,17 @@ $(document).ready(function () {
                     timer: 1000,
                     timerProgressBar: true,
                 });
-                $('#addKHForm button[type="submit"]').prop('disabled', false);
+
+                $('#submitBtn').prop('disabled', false);
+                $('#btnSpinner').addClass('d-none');
+                $('#btnIcon').removeClass('d-none');
             }
         });
     });
 });
+
+
+
 
 $('.changeStatusKhachHang').on('click', function () {
     const id = $(this).data('id');

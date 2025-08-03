@@ -2,6 +2,20 @@ $(document).ready(function () {
 
     $('#addNhanVienForm').on('submit', function (event) {
         event.preventDefault();
+        $('#btnNV').prop('disabled', true);
+        $('#btnIcon').addClass('d-none');
+        $('#btnSpinner').removeClass('d-none');
+
+        // Hiện loading SweetAlert2
+        Swal.fire({
+            title: 'Đang xử lý...',
+            html: 'Vui lòng chờ trong giây lát',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
 
         const formData = {
             ten: $('#ten').val(),
@@ -35,6 +49,7 @@ $(document).ready(function () {
                 });
             },
             error: function (xhr) {
+                Swal.close(); // Tắt loading
                 Swal.fire({
                     toast: true,
                     icon: 'error',
@@ -44,6 +59,9 @@ $(document).ready(function () {
                     timer: 3000,
                     timerProgressBar: true
                 });
+                $('#submitBtn').prop('disabled', false);
+                $('#btnSpinner').addClass('d-none');
+                $('#btnIcon').removeClass('d-none');
             }
         });
     });
@@ -122,7 +140,7 @@ $(document).ready(function () {
                 Swal.fire({
                     toast: true,
                     icon: 'success',
-                    title: response.message || 'Updatenhân viên thành công',
+                    title: response.message || 'Thông tin nhân viên đã được thay đổi',
                     position: 'top-end',
                     showConfirmButton: false,
                     timer: 1000,
@@ -135,7 +153,7 @@ $(document).ready(function () {
                 Swal.fire({
                     toast: true,
                     icon: 'error',
-                    title: xhr.responseText || 'Lỗi khi thêm nhân viên',
+                    title: xhr.responseText || 'Lỗi khi thay đổi thông tin nhân viên',
                     position: 'top-end',
                     showConfirmButton: false,
                     timer: 1000,

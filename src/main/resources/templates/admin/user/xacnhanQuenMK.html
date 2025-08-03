@@ -16,6 +16,7 @@
             align-items: center;
             background-color: #f5f5f5;
         }
+
         .login-container {
             display: flex;
             max-width: 900px;
@@ -24,26 +25,32 @@
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
         .login-form {
             flex: 1;
             padding: 40px;
             background: #ffffff;
         }
+
         .login-form h2 {
             font-weight: bold;
             margin-bottom: 20px;
         }
+
         .login-form .form-control {
             border-radius: 20px;
         }
+
         .login-form .btn {
             border-radius: 20px;
             background-color: black;
             color: white;
         }
+
         .login-form .btn:hover {
             background-color: #333;
         }
+
         .welcome-section {
             flex: 1;
             background-color: black;
@@ -56,6 +63,7 @@
             border-top-right-radius: 120px;
             border-bottom-right-radius: 120px;
         }
+
         .welcome-section h2 {
             font-weight: bold;
             margin-bottom: 10px;
@@ -65,11 +73,11 @@
 <body>
 <div class="login-container">
     <div class="welcome-section">
-        <h2>XÁC NHẬN MÃ QUÊN MẬT KHẨU</h2>
-        <p th:text="'Vui lòng nhập mã xác nhận đã gửi đến email: ' + ${email}"></p>
+        <h2>KHÔI PHỤC MẬT KHẨU</h2>
+        <p th:text="'Vui lòng nhập mã OTP đã gửi đến email: ' + ${email}"></p>
     </div>
     <div class="login-form">
-        <h2 class="text-center">Nhập mã xác nhận</h2>
+        <h2 class="text-center">Nhập mã OTP</h2>
 
         <!-- Hiển thị thông báo lỗi -->
         <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -82,7 +90,8 @@
         <form th:action="@{/forgot-password/verify-code}" method="post" id="verifyCodeForm">
             <input type="hidden" th:name="email" th:value="${email}">
             <div class="form-group">
-                <label for="code"><span class="text-danger">*</span> Mã xác nhận:</label>
+                <label for="code" class="form-label fw-bold"><span class="text-danger ">*</span> <strong>Mã xác
+                    nhận:</strong></label>
                 <input type="text" class="form-control" id="code" name="code" required>
             </div>
             <button type="submit" class="btn btn-primary btn-block">Xác nhận</button>
@@ -121,7 +130,7 @@
         });
     }
 
-    document.getElementById('verifyCodeForm').addEventListener('submit', function(e) {
+    document.getElementById('verifyCodeForm').addEventListener('submit', function (e) {
         const code = document.getElementById('code').value.trim();
 
         if (!code) {

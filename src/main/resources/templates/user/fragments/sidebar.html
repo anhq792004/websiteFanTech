@@ -1,0 +1,42 @@
+<aside th:fragment="sidebar" xmlns:th="http://www.thymeleaf.org">
+    <div class="card border-0 shadow-sm ">
+        <div class="card-header bg-white border-0 text-center">
+            <img src="avatar.png" alt="Avatar" class="img-fluid rounded-circle mb-2"
+                 style="width: 100px;">
+            <h5>AnhQ</h5>
+            <span class=" mt-2">Thông tin tài khoản</span>
+        </div>
+        <ul class="list-group list-group-flush mt-3">
+            <li class="list-group-item">
+                <a href="/profile" class="text-dark-emphasis">
+                    <i class="bi bi-card-text fs-4"></i>
+                    <span class="fw-bold">Hồ sơ</span>
+                </a>
+            </li>
+            <li class="list-group-item">
+                <a href="/profile/address" class="text-dark-emphasis">
+                    <i class="bi bi-geo-alt fs-4"></i>
+                    <span class="fw-bold">Địa chỉ</span>
+                </a>
+            </li>
+            <li class="list-group-item">
+                <a href="/profile/ordered" class="text-dark-emphasis">
+                    <i class="bi bi-cart fs-4"></i>
+                    <span class="fw-bold">Đơn mua</span>
+                </a>
+            </li>
+            <li class="list-group-item fs-4">
+                <a href="/profile/coupon" class="text-dark-emphasis">
+                    <i class="bi bi-ticket fs-4"></i>
+                    <span class="fw-bold">Phiếu giảm giá</span>
+                </a>
+            </li>
+            <li class="list-group-item fs-4 ">
+                <a href="/profile/change-password" class="text-dark-emphasis">
+                    <i class="bi bi-lock"></i>
+                    <span class="fw-bold">Đổi mật khẩu</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</aside>

@@ -44,10 +44,10 @@
                 </ol>
             </nav>
 
-            <div class="row">
+            <div class="row edit" style="background-color: #FFFFFF;">
                 <!-- Hình ảnh sản phẩm -->
-                <div class="col-md-6 mb-4">
-                    <div class="card">
+                <div class="col-md-6">
+                    <div>
                         <!-- Hiển thị ảnh từ chiTietDauTien nếu có -->
                         <img id="productImage"
                              th:if="${chiTietDauTien != null and chiTietDauTien.hinhAnh != null and chiTietDauTien.hinhAnh.hinhAnh != null}"
@@ -67,25 +67,26 @@
 
                 <!-- Thông tin sản phẩm -->
                 <div class="col-md-6">
-                    <div class="card h-100">
-                        <div class="card-body">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body px-4 py-3">
                             <!-- Tên sản phẩm -->
-                            <h1 class="card-title h2 mb-3" th:text="${sanPham.ten}">Tên sản phẩm</h1>
+                            <h1 class="card-title h3 mb-3 fw-bold text-center text-primary" th:text="${sanPham.ten}">Tên
+                                sản phẩm</h1>
 
-                            <!-- Mã sản phẩm -->
-                            <p class="text-muted mb-3">
-                                <strong>Mã sản phẩm:</strong>
-                                <span th:text="${sanPham.ma != null ? sanPham.ma : 'Chưa có mã'}">SP001</span>
-                            </p>
-
-                            <!-- Trạng thái -->
-                            <div class="mb-3">
+                            <!-- Mã sản phẩm + Trạng thái -->
+                            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+                                <p class="mb-0 text-muted">
+                                    <strong>Mã sản phẩm:</strong>
+                                    <span th:text="${sanPham.ma != null ? sanPham.ma : 'Chưa có mã'}">SP001</span>
+                                </p>
+                                <div>
                                 <span class="badge bg-success" th:if="${sanPham.trangThai}">
                                     <i class="fas fa-check-circle me-1"></i>Có sẵn
                                 </span>
-                                <span class="badge bg-secondary" th:unless="${sanPham.trangThai}">
+                                    <span class="badge bg-secondary" th:unless="${sanPham.trangThai}">
                                     <i class="fas fa-times-circle me-1"></i>Hết hàng
                                 </span>
+                                </div>
                             </div>
 
                             <!-- Loại quạt -->
@@ -94,11 +95,12 @@
                                 <span class="badge bg-info ms-2" th:text="${sanPham.kieuQuat.ten}">Quạt trần</span>
                             </div>
 
-                            <!-- Lựa chọn màu sắc -->
-                            <div class="mb-4" th:if="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty()}">
-                                <h5>Chọn màu sắc:</h5>
-                                <div class="row" id="colorOptions">
-                                    <div class="col-auto" th:each="chiTiet, iterStat : ${sanPham.sanPhamChiTiet}">
+                            <!-- Chọn màu sắc -->
+                            <div class="mb-4"
+                                 th:if="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty()}">
+                                <h6 class="fw-semibold mb-2">Chọn màu sắc:</h6>
+                                <div class="d-flex flex-wrap gap-2" id="colorOptions">
+                                    <div th:each="chiTiet, iterStat : ${sanPham.sanPhamChiTiet}">
                                         <input type="radio"
                                                class="btn-check color-option"
                                                th:id="'color-' + ${iterStat.index}"
@@ -108,7 +110,7 @@
                                                name="selectedColor"
                                                autocomplete="off"
                                                th:checked="${iterStat.first}">
-                                        <label class="btn btn-outline-primary"
+                                        <label class="btn btn-outline-primary btn-sm"
                                                th:for="'color-' + ${iterStat.index}"
                                                th:text="${chiTiet.mauSac != null ? chiTiet.mauSac.ten : 'Không có màu'}">
                                         </label>
@@ -116,63 +118,42 @@
                                 </div>
                             </div>
 
-                            <!-- Lựa chọn công suất -->
+                            <!-- Chọn công suất -->
                             <div class="mb-4" id="powerSection" style="display: none;">
-                                <h5>Chọn công suất:</h5>
-                                <div class="row" id="powerOptions">
-                                    <!-- Các tùy chọn công suất sẽ được JavaScript điền vào -->
+                                <h6 class="fw-semibold mb-2">Chọn công suất:</h6>
+                                <div class="d-flex flex-wrap gap-2" id="powerOptions">
+                                    <!-- JavaScript cập nhật -->
                                 </div>
                             </div>
 
-                            <!-- Giá sản phẩm -->
+                            <!-- Giá -->
                             <div class="mb-4">
-                                <h3 class="text-primary">
-                                    <span id="productPrice" th:text="${chiTietDauTien != null and chiTietDauTien.gia != null ? #numbers.formatDecimal(chiTietDauTien.gia, 0, 'COMMA', 0, 'POINT') : '0'}">500,000</span>
-                                    <small class="text-muted">VNĐ</small>
-                                </h3>
-                            </div>
-
-                            <!-- Mô tả -->
-                            <div class="mb-4">
-                                <h5>Mô tả sản phẩm</h5>
-                                <p class="text-muted" th:text="${sanPham.moTa != null ? sanPham.moTa : 'Chưa có mô tả cho sản phẩm này.'}">
-                                    Mô tả sản phẩm sẽ được hiển thị ở đây...
-                                </p>
-                            </div>
-
-                            <!-- Thông tin chi tiết -->
-                            <div class="mb-4" id="productDetails">
-                                <h5>Thông tin chi tiết</h5>
-                                <div class="table-responsive">
-                                    <table class="table table-sm">
-                                        <tbody id="detailsTableBody">
-                                        <!-- Thông tin chi tiết sẽ được JavaScript cập nhật -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <!-- Mô tả chi tiết -->
-                            <div class="mb-4" id="detailedDescription">
-                                <h5>Mô tả chi tiết</h5>
-                                <p class="text-muted" id="detailedDescriptionText">
-                                    Mô tả chi tiết của biến thể sản phẩm...
-                                </p>
+                                <h4 class="text-primary fw-bold">
+                                    <span id="productPrice"
+                                          th:text="${chiTietDauTien != null and chiTietDauTien.gia != null ? #numbers.formatDecimal(chiTietDauTien.gia, 0, 'COMMA', 0, 'POINT') : '0'}">500,000</span>
+                                    <small class="text-muted fw-normal">VNĐ</small>
+                                </h4>
                             </div>
 
                             <!-- Số lượng -->
                             <div class="mb-4">
                                 <label for="quantity" class="form-label">Số lượng:</label>
-                                <div class="input-group" style="width: 150px;">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity()">-</button>
-                                    <input type="number" class="form-control text-center" id="quantity" value="1" min="1" max="999">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity()">+</button>
+                                <div class="input-group" style="max-width: 160px;">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            onclick="decreaseQuantity()">-
+                                    </button>
+                                    <input type="number" class="form-control text-center" id="quantity" value="1"
+                                           min="1" max="999">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            onclick="increaseQuantity()">+
+                                    </button>
                                 </div>
-                                <small class="text-muted">Số lượng có sẵn: <span id="availableQuantity">0</span></small>
+                                <small class="text-muted d-block mt-1">Số lượng có sẵn: <span
+                                        id="availableQuantity">0</span></small>
                             </div>
 
                             <!-- Nút hành động -->
-                            <div class="d-grid gap-2">
+                            <div class="d-grid gap-2 mb-4">
                                 <button class="btn btn-primary btn-lg" id="addToCartBtn" onclick="addToCart()">
                                     <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ hàng
                                 </button>
@@ -180,9 +161,46 @@
                                     <i class="fas fa-arrow-left me-2"></i>Quay lại trang chủ
                                 </a>
                             </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-md-12">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body px-4 py-3">
+                            <!-- Mô tả -->
+                            <div class="mb-4">
+                                <h6 class="fw-semibold mb-2">Mô tả sản phẩm</h6>
+                                <p class="text-muted mb-0"
+                                   th:text="${sanPham.moTa != null ? sanPham.moTa : 'Chưa có mô tả cho sản phẩm này.'}">
+                                    Mô tả sản phẩm sẽ được hiển thị ở đây...
+                                </p>
+                            </div>
+
+                            <!-- Thông tin chi tiết -->
+                            <div class="mb-4" id="productDetails">
+                                <h6 class="fw-semibold mb-2">Thông tin chi tiết</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm mb-0">
+                                        <tbody id="detailsTableBody">
+                                        <!-- Thông tin chi tiết sẽ được cập nhật -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Mô tả chi tiết -->
+                            <div id="detailedDescription">
+                                <h6 class="fw-semibold mb-2">Mô tả chi tiết</h6>
+                                <p class="text-muted mb-0" id="detailedDescriptionText">
+                                    Mô tả chi tiết của biến thể sản phẩm...
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
 
@@ -221,7 +239,7 @@
     });
 
     // Khởi tạo trang
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         initializeProductDetails();
         setupColorSelection();
     });
@@ -260,7 +278,7 @@
 
             // Thêm sự kiện thay đổi
             const colorInput = div.querySelector('.color-option');
-            colorInput.addEventListener('change', function() {
+            colorInput.addEventListener('change', function () {
                 if (this.checked) {
                     const selectedDetail = detailsMap[this.value];
                     updateProductDetails(selectedDetail);
@@ -471,7 +489,7 @@
         fetch('/cart/add', {
             method: 'POST',
             body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
         })
             .then(response => response.ok ? response.json() : Promise.reject())
             .then(data => {
@@ -504,24 +522,69 @@
         setTimeout(() => notification.remove(), 5000);
     }
 
-    function getBootstrapAlertClass(type) { return { 'success': 'success', 'error': 'danger', 'warning': 'warning' }[type] || 'info'; }
-    function getNotificationIcon(type) { return { 'success': '<i class="fas fa-check-circle me-2"></i>', 'error': '<i class="fas fa-exclamation-circle me-2"></i>', 'warning': '<i class="fas fa-exclamation-triangle me-2"></i>' }[type] || '<i class="fas fa-info-circle me-2"></i>'; }
-    function updateCartCount(count) { document.querySelectorAll('.cart-count').forEach(el => { el.textContent = count; el.style.display = count > 0 ? 'inline' : 'none'; }); }
-    function toggleUserDropdown(event) { event.preventDefault(); event.stopPropagation(); const dropdown = document.getElementById('userDropdownMenu'); document.querySelectorAll('.user-dropdown-menu').forEach(menu => menu.style.display = 'none'); dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block'; }
+    function getBootstrapAlertClass(type) {
+        return {'success': 'success', 'error': 'danger', 'warning': 'warning'}[type] || 'info';
+    }
+
+    function getNotificationIcon(type) {
+        return {
+            'success': '<i class="fas fa-check-circle me-2"></i>',
+            'error': '<i class="fas fa-exclamation-circle me-2"></i>',
+            'warning': '<i class="fas fa-exclamation-triangle me-2"></i>'
+        }[type] || '<i class="fas fa-info-circle me-2"></i>';
+    }
+
+    function updateCartCount(count) {
+        document.querySelectorAll('.cart-count').forEach(el => {
+            el.textContent = count;
+            el.style.display = count > 0 ? 'inline' : 'none';
+        });
+    }
+
+    function toggleUserDropdown(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const dropdown = document.getElementById('userDropdownMenu');
+        document.querySelectorAll('.user-dropdown-menu').forEach(menu => menu.style.display = 'none');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+
     document.addEventListener('click', () => document.querySelectorAll('.user-dropdown-menu').forEach(menu => menu.style.display = 'none'));
 
-    document.getElementById('quantity').addEventListener('input', function() {
+    document.getElementById('quantity').addEventListener('input', function () {
         const value = parseInt(this.value);
         const max = parseInt(this.max);
         const min = parseInt(this.min);
-        if (value > max) { this.value = max; showNotification(`Số lượng tối đa là ${max}`, 'warning'); }
-        else if (value < min) this.value = min;
+        if (value > max) {
+            this.value = max;
+            showNotification(`Số lượng tối đa là ${max}`, 'warning');
+        } else if (value < min) this.value = min;
     });
 
     window.addEventListener('resize', () => document.querySelectorAll('.user-dropdown-menu').forEach(menu => menu.style.display = 'none'));
-    function initLazyLoading() { const lazyImages = document.querySelectorAll('img[data-src]'); if ('IntersectionObserver' in window) { const observer = new IntersectionObserver((entries) => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.src = entry.target.dataset.src; entry.target.classList.remove('lazy'); observer.unobserve(entry.target); } })); lazyImages.forEach(img => observer.observe(img)); } else lazyImages.forEach(img => { img.src = img.dataset.src; img.classList.remove('lazy'); }); }
+
+    function initLazyLoading() {
+        const lazyImages = document.querySelectorAll('img[data-src]');
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.src = entry.target.dataset.src;
+                    entry.target.classList.remove('lazy');
+                    observer.unobserve(entry.target);
+                }
+            }));
+            lazyImages.forEach(img => observer.observe(img));
+        } else lazyImages.forEach(img => {
+            img.src = img.dataset.src;
+            img.classList.remove('lazy');
+        });
+    }
+
     initLazyLoading();
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => anchor.addEventListener('click', function(e) { e.preventDefault(); document.querySelector(this.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href'))?.scrollIntoView({behavior: 'smooth', block: 'start'});
+    }));
 </script>
 
 </body>
