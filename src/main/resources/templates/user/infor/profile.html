@@ -49,21 +49,45 @@
                             <p class="text-muted">Quản lý thông tin hồ sơ để bảo mật tài khoản</p>
                         </div>
                         <div class="card-body mt-3">
-                            <form>
+                            <form id="updateForm">
                                 <div class="mb-3">
-                                    <label class="form-label">Tên khách hàng</label>
-                                    <input type="text" class="form-control" value="">
+                                    <label class="form-label fw-bold">Tên</label>
+                                    <input type="text" class="form-control" placeholder="Nhập tên" name="name"
+                                           id="name" th:value="${khachHang.ten}">
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Email</label>
-                                    <input type="email" class="form-control" value=""
-                                           disabled>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold"><span
+                                                class="text-danger">*</span> Email</label>
+                                        <input type="email" class="form-control" th:value="${khachHang.taiKhoan.email}"
+                                               disabled>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Số điện thoại</label>
+                                        <input type="text" class="form-control"
+                                               th:value="${khachHang.soDienThoai != null ? khachHang.soDienThoai : 'Chưa cập nhật'}">
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Số điện thoại</label>
-                                    <input type="text" class="form-control" value="0647536475">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="ngaySinh" class="form-label fw-bold">Ngày sinh</label>
+                                        <input type="date" class="form-control" placeholder=""
+                                               aria-label="ngaySinh"
+                                               id="ngaySinh" th:value="*{khachHang.ngaySinh}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="gioiTinh" class="form-label fw-bold">Giới tính</label>
+                                        <select class="form-select" id="gioiTinh" name="gioiTinh" required
+                                                th:value=="*{khachHang.gioiTinh}">
+                                            <option value="Nam">Nam</option>
+                                            <option value="Nữ">Nữ</option>
+                                            <option value="Khác">Khác</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                                <button type="submit" class="btn btn-outline-warning">
+                                    <i class="bi bi-pencil-square"></i> Lưu
+                                </button>
                             </form>
                         </div>
                     </div>

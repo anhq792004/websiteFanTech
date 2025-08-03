@@ -50,6 +50,41 @@
                         </div>
                         <div class="card-body">
                             <form>
+                                <div th:unless="${#lists.isEmpty(hoaDons)}" class="table-container"
+                                     style="max-height: 400px; overflow-y: auto;">
+                                    <table class="table-auto w-full border-collapse border border-gray-200 mt-4">
+                                        <thead>
+                                        <tr class="bg-gray-100 text-gray-700">
+                                            <th class="px-4 py-2 border text-center">Mã hóa đơn</th>
+                                            <th class="px-4 py-2 border text-center">Ngày tạo</th>
+                                            <th class="px-4 py-2 border text-center">Số tiền</th>
+                                            <th class="px-4 py-2 border text-center">Trạng thái</th>
+                                            <th class="px-4 py-2 border text-center">Chi tiết</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="hoaDon : ${hoaDons}" class="text-gray-800 hover:bg-gray-50">
+                                            <td class="px-4 py-2 border text-center" th:text="${hoaDon.ma}"></td>
+                                            <td class="px-4 py-2 border text-center" th:text="${hoaDon.ngayTao}"></td>
+                                            <td class="px-4 py-2 border text-center giaVND" th:text="${hoaDon.tongTien}"></td>
+                                            <td class="px-4 py-2 border text-center"
+                                                th:switch="${hoaDon.trangThai}">
+                                                <span th:case="0" class="text-success-emphasis">Đang treo</span>
+                                                <span th:case="1" class="text-secondary-emphasis">Đang chờ xác nhận</span>
+                                                <span th:case="2" class="text-success">Đã xác nhận</span>
+                                                <span th:case="3" class="text-warning">Đang giao hàng</span>
+                                                <span th:case="4" class="text-primary">Hoàn thành</span>
+                                                <span th:case="5" class="text-danger">Hủy</span>
+                                            </td>
+                                            <td class="px-4 py-2 border text-center">
+                                                <a th:href="@{/vin-fan/hoa-don-kh/{id}(id=${hoaDon.id})}"
+                                                   class="text-blue-500 hover:underline">Xem
+                                                    chi tiết</a>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
 
                             </form>
                         </div>
