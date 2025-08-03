@@ -209,7 +209,7 @@
                             <tbody>
                             <tr th:each="item: ${listLSTT}">
                                 <td class="giaVND"
-                                    th:text="${item.tongTienSauGiamGia}"></td>
+                                    th:text="${#numbers.formatDecimal(item.tongTienSauGiamGia, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
                                 <td th:switch="${item.trangThai}">
                                     <span th:case="0" class="text-secondary-emphasis">Đang treo</span>
                                     <span th:case="1" class="text-secondary-emphasis">Đang chờ xác nhận</span>
@@ -318,7 +318,8 @@
                                 <div class="product-details ms-3">
                                     <h5 class="mb-2" th:text="${item.sanPhamChiTiet.sanPham.ten}"></h5>
                                     <p class="mb-2">Giá: <span class="product-price giaVND"
-                                                               th:text="${item.gia}"></span></p>
+                                                               th:text="${#numbers.formatDecimal(item.gia, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                    </p>
                                     <p class="mb-2">Hãng: <span class="product-category"
                                                                 th:text="${item.sanPhamChiTiet.hang.ten}"></span></p>
                                 </div>
@@ -355,7 +356,8 @@
                                     </form>
                                 </div>
 
-                                <div class="product-total giaVND" th:text="${item.thanhTien} "></div>
+                                <div class="product-total"
+                                     th:text="${#numbers.formatDecimal(item.thanhTien, 0, 'COMMA', 0, 'POINT')} + ' đ'"></div>
 
                                 <a href="javascript:void(0);"
                                    class="btn btn-outline-danger text-danger btn-xoa-sanPham"
@@ -371,14 +373,17 @@
                     <div class="summary mt-5 mx-4">
                         <p>Tổng số lượng sản phẩm <span class="float-end " th:text="${tongSoLuong}"></span></p>
                         <!--                        <p>Shipping fee <span class="float-end">$20.00</span></p>-->
-                        <p>Tổng tiền <span class="order-total float-end giaVND" th:text="${hoaDon.tongTien}"></span></p>
+                        <p>Tổng tiền <span class="order-total float-end "
+                                           th:text="${#numbers.formatDecimal(hoaDon.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                        </p>
                         <p>
                             Phiếu giảm giá
                             <span class="discount float-end"
                                   th:text="${hoaDon.phieuGiamGia != null ? hoaDon.phieuGiamGia.ten : 'Null'}"></span>
                         </p>
                         <p>Tổng tiền sau giảm giá <span class="order-total float-end giaVND"
-                                                        th:text="${hoaDon.tongTienSauGiamGia}"></span></p>
+                                                        th:text="${#numbers.formatDecimal(hoaDon.tongTienSauGiamGia, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                        </p>
                     </div>
                 </div>
             </section>
@@ -438,7 +443,7 @@
                         <tr th:each="item, iter : ${findSPCTByIdSanPham}">
                             <td th:text="${iter.count}"></td>
                             <td th:text="${item.sanPham.ten}"></td>
-                            <td th:text="${item.gia}">h1</td>
+                            <td th:text="${#numbers.formatDecimal(item.gia, 0, 'COMMA', 0, 'POINT')} + ' đ'">h1</td>
                             <td th:text="${item.congSuat.ten}"></td>
                             <td th:text="${item.mauSac.ten}"></td>
                             <td th:text="${item.soLuong}"></td>

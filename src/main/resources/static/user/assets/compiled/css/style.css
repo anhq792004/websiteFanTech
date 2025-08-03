@@ -1952,7 +1952,7 @@ a.btn_1 i,
 
 /*-------- 1.3 Structure --------*/
 main {
-  background-color: #fff;
+  background-color: #f5f5f5;
   z-index: 2;
   position: relative;
 }
@@ -2025,10 +2025,12 @@ main.freeze {
 header .main_header {
   position: relative;
   z-index: 99999;
+
 }
 @media (max-width: 991px) {
   header .main_header {
     padding: 15px 0;
+    border-bottom: black 45px;
   }
 }
 @media (max-width: 991px) {
@@ -2326,7 +2328,9 @@ header .sticky_element {
   }
 }
 header.version_1 .main_header {
-  background-color: #004dda;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
 }
 header.version_1 .main_header a.phone_top {
   color: #fff;
@@ -2604,11 +2608,11 @@ header.version_2 .search_mob_wp .btn_1:hover {
 }
 
 header.version_1 .main-menu > ul > li > a {
-  color: #fff;
+  color: black;
 }
 
 header.version_1 .main-menu > ul > li:hover > a {
-  color: #fff;
+  color: black;
 }
 
 .main-menu > ul > li.submenu:hover > a:after {
@@ -7234,7 +7238,7 @@ img.mfp-img {
 .user-info-btn {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  color: black;
   padding: 8px 15px;
   border-radius: 25px;
   display: flex;
@@ -7310,7 +7314,7 @@ img.mfp-img {
 
 .login-btn-custom:hover {
   background: rgba(255, 255, 255, 0.2);
-  color: white;
+  color: #007bff;
   text-decoration: none;
 }
 
@@ -7332,3 +7336,5 @@ img.mfp-img {
 .cart-btn:hover {
   color: #007bff;
 }
+
+

@@ -57,7 +57,7 @@ public class ProfileController {
         }
 
         model.addAttribute("khachHang", khachHang);
-        return "user/infor/thongTinKH"; // Tên template
+        return "user/infor/profile"; // Tên template
     }
 
     /**
@@ -139,7 +139,7 @@ public class ProfileController {
         return "KH" + String.format("%04d", count + 1);
     }
 
-    @GetMapping("/order-infor")
+    @GetMapping("/ordered")
     public String trackOrder(Model model,
                              HttpSession session) {
         TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
@@ -147,7 +147,7 @@ public class ProfileController {
         List<HoaDon> hoaDons = hoaDonService.getHoaDonByIdKH(khachHang.getId());
         model.addAttribute("hoaDons", hoaDons);
 
-        return "user/orderInfor/index";
+        return "user/infor/ordered";
     }
 
     @GetMapping("/order-infor/detail")
@@ -158,6 +158,23 @@ public class ProfileController {
         List<HoaDon> hoaDons = hoaDonService.getHoaDonByIdKH(khachHang.getId());
         model.addAttribute("hoaDons", hoaDons);
 
-        return "user/orderInfor/index";
+        return "user/infor/ordered";
+    }
+    @GetMapping("/address")
+    public String address() {
+
+        return "user/infor/address";
+    }
+
+    @GetMapping("/coupon")
+    public String coupon() {
+
+        return "user/infor/coupon";
+    }
+
+    @GetMapping("/change-password")
+    public String changePassword() {
+
+        return "user/infor/changePassword";
     }
 }
