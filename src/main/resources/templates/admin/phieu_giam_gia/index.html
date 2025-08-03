@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:insert="~{/admin/fragments/head :: head}"></head>
+<head th:insert="~{/admin/fragments/head :: head}">
+    <!-- Đảm bảo Bootstrap CSS được bao gồm trong fragment head -->
+</head>
 <body>
 <!-- Site wrapper -->
 <div class="wrapper">
@@ -49,11 +51,11 @@
                                 <div class="col-md-3">
                                     <label class="form-label">&nbsp;</label>
                                     <div class="d-flex gap-2">
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-search"></i> Tìm kiếm
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            <i class="fas fa-search"></i>
                                         </button>
-                                        <a href="/admin/phieu-giam-gia/index" class="btn btn-secondary">
-                                            <i class="fas fa-refresh"></i> Làm mới
+                                        <a href="/admin/phieu-giam-gia/index" class="btn btn-outline-secondary">
+                                            <i class="fas fa-refresh"></i>
                                         </a>
                                     </div>
                                 </div>
@@ -72,8 +74,8 @@
 
                         <!-- Nút thêm mới và thông tin kết quả -->
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <a class="btn btn-primary" th:href="@{/admin/phieu-giam-gia/create}">
-                                <i class="fas fa-plus"></i> Thêm mới
+                            <a class="btn btn-outline-success" th:href="@{/admin/phieu-giam-gia/create}">
+                                <i class="fas fa-plus"></i>
                             </a>
                             <div class="text-muted">
                                 <i class="fas fa-info-circle"></i>
@@ -83,8 +85,8 @@
 
                         <!-- Bảng hiển thị dữ liệu -->
                         <div class="table-responsive">
-                            <table class="table table-bordered table-striped">
-                                <thead class="table-dark">
+                            <table class="table">
+                                <thead>
                                 <tr>
                                     <th>Mã</th>
                                     <th>Tên</th>
