@@ -49,8 +49,56 @@
                             <p class="text-muted">Quản lý thông tin hồ sơ để bảo mật tài khoản</p>
                         </div>
                         <div class="card-body">
-                            <form>
+                            <form id="formUpdateKH">
+                                <div class="d-flex justify-content-end mb-3 mt-3">
+                                    <button type="button" class="btn btn-outline-success"
+                                            data-bs-toggle="modal" data-bs-target="#themModal">
+<!--                                            th:if="${#lists.size(listDiaChi) < 3}">-->
+                                        <i class="bi bi-patch-plus-fill"></i> Thêm địa chỉ
+                                    </button>
+                                </div>
+                                <div th:each="diaChi, stat : ${listDiaChi}">
+                                    <form>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <!-- Phần hiển thị địa chỉ -->
+                                            <div>
+                                                <input type="hidden" name="khachHangId"
+                                                       th:value="${khachHang.id}"/>
+                                                <input type="hidden" name="diaChiId" th:value="${diaChi.id}"/>
+                                                <input type="hidden" th:id="'tinh' + ${stat.index}"
+                                                       th:value="${diaChi.tinh}"/>
+                                                <input type="hidden" th:id="'huyen' + ${stat.index}"
+                                                       th:value="${diaChi.huyen}"/>
+                                                <input type="hidden" th:id="'xa' + ${stat.index}"
+                                                       th:value="${diaChi.xa}"/>
+                                                <h6 th:id="'city' + ${stat.index}" class="mb-1">Địa chỉ: </h6>
+                                                <h6 th:id="'district' + ${stat.index}">Quận / Huyện: </h6>
+                                                <h6 th:id="'ward' + ${stat.index}">Xã / Phường: </h6>
+                                                <h6 th:text="${diaChi.soNhaNgoDuong}">Chi tiết địa chỉ</h6>
+                                            </div>
+                                            <div>
+                                                <button
+                                                        type="button"
+                                                        class="btn btn-outline-warning btn-edit-dia-chi"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#myModal"
+                                                        th:attr="data-id=${diaChi.id},
+                                                                 data-khachhangid=${khachHang.id},
+                                                                 data-tinh=${diaChi.tinh},
+                                                                 data-huyen=${diaChi.huyen},
+                                                                 data-xa=${diaChi.xa},
+                                                                 data-sonha=${diaChi.soNhaNgoDuong}">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </button>
 
+                                                <a class="btn btn-outline-danger ms-3 "
+                                                   th:href="@{/khach-hang/xoa/{id}(id=${diaChi.id}, khachHangId=${khachHang.id})}">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -62,7 +110,89 @@
     <footer th:replace="/user/fragments/footer :: footer"></footer>
     <!--/footer-->
 </div>
+<!-- Modal -->
+<div class="modal fade" id="themModal" tabindex="-1" aria-labelledby="themModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="addDCForm">
+            <div class="modal-content">
+                <input type="hidden" name="idKH" th:value="${khachHang.id}"/>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="themModalLabel">Thêm mới địa chỉ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row align-items-start mb-3">
+                        <div class="col">
+                            <select class="form-select" id="city2" name="tinh" required>
+                                <option value="" selected>Chọn Tỉnh/Thành phố</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <select class="form-select" id="district2" name="huyen" required>
+                                <option value="" selected>Chọn Quận/Huyện</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <select class="form-select" id="ward2" name="xa" required>
+                            <option value="" selected>Chọn Xã/Phường</option>
+                        </select>
+                    </div>
+                    <div class="col floating-group mt-3">
+                        <input type="text" class="form-control" placeholder=""
+                               aria-label="diaChiCuThe"
+                               id="diaChiCuThe"
+                               name="soNhaNgoDuong">
+                        <label for="diaChiCuThe">Địa chỉ cụ thể</label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="bi bi-patch-plus-fill"></i> Thêm
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="myModalLabel">Thay đổi thông tin địa chỉ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="px-3">
+                <form th:action="@{/khach-hang/cap-nhat-dia-chi}" method="post">
+                    <input type="hidden" name="id" id="updateDiaChiId">
+                    <input type="hidden" name="khachHangId" id="updateKhachHangId">
 
+                    <!-- Các select tỉnh/huyện/xã -->
+                    <div class="row align-items-start mb-3 mt-3">
+                        <div class="col">
+                            <select name="tinh" id="city" class="form-select" required>...</select>
+                        </div>
+                        <div class="col">
+                            <select name="huyen" id="district" class="form-select" required>...</select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <select name="xa" id="ward" class="form-select" required>...</select>
+                    </div>
+                    <div class="col floating-group mt-3">
+                        <input type="text" name="soNhaNgoDuong" id="soNhaNgoDuong" class="form-control" required/>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-warning">
+                            <i class="bi bi-pencil-square"></i> Lưu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Bootstrap JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 
@@ -71,6 +201,205 @@
 <script th:src="@{/user/assets/compiled/js/main.js}"></script>
 
 <script th:src="@{/user/assets/compiled/js/droptk.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script th:inline="javascript">
+    // Lấy danh sách địa chỉ từ Thymeleaf (chuyển từ dạng Thymeleaf sang JSON)
+
+    var listDiaChi = /*[[${listDiaChi}]]*/ [];
+
+    listDiaChi.forEach(function (diaChi, index) {
+        // Lấy giá trị từ các trường input dựa theo chỉ số
+        var idTinh = document.getElementById('tinh' + index).value;
+        var idHuyen = document.getElementById('huyen' + index).value;
+        var idXa = document.getElementById('xa' + index).value;
+
+        // Phần tử hiển thị kết quả
+        var citis = document.getElementById('city' + index);
+        var districts = document.getElementById('district' + index);
+        var wards = document.getElementById('ward' + index);
+
+        // Cấu hình Axios để lấy dữ liệu từ GitHub
+        var Parameter = {
+            url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",
+            method: "GET",
+            responseType: "application/json",
+        };
+
+        // Gọi API để lấy dữ liệu địa giới hành chính
+        axios(Parameter).then(function (result) {
+            renderCity(result.data, idTinh, idHuyen, idXa, citis, districts, wards);
+        });
+
+        // Hàm xử lý dữ liệu địa giới hành chính
+        function renderCity(data, idTinh, idHuyen, idXa, citis, districts, wards) {
+            var selectedCity = data.find(city => city.Id == idTinh);
+            if (selectedCity) {
+                citis.textContent = "Tỉnh: " + selectedCity.Name;
+
+                var selectedDistrict = selectedCity.Districts.find(district => district.Id == idHuyen);
+                if (selectedDistrict) {
+                    districts.textContent = "Quận / Huyện: " + selectedDistrict.Name;
+
+                    var selectedWard = selectedDistrict.Wards.find(ward => ward.Id == idXa);
+                    if (selectedWard) {
+                        wards.textContent = "Xã / Phường: " + selectedWard.Name;
+                    } else {
+                        wards.textContent = "Xã / Phường: Không tìm thấy";
+                    }
+                } else {
+                    districts.textContent = "Quận / Huyện: Không tìm thấy";
+                    wards.textContent = "Xã / Phường: Không tìm thấy";
+                }
+            } else {
+                citis.textContent = "Tỉnh: Không tìm thấy";
+                districts.textContent = "Quận / Huyện: Không tìm thấy";
+                wards.textContent = "Xã / Phường: Không tìm thấy";
+            }
+        }
+    });
+    var cities2 = document.getElementById("city2");
+    var districts2 = document.getElementById("district2");
+    var wards2 = document.getElementById("ward2");
+
+    var parameter = {
+        url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",
+        method: "GET",
+        responseType: "json",
+    };
+
+    axios(parameter).then(function (result) {
+        renderCity2(result.data);
+    });
+
+    function renderCity2(data) {
+        for (const city of data) {
+            cities2.options[cities2.options.length] = new Option(city.Name, city.Id);
+        }
+        cities2.onchange = function () {
+            districts2.length = 1;
+            wards2.length = 1;
+            if (this.value !== "") {
+                const result = data.find(n => n.Id === this.value);
+                if (result) {
+                    for (const district of result.Districts) {
+                        districts2.options[districts2.options.length] = new Option(district.Name, district.Id);
+                    }
+                }
+            }
+        };
+
+        districts2.onchange = function () {
+            wards2.length = 1;
+            const selectedCity = data.find(n => n.Id === cities2.value);
+            if (this.value !== "") {
+                const result = selectedCity.Districts.find(n => n.Id === this.value);
+                if (result) {
+                    for (const ward of result.Wards) {
+                        wards2.options[wards2.options.length] = new Option(ward.Name, ward.Id);
+                    }
+                }
+            }
+        };
+    }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let jsonData = []; // Lưu toàn bộ JSON vào biến để dùng lại
+
+        document.querySelectorAll('.btn-edit-dia-chi').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const tinh = this.getAttribute('data-tinh');
+                const huyen = this.getAttribute('data-huyen');
+                const xa = this.getAttribute('data-xa');
+                const soNha = this.getAttribute('data-sonha');
+                const diaChiId = this.getAttribute('data-id');
+                const khachHangId = this.getAttribute('data-khachhangid');
+
+                document.getElementById('updateDiaChiId').value = diaChiId || "";
+                document.getElementById('updateKhachHangId').value = khachHangId || "";
+                document.getElementById('soNhaNgoDuong').value = soNha;
+
+                axios.get("https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json")
+                    .then(function (res) {
+                        jsonData = res.data;
+                        renderUpdateForm(jsonData, tinh, huyen, xa);
+                    });
+            });
+        });
+
+        function renderUpdateForm(data, idTinh, idHuyen, idXa) {
+            const citySelect = document.getElementById("city");
+            const districtSelect = document.getElementById("district");
+            const wardSelect = document.getElementById("ward");
+
+            citySelect.innerHTML = '<option value="">Chọn Tỉnh/Thành phố</option>';
+            districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+            wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
+
+            data.forEach(city => {
+                const opt = document.createElement("option");
+                opt.value = city.Id;
+                opt.textContent = city.Name;
+                if (city.Id == idTinh) opt.selected = true;
+                citySelect.appendChild(opt);
+            });
+
+            fillDistricts(idTinh, idHuyen);
+            fillWards(idTinh, idHuyen, idXa);
+        }
+
+        function fillDistricts(idTinh, idHuyen = null) {
+            const districtSelect = document.getElementById("district");
+            districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+            const city = jsonData.find(c => c.Id == idTinh);
+            if (city) {
+                city.Districts.forEach(d => {
+                    const opt = document.createElement("option");
+                    opt.value = d.Id;
+                    opt.textContent = d.Name;
+                    if (d.Id == idHuyen) opt.selected = true;
+                    districtSelect.appendChild(opt);
+                });
+            }
+            // Tự động render xã lại nếu cần
+            fillWards(idTinh, idHuyen);
+        }
+
+        function fillWards(idTinh, idHuyen, idXa = null) {
+            const wardSelect = document.getElementById("ward");
+            wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
+            const city = jsonData.find(c => c.Id == idTinh);
+            if (city) {
+                const district = city.Districts.find(d => d.Id == idHuyen);
+                if (district) {
+                    district.Wards.forEach(w => {
+                        const opt = document.createElement("option");
+                        opt.value = w.Id;
+                        opt.textContent = w.Name;
+                        if (w.Id == idXa) opt.selected = true;
+                        wardSelect.appendChild(opt);
+                    });
+                }
+            }
+        }
+
+        // ✅ Bắt sự kiện khi chọn lại tỉnh
+        document.getElementById("city").addEventListener("change", function () {
+            const selectedTinh = this.value;
+            fillDistricts(selectedTinh);
+        });
+
+        // ✅ Bắt sự kiện khi chọn lại huyện
+        document.getElementById("district").addEventListener("change", function () {
+            const selectedTinh = document.getElementById("city").value;
+            const selectedHuyen = this.value;
+            fillWards(selectedTinh, selectedHuyen);
+        });
+    });
+</script>
 
 </body>
 </html>
