@@ -89,7 +89,6 @@
                                 <thead>
                                 <tr>
                                     <th>Mã</th>
-                                    <th>Tên</th>
                                     <th>Ngày bắt đầu</th>
                                     <th>Ngày kết thúc</th>
                                     <th>Giá trị giảm</th>
@@ -98,7 +97,6 @@
                                     <th>Số lượng đã sử dụng</th>
                                     <th>Giá trị đơn hàng tối thiểu</th>
                                     <th>Loại phiếu</th>
-                                    <th>Người tạo</th>
                                     <th>Trạng thái</th>
                                     <th>Hành động</th>
                                 </tr>
@@ -113,7 +111,6 @@
                                     <td>
                                         <span class="badge bg-info" th:text="${pgg.ma}"></span>
                                     </td>
-                                    <td th:text="${pgg.ten}"></td>
                                     <td th:text="${#dates.format(pgg.ngayBatDau, 'dd/MM/yyyy')}"></td>
                                     <td th:text="${#dates.format(pgg.ngayKetThuc, 'dd/MM/yyyy')}"></td>
                                     <td>
@@ -137,7 +134,6 @@
                                         <span th:if="${pgg.loaiPhieu}" class="badge bg-success">Công khai</span>
                                         <span th:unless="${pgg.loaiPhieu}" class="badge bg-warning">Riêng tư</span>
                                     </td>
-                                    <td th:text="${pgg.nguoiTao}"></td>
                                     <td>
                                         <span th:if="${pgg.trangThai}" class="badge bg-success">
                                             <i class="fas fa-check"></i> Hoạt động
@@ -151,11 +147,6 @@
                                             <a th:href="@{'/admin/phieu-giam-gia/edit/' + ${pgg.id}}"
                                                class="btn btn-warning btn-sm" title="Sửa">
                                                 <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a th:href="@{'/admin/phieu-giam-gia/delete/' + ${pgg.id}}"
-                                               class="btn btn-danger btn-sm" title="Xóa"
-                                               onclick="return confirm('Bạn có chắc chắn muốn xóa phiếu giảm giá này?');">
-                                                <i class="fas fa-trash"></i>
                                             </a>
                                         </div>
                                     </td>
