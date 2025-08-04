@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hóa đơn - Fan Tech</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Arial', sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+        }
+        
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+        
+        .invoice-header {
+            text-align: center;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .company-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .company-info {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .invoice-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 20px 0;
+        }
+        
+        .invoice-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .invoice-info, .customer-info {
+            flex: 1;
+        }
+        
+        .info-section {
+            margin-bottom: 20px;
+        }
+        
+        .info-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ecf0f1;
+            padding-bottom: 5px;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 8px;
+        }
+        
+        .info-label {
+            font-weight: 500;
+            min-width: 120px;
+            color: #555;
+        }
+        
+        .info-value {
+            font-weight: 400;
+            color: #333;
+        }
+        
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .products-table th {
+            background-color: #34495e;
+            color: #fff;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 500;
+        }
+        
+        .products-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .products-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .product-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .product-details {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .summary-section {
+            margin-top: 30px;
+            border-top: 2px solid #ecf0f1;
+            padding-top: 20px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+        }
+        
+        .summary-label {
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .summary-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .total-row {
+            border-top: 2px solid #2c3e50;
+            padding-top: 15px;
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #ecf0f1;
+            padding-top: 20px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .status-confirmed {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .status-shipping {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-completed {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+        
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media print {
+            body {
+                font-size: 12px;
+            }
+            
+            .invoice-container {
+                padding: 10px;
+                max-width: 100%;
+            }
+            
+            .company-name {
+                font-size: 24px;
+            }
+            
+            .invoice-title {
+                font-size: 20px;
+            }
+            
+            .products-table th,
+            .products-table td {
+                padding: 8px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Header -->
+        <div class="invoice-header">
+            <div class="company-name">FAN TECH</div>
+            <div class="company-info">
+                <div>Địa chỉ: 123 Đường ABC, Quận XYZ, TP.HCM</div>
+                <div>Điện thoại: 0123 456 789 | Email: info@fantech.com</div>
+                <div>Website: www.fantech.com</div>
+            </div>
+            <div class="invoice-title">HÓA ĐƠN BÁN HÀNG</div>
+        </div>
+
+        <!-- Invoice Details -->
+        <div class="invoice-details">
+            <div class="invoice-info">
+                <div class="info-section">
+                    <h3>Thông tin hóa đơn</h3>
+                    <div class="info-row">
+                        <span class="info-label">Mã hóa đơn:</span>
+                        <span class="info-value" th:text="${hoaDon.ma}">HD001</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Ngày tạo:</span>
+                        <span class="info-value" th:text="${#temporals.format(hoaDon.ngayTao, 'dd/MM/yyyy HH:mm')}">01/01/2024</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Trạng thái:</span>
+                        <span class="info-value">
+                            <span class="status-badge" 
+                                  th:class="${hoaDon.trangThai == 0 ? 'status-pending' : 
+                                            hoaDon.trangThai == 1 ? 'status-confirmed' : 
+                                            hoaDon.trangThai == 2 ? 'status-confirmed' : 
+                                            hoaDon.trangThai == 3 ? 'status-shipping' : 
+                                            hoaDon.trangThai == 4 ? 'status-completed' : 'status-cancelled'}"
+                                  th:text="${hoaDon.trangThai == 0 ? 'Chờ xác nhận' : 
+                                           hoaDon.trangThai == 1 ? 'Đã xác nhận' : 
+                                           hoaDon.trangThai == 2 ? 'Đã xác nhận' : 
+                                           hoaDon.trangThai == 3 ? 'Đang giao hàng' : 
+                                           hoaDon.trangThai == 4 ? 'Hoàn thành' : 'Hủy'}">
+                                Chờ xác nhận
+                            </span>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Loại hóa đơn:</span>
+                        <span class="info-value" th:text="${hoaDon.loaiHoaDon ? 'Tại quầy' : 'Online'}">Online</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="customer-info">
+                <div class="info-section">
+                    <h3>Thông tin khách hàng</h3>
+                    <div class="info-row">
+                        <span class="info-label">Tên người nhận:</span>
+                        <span class="info-value" th:text="${hoaDon.tenNguoiNhan}">Nguyễn Văn A</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Số điện thoại:</span>
+                        <span class="info-value" th:text="${hoaDon.sdtNguoiNhan}">0123 456 789</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Địa chỉ:</span>
+                        <span class="info-value">
+                            <span th:text="${hoaDon.soNhaNgoDuong}">123</span>,
+                            <span th:text="${hoaDon.xa}">Phường ABC</span>,
+                            <span th:text="${hoaDon.huyen}">Quận XYZ</span>,
+                            <span th:text="${hoaDon.tinh}">TP.HCM</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="info-section">
+            <h3>Chi tiết sản phẩm</h3>
+            <table class="products-table">
+                <thead>
+                    <tr>
+                        <th style="width: 5%">STT</th>
+                        <th style="width: 35%">Tên sản phẩm</th>
+                        <th style="width: 15%">Thông số</th>
+                        <th style="width: 10%">Số lượng</th>
+                        <th style="width: 15%">Đơn giá</th>
+                        <th style="width: 20%">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item, iter : ${listHDCT}">
+                        <td class="text-center" th:text="${iter.count}">1</td>
+                        <td>
+                            <div class="product-name" th:text="${item.sanPhamChiTiet.sanPham.ten}">Quạt điện</div>
+                            <div class="product-details">
+                                Hãng: <span th:text="${item.sanPhamChiTiet.hang.ten}">Panasonic</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="product-details">
+                                <div>Công suất: <span th:text="${item.sanPhamChiTiet.congSuat.ten}">60W</span></div>
+                                <div>Màu: <span th:text="${item.sanPhamChiTiet.mauSac.ten}">Trắng</span></div>
+                            </div>
+                        </td>
+                        <td class="text-center" th:text="${item.soLuong}">1</td>
+                        <td class="text-right" th:text="${#numbers.formatDecimal(item.gia, 0, 'COMMA', 0, 'POINT')} + ' đ'">1,500,000</td>
+                        <td class="text-right" th:text="${#numbers.formatDecimal(item.thanhTien, 0, 'COMMA', 0, 'POINT')} + ' đ'">1,500,000</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-section">
+            <div class="summary-row">
+                <span class="summary-label">Tổng số lượng sản phẩm:</span>
+                <span class="summary-value" th:text="${tongSoLuong}">1</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Tổng tiền hàng:</span>
+                <span class="summary-value" th:text="${#numbers.formatDecimal(hoaDon.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'">1,500,000</span>
+            </div>
+            <div class="summary-row" th:if="${hoaDon.phieuGiamGia != null}">
+                <span class="summary-label">Phiếu giảm giá:</span>
+                <span class="summary-value" th:text="${hoaDon.phieuGiamGia.ten}">Giảm 10%</span>
+            </div>
+            <div class="summary-row total-row">
+                <span class="summary-label">Tổng tiền thanh toán:</span>
+                <span class="summary-value" th:text="${#numbers.formatDecimal(hoaDon.tongTienSauGiamGia, 0, 'COMMA', 0, 'POINT')} + ' đ'">1,350,000</span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div>Cảm ơn quý khách đã mua hàng tại Fan Tech!</div>
+            <div>Hóa đơn này có giá trị pháp lý và được sử dụng làm chứng từ thanh toán.</div>
+            <div>Mọi thắc mắc vui lòng liên hệ: 0123 456 789</div>
+        </div>
+    </div>
+
+    <script>
+        // Tự động in khi trang được tải
+        window.onload = function() {
+            window.print();
+        };
+        
+        // Thêm nút in thủ công
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                window.print();
+            }
+        });
+    </script>
+</body>
+</html> 

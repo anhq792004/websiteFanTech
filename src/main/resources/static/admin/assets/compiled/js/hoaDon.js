@@ -3,11 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.giaVND').forEach(element => {
         const originalValue = parseFloat(element.innerText || '0');
         if (!isNaN(originalValue)) {
-            element.innerText = originalValue.toLocaleString('vi-VN', {
-                style: 'currency',
-                currency: 'VND',
-                currencyDisplay: 'symbol'
-            });
+            element.innerText = originalValue.toLocaleString('vi-VN') + ' đ';
         }
     });
 

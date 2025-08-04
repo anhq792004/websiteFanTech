@@ -221,4 +221,20 @@ public class HoaDonController {
         hoaDonService.updateInfor(request);
         return ResponseEntity.ok("Cập nhật thông tin thành công");
     }
+
+    @GetMapping("/print/{id}")
+    public String printHoaDon(@PathVariable Long id, Model model) {
+        Optional<HoaDon> hoaDonOptional = hoaDonService.findHoaDonById(id);
+        HoaDon hoaDon = hoaDonOptional.orElseThrow(()
+                -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hóa đơn"));
+        model.addAttribute("hoaDon", hoaDon);
+
+        List<HoaDonChiTiet> listHDCT = hoaDonService.listHoaDonChiTiets(id);
+        model.addAttribute("listHDCT", listHDCT);
+
+        Integer tongSoLuong = hoaDonService.tongSoLuong(id);
+        model.addAttribute("tongSoLuong", tongSoLuong);
+
+        return "admin/hoa_don/print";
+    }
 }

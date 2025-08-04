@@ -1,6 +1,7 @@
 package com.example.datn.controller.webController;
 
 import com.example.datn.entity.HoaDon.HoaDon;
+import com.example.datn.entity.HoaDon.HoaDonChiTiet;
 import com.example.datn.entity.KhachHang;
 import com.example.datn.entity.TaiKhoan;
 import com.example.datn.service.HoaDonService.HoaDonService;
@@ -243,5 +244,37 @@ public class ProfileController {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi đổi mật khẩu!");
             return "redirect:/profile/change-password";
         }
+    }
+
+    @GetMapping("/print-invoice/{id}")
+    public String printInvoice(@PathVariable Long id, Model model, HttpSession session) {
+        TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        // Lấy thông tin khách hàng
+        KhachHang khachHang = khachHangService.findByTaiKhoan(currentUser);
+        if (khachHang == null) {
+            return "redirect:/login";
+        }
+
+        // Lấy hóa đơn theo ID và kiểm tra xem có thuộc về khách hàng này không
+        HoaDon hoaDon = hoaDonService.findHoaDonById(id).orElse(null);
+        if (hoaDon == null || !hoaDon.getKhachHang().getId().equals(khachHang.getId())) {
+            return "redirect:/profile/ordered";
+        }
+
+        // Lấy chi tiết hóa đơn
+        List<HoaDonChiTiet> listHDCT = hoaDonService.listHoaDonChiTiets(id);
+        
+        // Tính tổng số lượng
+        Integer tongSoLuong = hoaDonService.tongSoLuong(id);
+
+        model.addAttribute("hoaDon", hoaDon);
+        model.addAttribute("listHDCT", listHDCT);
+        model.addAttribute("tongSoLuong", tongSoLuong);
+
+        return "user/orderInfor/print";
     }
 }
