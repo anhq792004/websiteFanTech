@@ -1,15 +1,20 @@
 package com.example.datn.controller.webController;
 
+import com.example.datn.dto.request.AddDiaChiRequest;
+import com.example.datn.dto.request.UpdateDiaChiRequest;
+import com.example.datn.entity.DiaChi;
 import com.example.datn.entity.HoaDon.HoaDon;
 import com.example.datn.entity.HoaDon.HoaDonChiTiet;
 import com.example.datn.entity.KhachHang;
 import com.example.datn.entity.TaiKhoan;
+import com.example.datn.repository.DiaChiRepo;
+import com.example.datn.service.DiaChiService;
 import com.example.datn.service.HoaDonService.HoaDonService;
 import com.example.datn.service.KhachHangService.KhachHangService;
 import com.example.datn.service.taiKhoanService.TaiKhoanService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +33,10 @@ public class ProfileController {
     private final TaiKhoanService taiKhoanService;
 
     private final HoaDonService hoaDonService;
+
+    private final DiaChiRepo diaChiRepo;
+
+    private final DiaChiService diaChiService;
 
     /**
      * Hiển thị trang thông tin cá nhân
@@ -158,12 +167,51 @@ public class ProfileController {
 
         return "user/infor/ordered";
     }
+    // dia chi
     @GetMapping("/address")
-    public String address() {
-
+    public String address(Model model,
+                          HttpSession session) {
+        TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
+        KhachHang khachHang = khachHangService.findByTaiKhoan(currentUser);
+        List<DiaChi> listDiaChi = diaChiService.getDiaChiByIdKhachHang(khachHang.getId());
+        model.addAttribute("khachHang", khachHang);
+        model.addAttribute("listDiaChi", listDiaChi);
         return "user/infor/address";
     }
+    @PostMapping("/add-dia-chi")
+    public ResponseEntity<?> addDiaChi(@RequestBody AddDiaChiRequest request) {
+        try {
+            diaChiService.addDiaChi(request);
+            return ResponseEntity.ok().body("Thêm địa chỉ thành công!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
+    @GetMapping("/xoa/{id}")
+    public String xoa(@PathVariable("id") Long id, HttpSession session) {
+        TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
+        KhachHang khachHang = khachHangService.findByTaiKhoan(currentUser);
+
+        // Kiểm tra xem địa chỉ này có thuộc khách hàng hiện tại không (nếu cần)
+        DiaChi diaChi = diaChiRepo.findById(id).orElse(null);
+        if (diaChi != null && diaChi.getKhachHang().getId().equals(khachHang.getId())) {
+            diaChiRepo.deleteById(id);
+        }
+
+        return "redirect:/profile/address";
+    }
+
+
+    @PostMapping("/cap-nhat-dia-chi")
+    public String capNhatDiaChi(
+            UpdateDiaChiRequest request
+    ) {
+        diaChiService.update(request);
+        return "redirect:/profile/address";
+    }
+
+    //phieu giam gia
     @GetMapping("/coupon")
     public String coupon() {
 

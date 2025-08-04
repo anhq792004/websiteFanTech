@@ -1,6 +1,7 @@
 package com.example.datn.repository;
 
 import com.example.datn.entity.DiaChi;
+import com.example.datn.entity.KhachHang;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,7 @@ public interface DiaChiRepo extends JpaRepository<DiaChi,Long> {
     List<DiaChi> findByKhachHang_Id(Long id);
 
     Optional<DiaChi> findByIdAndKhachHang_Id(Long idDiaChi, Long idKhachHang);
+
+    Optional<DiaChi> findByKhachHang(KhachHang khachHang);
+
 }
