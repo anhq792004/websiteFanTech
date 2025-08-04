@@ -2,11 +2,14 @@ package com.example.datn.repository;
 
 import com.example.datn.entity.KhachHang;
 import com.example.datn.entity.NhanVien.NhanVien;
+import com.example.datn.entity.TaiKhoan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 public interface NhanVienRepo extends JpaRepository<NhanVien,Long> {
@@ -24,5 +27,7 @@ public interface NhanVienRepo extends JpaRepository<NhanVien,Long> {
 //            "OR LOWER(kh.taiKhoan.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(nv.soDienThoai) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<NhanVien> searchNhanVienKhongCoTrangThai(String keyword, Pageable pageable);
+
+    Optional<NhanVien> findByTaiKhoan(TaiKhoan taiKhoan);
 
 }

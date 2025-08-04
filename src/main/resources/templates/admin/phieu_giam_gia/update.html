@@ -615,13 +615,13 @@
                 giaTriGiam.setAttribute('max', '100');
                 giaTriGiam.setAttribute('placeholder', 'Nhập giá trị từ 0-100');
                 document.querySelector('label[for="giaTriGiam"]').textContent = 'Giá trị giảm (%)';
-                giaTriGiamToiDaGroup.style.display = 'block';
+                document.getElementById('giaTriGiamToiDaGroup').style.display = 'block';
                 giaTriGiamToiDaRequired.style.display = 'inline';
             } else {
                 giaTriGiam.removeAttribute('max');
                 giaTriGiam.setAttribute('placeholder', 'Nhập số tiền');
                 document.querySelector('label[for="giaTriGiam"]').textContent = 'Giá trị giảm (VNĐ)';
-                giaTriGiamToiDaGroup.style.display = 'none';
+                document.getElementById('giaTriGiamToiDaGroup').style.display = 'none';
                 giaTriGiamToiDaRequired.style.display = 'none';
             }
         }
@@ -656,6 +656,7 @@
         font-size: 0.875rem;
     }
 </style>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/simplePagination.js/1.6/jquery.simplePagination.min.js"></script>
