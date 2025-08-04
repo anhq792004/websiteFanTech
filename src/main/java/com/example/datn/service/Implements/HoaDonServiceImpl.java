@@ -8,18 +8,25 @@ import com.example.datn.entity.HoaDon.HoaDonChiTiet;
 import com.example.datn.entity.HoaDon.LichSuHoaDon;
 import com.example.datn.entity.HoaDon.PhuongThucThanhToan;
 import com.example.datn.entity.KhachHang;
+import com.example.datn.entity.NhanVien.NhanVien;
 import com.example.datn.entity.PhieuGiamGia;
 import com.example.datn.entity.SanPham.SanPhamChiTiet;
+import com.example.datn.entity.TaiKhoan;
 import com.example.datn.repository.HoaDonRepo.HoaDonChiTietRepo;
 import com.example.datn.repository.HoaDonRepo.HoaDonRepo;
 import com.example.datn.repository.HoaDonRepo.LichSuHoaDonRepo;
 import com.example.datn.repository.KhachHangRepo.KhachHangRepo;
+import com.example.datn.repository.NhanVienRepo;
 import com.example.datn.repository.SanPhamRepo.SanPhamChiTietRepo;
+import com.example.datn.repository.TaiKhoanRepo;
 import com.example.datn.service.HoaDonService.HoaDonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -36,7 +43,33 @@ public class HoaDonServiceImpl implements HoaDonService {
     private final HoaDonChiTietRepo hoaDonChiTietRepo;
     private final LichSuHoaDonRepo lichSuHoaDonRepo;
     private final KhachHangRepo khachHangRepo;
+    private final NhanVienRepo nhanVienRepo;
+    private final TaiKhoanRepo taiKhoanRepo;
 
+    // Lấy thông tin nhân viên đang đăng nhập
+    private NhanVien getCurrentNhanVien() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            String username = null;
+
+            if (principal instanceof UserDetails) {
+                username = ((UserDetails) principal).getUsername();
+            } else {
+                username = principal.toString();
+            }
+
+            TaiKhoan taiKhoan = taiKhoanRepo.findByEmail(username);
+            if (taiKhoan == null) {
+                throw new RuntimeException("Không tìm thấy tài khoản với email: " + username);
+            }
+
+            NhanVien nhanVien = nhanVienRepo.findByTaiKhoan(taiKhoan)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên cho tài khoản này"));
+            return nhanVien;
+        }
+        throw new RuntimeException("Không tìm thấy thông tin người dùng đang đăng nhập");
+    }
     @Override
     public List<HoaDon> findAll() {
         return hoaDonRepo.findAll();
@@ -175,38 +208,39 @@ public class HoaDonServiceImpl implements HoaDonService {
 
     @Override
     public void xacNhan(Long id, String ghiChu) {
-        // Tìm kiếm HoaDon dựa trên ID
         Optional<HoaDon> hoaDonOptional = hoaDonRepo.findById(id);
         List<HoaDonChiTiet> listHDCT = hoaDonChiTietRepo.findByHoaDon_Id(id);
-
 
         if (hoaDonOptional.isPresent()) {
             for (HoaDonChiTiet hdct : listHDCT) {
                 SanPhamChiTiet spct = hdct.getSanPhamChiTiet();
-                int soLuongTon = spct.getSoLuong(); // Số lượng hiện tại trong kho
-                int soLuongBan = hdct.getSoLuong();    // Số lượng trong hóa đơn chi tiết
+                int soLuongTon = spct.getSoLuong();
+                int soLuongBan = hdct.getSoLuong();
 
                 if (soLuongTon < soLuongBan) {
                     throw new RuntimeException("Số lượng tồn kho không đủ cho sản phẩm: " + spct.getSanPham().getTen());
                 }
             }
             HoaDon hoaDon = hoaDonOptional.get();
+            NhanVien currentNhanVien = getCurrentNhanVien();
 
-            // Cập nhật trạng thái của HoaDon
             hoaDon.setTrangThai(getTrangThaiHoaDon().getDaXacNhan());
             hoaDon.setGhiChu(ghiChu);
+            hoaDon.setNhanVien(currentNhanVien);
+            hoaDon.setNguoiTao(currentNhanVien.getTen());
             hoaDon.setNgaySua(LocalDateTime.now());
             hoaDonRepo.save(hoaDon);
 
-            // Tạo lịch sử cập nhật
             LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
             lichSuHoaDon.setHoaDon(hoaDon);
+            lichSuHoaDon.setNhanVien(currentNhanVien);
+            lichSuHoaDon.setNguoiTao(currentNhanVien.getTen());
             lichSuHoaDon.setTrangThai(getTrangThaiHoaDon().getDaXacNhan());
             lichSuHoaDon.setNgayTao(LocalDateTime.now());
-
             lichSuHoaDon.setMoTa(ghiChu);
-
             lichSuHoaDonRepo.save(lichSuHoaDon);
+        } else {
+            throw new RuntimeException("Không tìm thấy hóa đơn với ID: " + id);
         }
     }
 
@@ -227,11 +261,13 @@ public class HoaDonServiceImpl implements HoaDonService {
         if (hoaDonOptional.isPresent()) {
 
             HoaDon hoaDon = hoaDonOptional.get();
+            NhanVien currentNhanVien = getCurrentNhanVien();
 
             // Cập nhật trạng thái của HoaDon
             hoaDon.setTrangThai(getTrangThaiHoaDon().getChoXacNhan());
             hoaDon.setGhiChu("");
             hoaDon.setNgaySua(LocalDateTime.now());
+            hoaDon.setNguoiTao(currentNhanVien.getTen());
             hoaDonRepo.save(hoaDon);
 
             // Tạo lịch sử cập nhật
@@ -239,9 +275,8 @@ public class HoaDonServiceImpl implements HoaDonService {
             lichSuHoaDon.setHoaDon(hoaDon);
             lichSuHoaDon.setTrangThai(getTrangThaiHoaDon().getChoXacNhan());
             lichSuHoaDon.setNgayTao(LocalDateTime.now());
-
+            lichSuHoaDon.setNguoiTao(currentNhanVien.getTen());
             lichSuHoaDon.setMoTa("");
-
             lichSuHoaDonRepo.save(lichSuHoaDon);
         }
     }
@@ -251,15 +286,18 @@ public class HoaDonServiceImpl implements HoaDonService {
         Optional<HoaDon> hoaDonOptional = hoaDonRepo.findById(id);
         if (hoaDonOptional.isPresent()) {
             HoaDon hoaDon = hoaDonOptional.get();
+            NhanVien currentNhanVien = getCurrentNhanVien();
             // Cập nhật trạng thái của HoaDon giao hàng
             hoaDon.setTrangThai(getTrangThaiHoaDon().getDangGiaoHang());
             hoaDon.setNgaySua(LocalDateTime.now());
+            hoaDon.setNguoiTao(currentNhanVien.getTen());
             hoaDonRepo.save(hoaDon);
             // Tạo một bản ghi lịch sử cho HoaDon đã được giao hàng
             LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
             lichSuHoaDon.setHoaDon(hoaDon);
             lichSuHoaDon.setTrangThai(getTrangThaiHoaDon().getDangGiaoHang());
             lichSuHoaDon.setNgaySua(LocalDateTime.now());
+            lichSuHoaDon.setNguoiTao(currentNhanVien.getTen());
 
             lichSuHoaDon.setMoTa("Đơn hàng đã được gửi lúc " + LocalDate.now());
             lichSuHoaDonRepo.save(lichSuHoaDon);
@@ -271,16 +309,18 @@ public class HoaDonServiceImpl implements HoaDonService {
         Optional<HoaDon> hoaDonOptional = hoaDonRepo.findById(id);
         if (hoaDonOptional.isPresent()) {
             HoaDon hoaDon = hoaDonOptional.get();
+            NhanVien currentNhanVien = getCurrentNhanVien();
             // Cập nhật trạng thái của HoaDon hoàn thành
             hoaDon.setTrangThai(getTrangThaiHoaDon().getHoanThanh());
             hoaDon.setNgaySua(LocalDateTime.now());
+            hoaDon.setNguoiTao(currentNhanVien.getTen());
             hoaDonRepo.save(hoaDon);
             // Tạo một bản ghi lịch sử cho HoaDon hoàn thành
             LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
             lichSuHoaDon.setHoaDon(hoaDon);
             lichSuHoaDon.setTrangThai(getTrangThaiHoaDon().getHoanThanh());
             lichSuHoaDon.setNgaySua(LocalDateTime.now());
-
+            lichSuHoaDon.setNguoiTao(currentNhanVien.getTen());
             lichSuHoaDon.setMoTa("Đơn hàng đã được giao thành công lúc " + LocalDate.now());
             lichSuHoaDonRepo.save(lichSuHoaDon);
         }
@@ -291,6 +331,7 @@ public class HoaDonServiceImpl implements HoaDonService {
         Optional<HoaDon> optionalHoaDon = hoaDonRepo.findById(id);
         if (optionalHoaDon.isPresent()) {
             HoaDon hoaDon = optionalHoaDon.get();
+            NhanVien currentNhanVien = getCurrentNhanVien();
             List<HoaDonChiTiet> listHDCT = hoaDonChiTietRepo.findByHoaDon_Id(id);
 
             if (hoaDon.getTrangThai() != getTrangThaiHoaDon().getChoXacNhan()) {
@@ -308,6 +349,7 @@ public class HoaDonServiceImpl implements HoaDonService {
             hoaDon.setGhiChu(ghiChu);
             hoaDon.setTrangThai(getTrangThaiHoaDon().getHuy());
             hoaDon.setNgaySua(LocalDateTime.now());
+            hoaDon.setNguoiTao(currentNhanVien.getTen());
             hoaDonRepo.save(hoaDon);
 
             // Tạo một bản ghi lịch sử cho HoaDon hủy
@@ -316,6 +358,7 @@ public class HoaDonServiceImpl implements HoaDonService {
             lichSuHoaDon.setTrangThai(getTrangThaiHoaDon().getHuy());
             lichSuHoaDon.setNgaySua(LocalDateTime.now());
             lichSuHoaDon.setMoTa(ghiChu);
+            lichSuHoaDon.setNguoiTao(currentNhanVien.getTen());
             lichSuHoaDonRepo.save(lichSuHoaDon);
         } else {
             throw new RuntimeException("Không tìm thấy hóa đơn với ID: " + id);
