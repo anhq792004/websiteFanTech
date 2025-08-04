@@ -121,6 +121,19 @@
                         text-overflow: ellipsis;
                         min-height: 3em; /* Tùy chỉnh để đảm bảo 2 dòng */
                     }
+
+                    .accordion-button::after {
+                        transition: transform 0.2s ease;
+                    }
+
+                    .accordion-button.collapsed::after {
+                        transform: rotate(0deg);
+                    }
+
+                    .accordion-button:not(.collapsed)::after {
+                        transform: rotate(180deg);
+                    }
+
                 </style>
 
                 <script>
@@ -175,7 +188,126 @@
 
                 <div class="row">
                     <aside class="col-lg-4" id="sidebar_fixed">
-                        ádfasfsdf
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center pt-3">
+                                <strong>DANH MỤC SẢN PHẨM</strong>
+                                <button class="btn btn-outline-danger btn-sm px-2 py-0">✖ Xóa</button>
+                            </div>
+                            <div class="input-group p-3">
+                                <input type="text" class="form-control" name="keyword" placeholder="Tìm kiếm sản phẩm...">
+                                <button class="btn btn-outline-secondary" type="submit">
+                                    <i class="bi bi-search"></i> <!-- hoặc font-awesome: <i class="fas fa-search"></i> -->
+                                </button>
+                            </div>
+                            <div class="accordion" id="filterAccordion">
+                                <div class="accordion-item border-0 border-bottom border-top">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed bg-white py-3" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#loaiGiay">
+                                            Kiểu quạt
+                                        </button>
+                                    </h2>
+                                    <div id="kieuQuat" class="accordion-collapse collapse"
+                                         data-bs-parent="#filterAccordion">
+                                        <div class="accordion-body py-2">
+                                            <h1>1</h1>
+                                            <input>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item border-0 border-bottom">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed bg-white py-3" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#thuongHieu">
+                                            Công suất
+                                        </button>
+                                    </h2>
+                                    <div id="congSuat" class="accordion-collapse collapse"
+                                         data-bs-parent="#filterAccordion">
+                                        <div class="accordion-body py-2">
+                                            <h1>1</h1>
+                                            <input>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item border-0 border-bottom">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed bg-white py-3" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#chatLieu">
+                                            Hãng
+                                        </button>
+                                    </h2>
+                                    <div id="hang" class="accordion-collapse collapse"
+                                         data-bs-parent="#filterAccordion">
+                                        <div class="accordion-body py-2">
+                                            <h1>1</h1>
+                                            <input>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item border-0 border-bottom">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed bg-white py-3" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#deGiay">
+                                            Màu sắc
+                                        </button>
+                                    </h2>
+                                    <div id="deGiay" class="accordion-collapse collapse"
+                                         data-bs-parent="#filterAccordion">
+                                        <div class="accordion-body py-2">
+                                            <h1>1</h1>
+                                            <input>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item border-0 border-bottom">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed bg-white py-3" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#kichCo">
+                                            Nút bấm
+                                        </button>
+                                    </h2>
+                                    <div id="nutBam" class="accordion-collapse collapse"
+                                         data-bs-parent="#filterAccordion">
+                                        <div class="accordion-body py-2">
+                                            <h1>1</h1>
+                                            <input>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item border-0 border-bottom">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed bg-white py-3" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#mauSac">
+                                            Màu sắc
+                                        </button>
+                                    </h2>
+                                    <div id="mauSac" class="accordion-collapse collapse"
+                                         data-bs-parent="#filterAccordion">
+                                        <div class="accordion-body py-2">
+                                            <h1>1</h1>
+                                            <input>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="px-3 py-3">
+                                    <label class="form-label mb-1">Giá tiền (Giá gốc)</label>
+                                    <input type="range" class="form-range" min="0" max="1000000" step="10000"
+                                           id="giaTienRange">
+                                    <div class="d-flex justify-content-between small">
+                                        <span>0đ</span>
+                                        <span>1.000.000đ</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </aside>
 
                     <div class="col-lg-8">
@@ -192,13 +324,13 @@
                                             <img th:if="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty() and sanPham.sanPhamChiTiet[0].hinhAnh != null and sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh != null}"
                                                  th:src="@{${sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh}}"
                                                  class="card-img-top"
-                                                 style="height: 250px; object-fit: cover;"
+                                                 style="height: 210px; object-fit: contain;"
                                                  th:alt="${sanPham.ten}">
                                             <!-- Hiển thị ảnh mặc định nếu không có ảnh -->
                                             <img th:unless="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty() and sanPham.sanPhamChiTiet[0].hinhAnh != null and sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh != null}"
                                                  src="/user/assets/images/default_product.jpg"
                                                  class="card-img-top"
-                                                 style="height: 250px; object-fit: cover;"
+                                                 style="height: 210px; object-fit: contain;"
                                                  th:alt="${sanPham.ten}">
 
                                             <!-- Badge trạng thái -->
@@ -211,34 +343,34 @@
                                         <!-- Thông tin sản phẩm -->
                                         <div class="p-3 d-flex flex-column flex-grow-1">
                                             <!-- Tên sản phẩm -->
-                                            <h5 class="card-title" th:text="${sanPham.ten}">Tên sản phẩm</h5>
+                                            <h5 class="card-title " th:text="${sanPham.ten}">Tên sản phẩm</h5>
 
                                             <!-- Mô tả ngắn -->
                                             <div>
-                                                <p class="text-muted small line-clamp-2"
+                                                <p class="text-muted small line-clamp-2 mb-0"
                                                    th:text="${sanPham.moTa != null ? (sanPham.moTa.length() > 60 ? sanPham.moTa.substring(0, 60) + '...' : sanPham.moTa) : 'Chưa có mô tả'}">
                                                 </p>
                                             </div>
 
                                             <!-- Thông tin chi tiết -->
-                                            <div class="mb-1">
+                                            <div class="d-flex justify-content-between">
                                                 <!-- Mã sản phẩm -->
                                                 <small class="text-muted d-block">
                                                     <strong>Mã SP:</strong>
-                                                    <span th:text="${sanPham.ma != null ? sanPham.ma : 'Chưa có mã'}">SP001</span>
+                                                    <span th:text="${sanPham.ma != null ? (sanPham.ma.length() > 5 ? sanPham.moTa.substring(0, 5) + '...' : sanPham.ma) : 'Null'}">SP001</span>
                                                 </small>
 
                                                 <!-- Loại quạt -->
                                                 <small class="text-muted d-block"
                                                        th:if="${sanPham.kieuQuat != null}">
                                                     <strong>Loại:</strong>
-                                                    <span th:text="${sanPham.kieuQuat.ten}"></span>
+                                                    <span th:text="${sanPham.kieuQuat.ten != null ? (sanPham.kieuQuat.ten.length() > 10 ? sanPham.kieuQuat.ten.substring(0, 10) + '...' : sanPham.kieuQuat.ten) : 'Null'}"></span>
                                                 </small>
                                             </div>
 
                                             <!-- Giá sản phẩm -->
                                             <div class="mt-2">
-                                                <h4 class="text-dark-emphasis mb-1"
+                                                <h4 class="text-dark-emphasis mb-1 text-sm fw-bold"
                                                     th:if="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty() and sanPham.sanPhamChiTiet[0].gia != null}">
                                                     <span th:text="${#numbers.formatDecimal(sanPham.sanPhamChiTiet[0].gia, 0, 'COMMA', 0, 'POINT')}">500,000</span>
                                                     <small>đ</small>
