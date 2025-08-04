@@ -61,18 +61,26 @@
                                         </div>
                                     </div>
                                     <div class="row justify-content-around mb-3 fw-bold">
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <label for="ngaySinh" class="form-label"><span
                                                     class="text-danger">*</span> Ngày Sinh</label>
                                             <input type="date" class="form-control" id="ngaySinh"
                                                    name="ngaySinh" required>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <label for="gioiTinh" class="form-label fw-bold">Giới tính</label>
                                             <select class="form-select" id="gioiTinh" name="gioiTinh" required>
+                                                <option value="">-- Chọn Giới Tính --</option>
                                                 <option value="Nam">Nam</option>
                                                 <option value="Nữ">Nữ</option>
-                                                <option value="Khác">Khác</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="chucVu" class="form-label fw-bold">Chức vụ</label>
+                                            <select class="form-select" id="chucVu" name="chucVu" required>
+                                                <option value="">-- Chọn Chức Vụ --</option>
+                                                <option value="Admin">Admin</option>
+                                                <option value="Employe">Nhân viên</option>
                                             </select>
                                         </div>
                                     </div>
