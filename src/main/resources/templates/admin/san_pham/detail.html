@@ -296,7 +296,7 @@
                                                     data-field="gia" 
                                                     th:data-variant-id="${spct.id}" 
                                                     ondblclick="editCell(this)">
-                                                    <span class="fw-bold text-danger" th:text="${#numbers.formatDecimal(spct.gia, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span>
+                                                    <span class="fw-bold text-danger" th:text="${#numbers.formatDecimal(spct.gia, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
                                                     <input type="hidden" class="original-value" th:value="${spct.gia}">
                                                     <div class="edit-hint">Double click để sửa</div>
                                                 </td>
@@ -442,7 +442,7 @@
             success: function (data) {
                 // Điền thông tin vào modal
                 $('#variantDetailImage').attr('src', data.hinhAnh ? data.hinhAnh.hinhAnh : '/admin/assets/images/no-image.png');
-                $('#variantDetailPrice').text(formatCurrency(data.gia) + ' VND');
+                $('#variantDetailPrice').text(formatCurrency(data.gia) + ' đ');
                 $('#variantDetailColor').text(data.mauSac ? data.mauSac.ten : 'N/A');
                 $('#variantDetailPower').text(data.congSuat ? data.congSuat.ten : 'N/A');
                 $('#variantDetailBrand').text(data.hang ? data.hang.ten : 'N/A');
@@ -637,7 +637,7 @@
                 // Cập nhật UI
                 const span = cell.querySelector('span');
                 if (field === 'gia') {
-                    span.textContent = formatCurrency(newValue) + ' VND';
+                    span.textContent = formatCurrency(newValue) + ' đ';
                     cell.querySelector('.original-value').value = newValue;
                 } else {
                     span.textContent = newValue;

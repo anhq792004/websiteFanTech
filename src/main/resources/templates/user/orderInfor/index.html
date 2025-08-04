@@ -61,9 +61,13 @@
                                 <span th:case="5" class="text-danger">Hủy</span>
                             </td>
                             <td class="px-4 py-2 border text-center">
-                                <a th:href="@{/vin-fan/hoa-don-kh/{id}(id=${hoaDon.id})}"
-                                   class="text-blue-500 hover:underline">Xem
-                                    chi tiết</a>
+                                <div class="flex space-x-2 justify-center">
+                                    <a th:href="@{/vin-fan/hoa-don-kh/{id}(id=${hoaDon.id})}"
+                                       class="text-blue-500 hover:underline">Xem chi tiết</a>
+                                    <a th:href="@{/profile/print-invoice/{id}(id=${hoaDon.id})}"
+                                       target="_blank"
+                                       class="text-green-500 hover:underline">In hóa đơn</a>
+                                </div>
                             </td>
                         </tr>
                         </tbody>
