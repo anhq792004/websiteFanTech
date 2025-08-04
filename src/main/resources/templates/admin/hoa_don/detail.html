@@ -20,10 +20,17 @@
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h2>Theo dõi đơn hàng</h2>
-                        <button type="button" class="btn btn-outline-primary " data-bs-toggle="modal"
-                                data-bs-target="#myModal1">
-                            Lịch sử
-                        </button>
+                        <div>
+                            <a th:href="@{/hoa-don/print/{id}(id=${hoaDon.id})}" 
+                               target="_blank" 
+                               class="btn btn-outline-success me-2">
+                                In hóa đơn
+                            </a>
+                            <button type="button" class="btn btn-outline-primary " data-bs-toggle="modal"
+                                    data-bs-target="#myModal1">
+                                Lịch sử
+                            </button>
+                        </div>
                     </div>
                     <div class="modal fade" id="myModal1" tabindex="-1" aria-labelledby="exampleModalLabel"
                          aria-hidden="true">
