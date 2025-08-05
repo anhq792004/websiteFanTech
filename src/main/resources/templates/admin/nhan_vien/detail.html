@@ -66,9 +66,9 @@
                                         <div class="mb-3 col-md-4">
                                             <label class="form-label fw-bold"><span class="text-danger">*</span> Ngày
                                                 sinh</label>
-                                            <input class="form-control" id="ngaySinh"
-                                                   th:value="${#dates.format(nhanVien.ngaySinh, 'yyyy-MM-dd')}"
-                                                   type="date" required>
+                                            <input type="text" class="form-control flatpickr" id="ngaySinh"
+                                                   name="ngaySinh" placeholder="Ngày sinh"
+                                                   th:value="${ngaySinhFormatted}" required>
 
                                         </div>
                                         <div class="mb-3 col-md-4">
@@ -220,7 +220,12 @@
             }
         });
     </script>
-
+    <script>
+        flatpickr("#ngaySinh", {
+            dateFormat: "d/m/Y", // Ensure the correct format
+            maxDate: "today",
+        });
+    </script>
 
 </div>
 </body>

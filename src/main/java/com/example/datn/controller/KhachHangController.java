@@ -57,6 +57,7 @@ public class KhachHangController {
 
     @GetMapping("/view-them")
     public String showThemKhachHangForm(Model model) {
+
         model.addAttribute("khachHang", new KhachHang());
         return "admin/khach_hang/view-them";
     }
@@ -79,8 +80,15 @@ public class KhachHangController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> add(@RequestBody AddKhachHangRequest request) {
+    public ResponseEntity<?> add(@RequestBody AddKhachHangRequest request,
+                                 Model model) {
         try {
+            String ngaySinhFormatted = "";
+            if (request.getNgaySinh() != null) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                ngaySinhFormatted = sdf.format(request.getNgaySinh());
+            }
+            model.addAttribute("ngaySinhFormatted", ngaySinhFormatted);
             khachHangService.addKH(request);
             return ResponseEntity.ok().body("Thêm khách hàng thành công!");
         } catch (IllegalArgumentException e) {
