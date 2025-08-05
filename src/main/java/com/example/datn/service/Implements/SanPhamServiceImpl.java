@@ -16,10 +16,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -196,5 +200,151 @@ public class SanPhamServiceImpl implements SanPhamService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<SanPham> searchAndFilterProducts(String query, Long kieuQuatId, Long congSuatId, 
+                                               Long hangId, Long mauSacId, Long nutBamId, 
+                                               Double minPrice, Double maxPrice, int page, int size) {
+        // Lấy tất cả sản phẩm đang hoạt động
+        List<SanPham> allProducts = sanPhamRepo.findByTrangThaiTrue();
+        
+        // Filter theo các điều kiện
+        return allProducts.stream()
+                .filter(sanPham -> {
+                    // Filter theo query (tên sản phẩm hoặc mã sản phẩm)
+                    if (query != null && !query.trim().isEmpty()) {
+                        String searchQuery = query.toLowerCase().trim();
+                        String productName = sanPham.getTen() != null ? sanPham.getTen().toLowerCase() : "";
+                        String productCode = sanPham.getMa() != null ? sanPham.getMa().toLowerCase() : "";
+                        
+                        if (!productName.contains(searchQuery) && !productCode.contains(searchQuery)) {
+                            return false;
+                        }
+                    }
+                    
+                    // Filter theo kiểu quạt
+                    if (kieuQuatId != null && (sanPham.getKieuQuat() == null || !sanPham.getKieuQuat().getId().equals(kieuQuatId))) {
+                        return false;
+                    }
+                    
+                    // Filter theo giá (chỉ kiểm tra biến thể đầu tiên - hiển thị)
+                    if (minPrice != null || maxPrice != null) {
+                        if (sanPham.getSanPhamChiTiet() == null || sanPham.getSanPhamChiTiet().isEmpty()) {
+                            return false;
+                        }
+                        
+                        // Lấy biến thể đầu tiên (biến thể hiển thị)
+                        SanPhamChiTiet firstVariant = sanPham.getSanPhamChiTiet().get(0);
+                        if (firstVariant.getGia() == null) {
+                            return false;
+                        }
+                        
+                        BigDecimal price = firstVariant.getGia();
+                        if (minPrice != null && price.compareTo(BigDecimal.valueOf(minPrice)) < 0) {
+                            return false;
+                        }
+                        if (maxPrice != null && price.compareTo(BigDecimal.valueOf(maxPrice)) > 0) {
+                            return false;
+                        }
+                    }
+                    
+                    // Filter theo các thuộc tính khác (công suất, hãng, màu sắc, nút bấm)
+                    if (congSuatId != null || hangId != null || mauSacId != null || nutBamId != null) {
+                        boolean hasValidAttributes = sanPham.getSanPhamChiTiet().stream()
+                                .anyMatch(spct -> {
+                                    if (congSuatId != null && (spct.getCongSuat() == null || !spct.getCongSuat().getId().equals(congSuatId))) return false;
+                                    if (hangId != null && (spct.getHang() == null || !spct.getHang().getId().equals(hangId))) return false;
+                                    if (mauSacId != null && (spct.getMauSac() == null || !spct.getMauSac().getId().equals(mauSacId))) return false;
+                                    if (nutBamId != null && (spct.getNutBam() == null || !spct.getNutBam().getId().equals(nutBamId))) return false;
+                                    return true;
+                                });
+                        if (!hasValidAttributes) return false;
+                    }
+                    
+                    return true;
+                })
+                .skip(page * size)
+                .limit(size)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public long countFilteredProducts(String query, Long kieuQuatId, Long congSuatId, 
+                                    Long hangId, Long mauSacId, Long nutBamId, 
+                                    Double minPrice, Double maxPrice) {
+        // Lấy tất cả sản phẩm đang hoạt động
+        List<SanPham> allProducts = sanPhamRepo.findByTrangThaiTrue();
+        
+        // Filter theo các điều kiện (tương tự như searchAndFilterProducts nhưng không có pagination)
+        return allProducts.stream()
+                .filter(sanPham -> {
+                    // Filter theo query (tên sản phẩm hoặc mã sản phẩm)
+                    if (query != null && !query.trim().isEmpty()) {
+                        String searchQuery = query.toLowerCase().trim();
+                        String productName = sanPham.getTen() != null ? sanPham.getTen().toLowerCase() : "";
+                        String productCode = sanPham.getMa() != null ? sanPham.getMa().toLowerCase() : "";
+                        
+                        if (!productName.contains(searchQuery) && !productCode.contains(searchQuery)) {
+                            return false;
+                        }
+                    }
+                    
+                    // Filter theo kiểu quạt
+                    if (kieuQuatId != null && (sanPham.getKieuQuat() == null || !sanPham.getKieuQuat().getId().equals(kieuQuatId))) {
+                        return false;
+                    }
+                    
+                    // Filter theo giá (chỉ kiểm tra biến thể đầu tiên - hiển thị)
+                    if (minPrice != null || maxPrice != null) {
+                        if (sanPham.getSanPhamChiTiet() == null || sanPham.getSanPhamChiTiet().isEmpty()) {
+                            return false;
+                        }
+                        
+                        // Lấy biến thể đầu tiên (biến thể hiển thị)
+                        SanPhamChiTiet firstVariant = sanPham.getSanPhamChiTiet().get(0);
+                        if (firstVariant.getGia() == null) {
+                            return false;
+                        }
+                        
+                        BigDecimal price = firstVariant.getGia();
+                        if (minPrice != null && price.compareTo(BigDecimal.valueOf(minPrice)) < 0) {
+                            return false;
+                        }
+                        if (maxPrice != null && price.compareTo(BigDecimal.valueOf(maxPrice)) > 0) {
+                            return false;
+                        }
+                    }
+                    
+                    // Filter theo các thuộc tính khác (công suất, hãng, màu sắc, nút bấm)
+                    if (congSuatId != null || hangId != null || mauSacId != null || nutBamId != null) {
+                        boolean hasValidAttributes = sanPham.getSanPhamChiTiet().stream()
+                                .anyMatch(spct -> {
+                                    if (congSuatId != null && (spct.getCongSuat() == null || !spct.getCongSuat().getId().equals(congSuatId))) return false;
+                                    if (hangId != null && (spct.getHang() == null || !spct.getHang().getId().equals(hangId))) return false;
+                                    if (mauSacId != null && (spct.getMauSac() == null || !spct.getMauSac().getId().equals(mauSacId))) return false;
+                                    if (nutBamId != null && (spct.getNutBam() == null || !spct.getNutBam().getId().equals(nutBamId))) return false;
+                                    return true;
+                                });
+                        if (!hasValidAttributes) return false;
+                    }
+                    
+                    return true;
+                })
+                .count();
+    }
+
+    @Override
+    public Map<String, Double> getPriceRange() {
+        Map<String, Double> priceRange = new HashMap<>();
+        
+        // Lấy giá min và max từ sản phẩm chi tiết
+        Double minPrice = sanPhamChiTietRepo.findMinPrice();
+        Double maxPrice = sanPhamChiTietRepo.findMaxPrice();
+        
+        priceRange.put("min", minPrice != null ? minPrice : 0.0);
+        priceRange.put("max", maxPrice != null ? maxPrice : 10000000.0);
+        
+        return priceRange;
     }
 }

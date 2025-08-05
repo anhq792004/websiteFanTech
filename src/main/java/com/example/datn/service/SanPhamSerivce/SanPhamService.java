@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface SanPhamService {
@@ -25,4 +26,17 @@ public interface SanPhamService {
 
     // Thêm method để lấy tất cả sản phẩm đang hoạt động
     List<SanPham> findAllActiveProducts();
+
+    // Method để search và filter sản phẩm
+    List<SanPham> searchAndFilterProducts(String query, Long kieuQuatId, Long congSuatId, 
+                                        Long hangId, Long mauSacId, Long nutBamId, 
+                                        Double minPrice, Double maxPrice, int page, int size);
+
+    // Method để đếm số sản phẩm đã filter
+    long countFilteredProducts(String query, Long kieuQuatId, Long congSuatId, 
+                             Long hangId, Long mauSacId, Long nutBamId, 
+                             Double minPrice, Double maxPrice);
+
+    // Method để lấy khoảng giá min/max
+    Map<String, Double> getPriceRange();
 }
