@@ -37,44 +37,58 @@
                                     <div class="mb-3">
                                         <label class="form-label fw-bold"><span class="text-danger">*</span> Tên nhân
                                             viên</label>
-                                        <input class="form-control" id="name" th:field="*{ten}" required>
+                                        <input class="form-control" id="name" th:value="${nhanVien.ten}" required>
                                     </div>
                                 </div>
                                 <div class="col-md-8">
                                     <div class="mb-3">
                                         <label class="form-label fw-bold"><span class="text-danger">*</span>
                                             Email</label>
-                                        <input class="form-control" th:field="*{taiKhoan.email}" type="email"
+                                        <input class="form-control" th:value="${nhanVien.taiKhoan.email}" type="email"
                                                disabled required>
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold"><span class="text-danger">*</span> Số Điện
                                                 Thoại</label>
-                                            <input class="form-control" id="soDienThoai" th:field="*{soDienThoai}"
+                                            <input class="form-control" id="soDienThoai"
+                                                   th:value="${nhanVien.soDienThoai}"
                                                    type="tel" required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="canCuocCongDan" class="form-label fw-bold"><span
                                                     class="text-danger">*</span> Số CCCD</label>
                                             <input type="text" class="form-control" id="canCuocCongDan"
-                                                   th:field="*{canCuocCongDan}" name="soCCCD" required>
+                                                   th:value="${nhanVien.canCuocCongDan}" name="soCCCD" required>
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="mb-3 col-md-6">
+                                        <div class="mb-3 col-md-4">
                                             <label class="form-label fw-bold"><span class="text-danger">*</span> Ngày
                                                 sinh</label>
-                                            <input class="form-control" id="ngaySinh" th:field="*{ngaySinh}" type="date"
-                                                   required>
+                                            <input class="form-control" id="ngaySinh"
+                                                   th:value="${#dates.format(nhanVien.ngaySinh, 'yyyy-MM-dd')}"
+                                                   type="date" required>
+
                                         </div>
-                                        <div class="mb-3 col-md-6">
+                                        <div class="mb-3 col-md-4">
                                             <label for="gioiTinh" class="form-label fw-bold">Giới tính</label>
-                                            <select class="form-select" id="gioiTinh" name="gioiTinh" required
-                                                    th:field="*{gioiTinh}">
-                                                <option value="Nam">Nam</option>
-                                                <option value="Nữ">Nữ</option>
-                                                <option value="Khác">Khác</option>
+                                            <select class="form-select" id="gioiTinh" name="gioiTinh" required>
+                                                <option value="Nam" th:selected="${nhanVien.gioiTinh == 'Nam'}">Nam
+                                                </option>
+                                                <option value="Nữ" th:selected="${nhanVien.gioiTinh == 'Nữ'}">Nữ
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3 col-md-4">
+                                            <label for="chucVu" class="form-label fw-bold">Chức vụ</label>
+                                            <select class="form-select" id="chucVu" name="chucVu" required>
+                                                <option value="Employe"
+                                                        th:selected="${nhanVien.chucVu.viTri == 'Employe'}">Nhân viên
+                                                </option>
+                                                <option value="Admin" th:selected="${nhanVien.chucVu.viTri == 'Admin'}">
+                                                    Admin
+                                                </option>
                                             </select>
                                         </div>
                                     </div>

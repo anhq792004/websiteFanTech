@@ -78,6 +78,7 @@ $(document).ready(function () {
     });
 });
 
+// Thêm khách hàng
 $(".btn-add-khachHang").click(function () {
     const hoaDonId = $(this).data("id-hd");
     const sanPhamId = $(this).data("id-sp");
@@ -343,12 +344,38 @@ $(document).ready(function () {
             }
         }
 
+        // Hỏi người dùng có muốn in hóa đơn không
+        Swal.fire({
+            title: 'Xác nhận thanh toán',
+            text: 'Bạn có muốn in hóa đơn sau khi thanh toán không?',
+            icon: 'question',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: 'Có, in hóa đơn',
+            denyButtonText: 'Không in hóa đơn',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#28a745',
+            denyButtonColor: '#6c757d',
+            cancelButtonColor: '#dc3545'
+        }).then((result) => {
+            if (result.isConfirmed || result.isDenied) {
+                // Tiếp tục thanh toán với thông tin về việc in hóa đơn
+                const shouldPrint = result.isConfirmed;
+                processPayment(idHD, phuongThucThanhToan, shouldPrint);
+            }
+        });
+    });
+
+    // Hàm xử lý thanh toán
+    function processPayment(idHD, phuongThucThanhToan, shouldPrint) {
+
         $.ajax({
             url: '/sale/thanh-toan',
             type: 'POST',
             data: {
                 idHD: idHD,
-                phuongThucThanhToan: phuongThucThanhToan
+                phuongThucThanhToan: phuongThucThanhToan,
+                shouldPrint: shouldPrint
             },
             success: function (response) {
                 // Kiểm tra nếu phản hồi là QR code Momo
@@ -384,15 +411,29 @@ $(document).ready(function () {
                     });
                 } else {
                     // Xử lý thành công bình thường
+                    let message = response;
+                    let shouldPrintInvoice = false;
+                    
+                    // Kiểm tra xem có yêu cầu in hóa đơn không
+                    if (response.includes('PRINT_INVOICE:')) {
+                        const parts = response.split('PRINT_INVOICE:');
+                        message = parts[0].trim();
+                        shouldPrintInvoice = true;
+                    }
+                    
                     Swal.fire({
                         toast: true,
                         icon: 'success',
-                        title: response,
+                        title: message,
                         position: 'top-end',
                         showConfirmButton: false,
                         timer: 1000,
                         timerProgressBar: true
                     }).then(() => {
+                        // Nếu người dùng chọn in hóa đơn, mở tab in hóa đơn
+                        if (shouldPrintInvoice) {
+                            window.open(`/hoa-don/print/${idHD}`, '_blank');
+                        }
                         window.location.href = '/sale/index';
                     });
                 }
@@ -409,7 +450,7 @@ $(document).ready(function () {
                 });
             }
         });
-    });
+    }
 });
 
 // Thêm hàm giám sát quá trình thanh toán Momo
