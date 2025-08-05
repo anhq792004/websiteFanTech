@@ -16,7 +16,7 @@ public interface NhanVienRepo extends JpaRepository<NhanVien,Long> {
     @Query("SELECT nv FROM NhanVien nv " +
             "WHERE (LOWER(nv.ma) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(nv.ten) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-//            "OR LOWER(kh.taiKhoan.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(nv.taiKhoan.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(nv.soDienThoai) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "AND (:trangThai IS NULL OR nv.trangThai = :trangThai) ")
     Page<NhanVien> searchNhanVien(String keyword, Boolean trangThai, Pageable pageable);
@@ -24,7 +24,7 @@ public interface NhanVienRepo extends JpaRepository<NhanVien,Long> {
     @Query("SELECT nv FROM NhanVien nv " +
             "WHERE (LOWER(nv.ma) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(nv.ten) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-//            "OR LOWER(kh.taiKhoan.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(nv.taiKhoan.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(nv.soDienThoai) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<NhanVien> searchNhanVienKhongCoTrangThai(String keyword, Pageable pageable);
 

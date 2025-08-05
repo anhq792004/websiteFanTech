@@ -3,7 +3,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:insert="~{/admin/fragments/head :: head}">
 </head>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <link rel="stylesheet" th:href="@{/admin/assets/compiled/css/hoaDon.css}">
 <body>
 <!-- Site wrapper -->
@@ -259,7 +258,6 @@
     <!--    <script th:src="@{/admin/assets/compiled/js/components.js}"></script>-->
     <script th:src="@{/admin/assets/compiled/js/hoaDon.js}"></script>
     <script th:replace="/admin/fragments/script :: script"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         flatpickr("#startDate", {
             dateFormat: "Y-m-d", // Ensure the correct format

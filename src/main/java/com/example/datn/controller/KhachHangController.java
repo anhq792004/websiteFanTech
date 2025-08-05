@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 @Controller
@@ -60,9 +61,15 @@ public class KhachHangController {
     @GetMapping("/detail")
     public String detail(@RequestParam Long id, Model model) {
         KhachHang khachHang = khachHangService.findById(id);
-        model.addAttribute("khachHang", khachHang);
-
+        // ✅ Format ngày sinh nếu có
+        String ngaySinhFormatted = "";
+        if (khachHang.getNgaySinh() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            ngaySinhFormatted = sdf.format(khachHang.getNgaySinh());
+        }
         List<DiaChi> listDiaChi = diaChiService.getDiaChiByIdKhachHang(id);
+        model.addAttribute("ngaySinhFormatted", ngaySinhFormatted); // ✅ Truyền thêm biến này vào model
+        model.addAttribute("khachHang", khachHang);
         model.addAttribute("listDiaChi", listDiaChi);
 
         return "admin/khach_hang/detail";
@@ -118,9 +125,6 @@ public class KhachHangController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Cập nhật thất bại");
         }
     }
-
-
-
 
 
 }
