@@ -27,7 +27,8 @@ $(document).ready(function () {
             tinhThanhPho: $('#city').val(),
             quanHuyen: $('#district').val(),
             xaPhuong: $('#ward').val(),
-            soNhaNgoDuong: $('#diaChiCuThe').val()
+            soNhaNgoDuong: $('#diaChiCuThe').val(),
+            chucVu: $('#chucVu').val()
         };
 
         $.ajax({
@@ -59,7 +60,8 @@ $(document).ready(function () {
                     timer: 3000,
                     timerProgressBar: true
                 });
-                $('#submitBtn').prop('disabled', false);
+
+                $('#btnNV').prop('disabled', false);
                 $('#btnSpinner').addClass('d-none');
                 $('#btnIcon').removeClass('d-none');
             }
@@ -128,7 +130,8 @@ $(document).ready(function () {
             tinhThanhPho: $('#city').val(),
             quanHuyen: $('#district').val(),
             xaPhuong: $('#ward').val(),
-            soNhaNgoDuong: $('#soNhaNgoDuong').val()
+            soNhaNgoDuong: $('#soNhaNgoDuong').val(),
+            chucVu: $('#chucVu').val()
         };
 
         $.ajax({
@@ -164,6 +167,50 @@ $(document).ready(function () {
     });
 });
 
+function checkEmailExists(email) {
+    if (email && email.length > 0) {
+        $.ajax({
+            url: '/admin/nhan-vien/check-email',
+            type: 'POST',
+            data: { email: email },
+            success: function (response) {
+                if (response.exists) {
+                    $('#email').addClass('is-invalid');
+                    $('#email-error').text('Email này đã được sử dụng').show();
+                    // Hiển thị thông báo SweetAlert2
+                    Swal.fire({
+                        toast: true,
+                        icon: 'error',
+                        title: 'Email này đã được sử dụng',
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                } else {
+                    $('#email').removeClass('is-invalid');
+                    $('#email-error').hide();
+                }
+            },
+            error: function (xhr) {
+                // Xử lý lỗi nếu AJAX thất bại
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    title: 'Lỗi khi kiểm tra email',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            }
+        });
+    }
+}
 
+// Gọi kiểm tra email khi người dùng nhập xong
+$('#email').on('blur', function() {
+    checkEmailExists($(this).val());
+});
 
 

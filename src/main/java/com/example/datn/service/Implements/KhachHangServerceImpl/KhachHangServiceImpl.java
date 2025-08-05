@@ -69,6 +69,11 @@ public class KhachHangServiceImpl implements KhachHangService {
 
     @Override
     public KhachHang addKH(AddKhachHangRequest request) {
+        // Kiểm tra email trùng
+        if (taiKhoanRepo.findByEmail(request.getEmail()) != null) {
+            throw new RuntimeException("Email đã được sử dụng");
+        }
+
         // Tạo tài khoản
         TaiKhoan taiKhoan = new TaiKhoan();
         ChucVu chucVu = chucVuRepo.findByViTri("User")
@@ -83,9 +88,8 @@ public class KhachHangServiceImpl implements KhachHangService {
         taiKhoan.setNgayTao(new Date());
         taiKhoan.setTrangThai(true);
 
-        // Tạo và mã hóa mật khẩu ngẫu nhiên
         String randomPassword = generateRandomPassword(8);
-        taiKhoan.setMatKhau(passwordEncoder.encode(randomPassword)); // Sử dụng PasswordEncoder
+        taiKhoan.setMatKhau(passwordEncoder.encode(randomPassword));
         taiKhoanRepo.save(taiKhoan);
 
         // Tạo khách hàng
@@ -109,7 +113,7 @@ public class KhachHangServiceImpl implements KhachHangService {
         diaChi.setSoNhaNgoDuong(request.getSoNhaNgoDuong());
         diaChiRepo.save(diaChi);
 
-        // Gửi email chứa mật khẩu
+        // Gửi email
         try {
             String subject = "Tài khoản của bạn đã được tạo";
             String content = "Chào " + request.getTen() + ",<br><br>" +

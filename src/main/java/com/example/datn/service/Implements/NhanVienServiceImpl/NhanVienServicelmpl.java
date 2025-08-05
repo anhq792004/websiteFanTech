@@ -106,13 +106,14 @@ public class NhanVienServicelmpl implements NhanVienService {
 
     @Override
     public void addNhanVien(AddNhanVienRequest request) {
+        // Kiểm tra email đã tồn tại
+        if (taiKhoanRepo.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email đã được sử dụng. Vui lòng chọn email khác!");
+        }
+
         TaiKhoan taiKhoan = new TaiKhoan();
-        ChucVu chucVu = chucVuRepo.findByViTri("Employe") // Sửa "Employe" thành "Employee"
-                .orElseGet(() -> {
-                    ChucVu newChucVu = new ChucVu();
-                    newChucVu.setViTri("Employe");
-                    return chucVuRepo.save(newChucVu);
-                });
+        ChucVu chucVu = chucVuRepo.findByViTri(request.getChucVu())
+                .orElseThrow(() -> new RuntimeException("Chức vụ không tồn tại: " + request.getChucVu()));
         taiKhoan.setMa("TK" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         taiKhoan.setChucVu(chucVu);
         taiKhoan.setEmail(request.getEmail());
