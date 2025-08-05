@@ -8,6 +8,7 @@ import com.example.datn.dto.request.UpdateInforKhachHangRequest;
 import com.example.datn.entity.DiaChi;
 import com.example.datn.entity.KhachHang;
 import com.example.datn.repository.DiaChiRepo;
+import com.example.datn.repository.TaiKhoanRepo;
 import com.example.datn.service.DiaChiService;
 import com.example.datn.service.KhachHangService.KhachHangService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -28,7 +31,7 @@ public class KhachHangController {
     private final KhachHangService khachHangService;
     private final DiaChiService diaChiService;
     private final DiaChiRepo diaChiRepo;
-
+    private final TaiKhoanRepo taiKhoanRepo;
     @GetMapping("/index")
     public String getAllKhachHang(
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -119,8 +122,12 @@ public class KhachHangController {
         }
     }
 
-
-
-
-
+    @PostMapping("/check-email")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> checkEmailExists(@RequestParam String email) {
+        Map<String, Boolean> response = new HashMap<>();
+        boolean exists = taiKhoanRepo.existsByEmail(email);
+        response.put("exists", exists);
+        return ResponseEntity.ok(response);
+    }
 }

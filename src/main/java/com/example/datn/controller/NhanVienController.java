@@ -9,6 +9,7 @@ import com.example.datn.entity.KhachHang;
 import com.example.datn.entity.NhanVien.NhanVien;
 import com.example.datn.repository.DiaChiRepo;
 import com.example.datn.repository.NhanVienRepo;
+import com.example.datn.repository.TaiKhoanRepo;
 import com.example.datn.service.ChucVuService.ChucVuService;
 import com.example.datn.service.DiaChiService;
 import com.example.datn.service.NhanVienService.NhanVienService;
@@ -36,7 +37,7 @@ public class NhanVienController {
     private final NhanVienService nhanVienService;
     private final ChucVuService chucVuService;
     private final DiaChiRepo diaChiRepo;
-
+    private final TaiKhoanRepo taiKhoanRepo;
     @ModelAttribute("listDiaChi")
     List<DiaChi> getListDiaChi() {
         return diaChiRepo.findAll();
@@ -109,6 +110,15 @@ public class NhanVienController {
     @PostMapping("/change-status")
     public ResponseEntity<?> thayDoiTrangThai(@RequestParam(value = "id", required = true) Long id) {
         return nhanVienService.changeStatus(id);
+    }
+    // Thêm method này vào Controller để kiểm tra email realtime (optional)
+    @PostMapping("/check-email")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> checkEmailExists(@RequestParam String email) {
+        Map<String, Boolean> response = new HashMap<>();
+        boolean exists = taiKhoanRepo.existsByEmail(email);
+        response.put("exists", exists);
+        return ResponseEntity.ok(response);
     }
 
 }

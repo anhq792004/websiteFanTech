@@ -115,6 +115,50 @@ $('.changeStatusKhachHang').on('click', function () {
         }
     });
 });
+function checkEmailExists(email) {
+    if (email && email.length > 0) {
+        $.ajax({
+            url: '/khach-hang/check-email', // Endpoint kiểm tra email
+            type: 'POST',
+            data: { email: email },
+            success: function (response) {
+                if (response.exists) {
+                    $('#email').addClass('is-invalid');
+                    $('#submitBtn').prop('disabled', true); // Vô hiệu hóa nút submit
+                    Swal.fire({
+                        toast: true,
+                        icon: 'error',
+                        title: 'Email này đã được sử dụng',
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                } else {
+                    $('#email').removeClass('is-invalid');
+                    $('#email-error').hide();
+                    $('#submitBtn').prop('disabled', false); // Kích hoạt lại nút submit
+                }
+            },
+            error: function (xhr) {
+                // Hiển thị lỗi AJAX bằng SweetAlert2
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    title: 'Lỗi khi kiểm tra email',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            }
+        });
+    }
+}
 
+// Kiểm tra email khi người dùng rời khỏi input
+$('#email').on('blur', function () {
+    checkEmailExists($(this).val());
+});
 
 
