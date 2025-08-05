@@ -64,8 +64,8 @@
                                         <div class="col-md-4">
                                             <label for="ngaySinh" class="form-label"><span
                                                     class="text-danger">*</span> Ngày Sinh</label>
-                                            <input type="date" class="form-control" id="ngaySinh"
-                                                   name="ngaySinh" required>
+                                            <input type="text" class="form-control flatpickr" id="ngaySinh"
+                                                   name="ngaySinh" placeholder="Ngày sinh" required>
                                         </div>
                                         <div class="col-md-4">
                                             <label for="gioiTinh" class="form-label fw-bold">Giới tính</label>
@@ -109,9 +109,9 @@
                                         </div>
                                     </div>
                                     <div class="col">
-                                        <label for="dcct" class="form-label fw-bold"><span
+                                        <label for="soNhaNgoDuong" class="form-label fw-bold"><span
                                                 class="text-danger">*</span> Địa Chỉ Cụ Thể</label>
-                                        <input type="text" class="form-control" id="dcct"
+                                        <input type="text" class="form-control" id="soNhaNgoDuong"
                                                name="soNhaNgoDuong" required>
                                     </div>
                                 </div>
@@ -130,6 +130,11 @@
 <script th:src="@{/admin/assets/compiled/js/components.js}"></script>
 <script th:src="@{/admin/assets/compiled/js/nhanVien.js}"></script>
 <script th:replace="/admin/fragments/script :: script"></script>
-
+<script>
+    flatpickr("#ngaySinh", {
+        dateFormat: "d/m/Y", // Ensure the correct format
+        maxDate: "today",
+    });
+</script>
 </body>
 </html>

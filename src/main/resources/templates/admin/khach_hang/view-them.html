@@ -60,8 +60,8 @@
                                     <div class="row mb-3">
                                         <div class="col-md-6">
                                             <label for="ngaySinh" class="form-label fw-bold">Ngày sinh</label>
-                                            <input type="date" class="form-control" placeholder="Nhập ngày sinh"
-                                                   aria-label="ngaySinh" id="ngaySinh">
+                                            <input type="text" class="form-control flatpickr" id="ngaySinh"
+                                                   name="ngaySinh" placeholder="Ngày sinh" required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="gioiTinh" class="form-label fw-bold">Giới tính</label>
@@ -126,6 +126,12 @@
     <script th:replace="/admin/fragments/script :: script"></script>
     <script th:src="@{/admin/assets/compiled/js/KhachHang/khachHang.js}"></script>
     <script th:src="@{/admin/assets/compiled/js/components.js}"></script>
+    <script>
+        flatpickr("#ngaySinh", {
+            dateFormat: "d/m/Y", // Ensure the correct format
+            maxDate: "today",
+        });
+    </script>
 </div>
 
 </body>

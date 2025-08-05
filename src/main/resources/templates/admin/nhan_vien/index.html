@@ -73,9 +73,9 @@
                                     <th style="width: 5%;">STT</th>
                                     <th style="width: 5%;">Mã</th>
                                     <th style="width: 5%;">Họ và tên</th>
-                                    <!--                                    <th style="width: 5%;">Email</th>-->
-                                    <th style="width: 5%;">Ngày sinh</th>
                                     <th style="width: 5%;">Giới tính</th>
+                                    <th style="width: 5%;">Ngày sinh</th>
+                                    <th style="width: 5%;">Email</th>
                                     <th style="width: 5%;">Trạng thái</th>
                                     <th style="width: 5%;">Hành động</th>
                                 </tr>
@@ -85,9 +85,9 @@
                                     <td th:text="${iterStat.count}"></td>
                                     <td th:text="${nhanVien.ma}"></td>
                                     <td th:text="${nhanVien.ten}"></td>
-                                    <!-- <td th:text="${nhanVien.taiKhoan.email}"></td>-->
-                                    <td th:text="${nhanVien.ngaySinh}"></td>
                                     <td th:text="${nhanVien.gioiTinh}"></td>
+                                    <td th:text="${#dates.format(nhanVien.ngaySinh, 'dd/MM/yyyy')}"></td>
+                                    <td th:text="${nhanVien.taiKhoan.email}"></td>
                                     <td th:text="${nhanVien.trangThai ? 'Đang làm việc' : 'Đã nghỉ việc'}"></td>
                                     <td>
                                         <a th:href="@{/admin/nhan-vien/detail(id=${nhanVien.id})}"

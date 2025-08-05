@@ -26,6 +26,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ public class NhanVienController {
     private final ChucVuService chucVuService;
     private final DiaChiRepo diaChiRepo;
     private final TaiKhoanRepo taiKhoanRepo;
+
     @ModelAttribute("listDiaChi")
     List<DiaChi> getListDiaChi() {
         return diaChiRepo.findAll();
@@ -73,11 +75,18 @@ public class NhanVienController {
     }
 
     @PostMapping("/them")
-    public ResponseEntity<?>add(@RequestBody AddNhanVienRequest nhanVien){
+    public ResponseEntity<?> add(@RequestBody AddNhanVienRequest nhanVien,
+                                 Model model) {
         try {
+            String ngaySinhFormatted = "";
+            if (nhanVien.getNgaySinh() != null) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                ngaySinhFormatted = sdf.format(nhanVien.getNgaySinh());
+            }
+            model.addAttribute("ngaySinhFormatted", ngaySinhFormatted);
             nhanVienService.addNhanVien(nhanVien);
             return ResponseEntity.ok().body("Thêm thanh công");
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -94,9 +103,15 @@ public class NhanVienController {
     }
 
     @GetMapping("/detail")
-    public String detail(@RequestParam Long id, Model model){
-        NhanVien nhanVien=nhanVienService.findNhanVienById(id);
-        model.addAttribute("nhanVien",nhanVien);
+    public String detail(@RequestParam Long id, Model model) {
+        NhanVien nhanVien = nhanVienService.findNhanVienById(id);
+        String ngaySinhFormatted = "";
+        if (nhanVien.getNgaySinh() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            ngaySinhFormatted = sdf.format(nhanVien.getNgaySinh());
+        }
+        model.addAttribute("ngaySinhFormatted", ngaySinhFormatted);
+        model.addAttribute("nhanVien", nhanVien);
         return "admin/nhan_vien/detail";
     }
 
@@ -111,6 +126,7 @@ public class NhanVienController {
     public ResponseEntity<?> thayDoiTrangThai(@RequestParam(value = "id", required = true) Long id) {
         return nhanVienService.changeStatus(id);
     }
+
     // Thêm method này vào Controller để kiểm tra email realtime (optional)
     @PostMapping("/check-email")
     @ResponseBody
