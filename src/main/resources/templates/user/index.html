@@ -23,6 +23,306 @@
 <!-- FontAwesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+<!-- Custom Filter Styles -->
+<style>
+    /* Filter Sidebar Styles */
+    .filter-sidebar {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    /* Search Section */
+    .search-section .input-group {
+        border-radius: 25px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .search-section .input-group-text {
+        border: none;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .search-section .form-control {
+        border: none;
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+
+    .search-section .form-control:focus {
+        box-shadow: none;
+        border-color: transparent;
+    }
+
+    /* Filter Groups */
+    .filter-group {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .filter-group:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+
+    .filter-label {
+        cursor: pointer;
+        padding: 8px 0;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #333;
+        border-bottom: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .filter-label:hover {
+        color: #667eea;
+        border-bottom-color: #667eea;
+    }
+
+    .filter-icon {
+        transition: transform 0.3s ease;
+        color: #666;
+    }
+
+    .filter-label[aria-expanded="true"] .filter-icon {
+        transform: rotate(180deg);
+        color: #667eea;
+    }
+
+    /* Select Styles */
+    .filter-select {
+        border: 1px solid #e1e5e9;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .filter-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    /* Price Range */
+    .price-range-container {
+        padding: 10px 0;
+    }
+
+    .custom-range {
+        height: 6px;
+        border-radius: 3px;
+        background: #e1e5e9;
+        outline: none;
+        -webkit-appearance: none;
+    }
+
+    .custom-range::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .custom-range::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .price-display {
+        font-size: 12px;
+        color: #666;
+    }
+
+    .price-current {
+        font-weight: 600;
+        color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+        padding: 4px 8px;
+        border-radius: 4px;
+    }
+
+    /* Product Cards */
+    .product-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .product-image {
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+
+    .product-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .product-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        line-height: 1.4;
+    }
+
+    .product-description {
+        color: #666;
+        font-size: 13px;
+        line-height: 1.5;
+        margin-bottom: 12px;
+    }
+
+    .product-info {
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 10px;
+    }
+
+    .product-price {
+        font-size: 18px;
+        font-weight: 700;
+        color: #e74c3c;
+        margin-bottom: 15px;
+    }
+
+    .product-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-detail {
+        flex: 1;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-detail:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-cart {
+        background: #28a745;
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cart:hover {
+        background: #218838;
+        transform: scale(1.1);
+    }
+
+    /* Clear Filters Button */
+    .btn-clear-filters {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-clear-filters:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+    }
+
+    /* Pagination */
+    .pagination .page-link {
+        border: none;
+        color: #667eea;
+        margin: 0 2px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+
+    /* Loading Animation */
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .filter-sidebar {
+            margin-bottom: 20px;
+        }
+        
+        .product-card {
+            margin-bottom: 20px;
+        }
+    }
+</style>
+
 <body>
 
 <div id="page">
@@ -188,121 +488,115 @@
 
                 <div class="row">
                     <aside class="col-lg-4" id="sidebar_fixed">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-header bg-white d-flex justify-content-between align-items-center pt-3">
-                                <strong>DANH MỤC SẢN PHẨM</strong>
-                                <button class="btn btn-outline-danger btn-sm px-2 py-0">✖ Xóa</button>
-                            </div>
-                            <div class="input-group p-3">
-                                <input type="text" class="form-control" name="keyword" placeholder="Tìm kiếm sản phẩm...">
-                                <button class="btn btn-outline-secondary" type="submit">
-                                    <i class="bi bi-search"></i> <!-- hoặc font-awesome: <i class="fas fa-search"></i> -->
+                        <div class="filter-sidebar">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4 class="mb-0">
+                                    <i class="fas fa-filter me-2"></i>DANH MỤC SẢN PHẨM
+                                </h4>
+                                <button id="clearFilters" class="btn-clear-filters">
+                                    <i class="fas fa-times me-1"></i>Xóa
                                 </button>
                             </div>
-                            <div class="accordion" id="filterAccordion">
-                                <div class="accordion-item border-0 border-bottom border-top">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed bg-white py-3" type="button"
-                                                data-bs-toggle="collapse" data-bs-target="#loaiGiay">
-                                            Kiểu quạt
-                                        </button>
-                                    </h2>
-                                    <div id="kieuQuat" class="accordion-collapse collapse"
-                                         data-bs-parent="#filterAccordion">
-                                        <div class="accordion-body py-2">
-                                            <h1>1</h1>
-                                            <input>
-                                        </div>
+                            <!-- Search Section -->
+                            <div class="search-section mb-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" id="searchInput" class="form-control border-start-0" 
+                                           placeholder="Tìm theo tên hoặc mã sản phẩm..." style="border-left: none;">
+                                </div>
+                            </div>
+
+                            <!-- Filter Categories -->
+                            <div class="filter-categories">
+                                <!-- Kiểu quạt -->
+                                <div class="filter-group mb-3">
+                                    <label class="filter-label d-flex justify-content-between align-items-center" 
+                                           data-bs-toggle="collapse" data-bs-target="#kieuQuatCollapse">
+                                        <span><i class="fas fa-fan me-2"></i>Kiểu quạt</span>
+                                        <i class="fas fa-chevron-down filter-icon"></i>
+                                    </label>
+                                    <div id="kieuQuatCollapse" class="collapse show">
+                                        <select id="kieuQuatSelect" class="form-select filter-select" data-filter="kieuQuatId">
+                                            <option value="">Tất cả kiểu quạt</option>
+                                        </select>
                                     </div>
                                 </div>
 
-                                <div class="accordion-item border-0 border-bottom">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed bg-white py-3" type="button"
-                                                data-bs-toggle="collapse" data-bs-target="#thuongHieu">
-                                            Công suất
-                                        </button>
-                                    </h2>
-                                    <div id="congSuat" class="accordion-collapse collapse"
-                                         data-bs-parent="#filterAccordion">
-                                        <div class="accordion-body py-2">
-                                            <h1>1</h1>
-                                            <input>
-                                        </div>
+                                <!-- Công suất -->
+                                <div class="filter-group mb-3">
+                                    <label class="filter-label d-flex justify-content-between align-items-center" 
+                                           data-bs-toggle="collapse" data-bs-target="#congSuatCollapse">
+                                        <span><i class="fas fa-bolt me-2"></i>Công suất</span>
+                                        <i class="fas fa-chevron-down filter-icon"></i>
+                                    </label>
+                                    <div id="congSuatCollapse" class="collapse">
+                                        <select id="congSuatSelect" class="form-select filter-select" data-filter="congSuatId">
+                                            <option value="">Tất cả công suất</option>
+                                        </select>
                                     </div>
                                 </div>
 
-                                <div class="accordion-item border-0 border-bottom">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed bg-white py-3" type="button"
-                                                data-bs-toggle="collapse" data-bs-target="#chatLieu">
-                                            Hãng
-                                        </button>
-                                    </h2>
-                                    <div id="hang" class="accordion-collapse collapse"
-                                         data-bs-parent="#filterAccordion">
-                                        <div class="accordion-body py-2">
-                                            <h1>1</h1>
-                                            <input>
-                                        </div>
+                                <!-- Hãng -->
+                                <div class="filter-group mb-3">
+                                    <label class="filter-label d-flex justify-content-between align-items-center" 
+                                           data-bs-toggle="collapse" data-bs-target="#hangCollapse">
+                                        <span><i class="fas fa-tag me-2"></i>Hãng</span>
+                                        <i class="fas fa-chevron-down filter-icon"></i>
+                                    </label>
+                                    <div id="hangCollapse" class="collapse">
+                                        <select id="hangSelect" class="form-select filter-select" data-filter="hangId">
+                                            <option value="">Tất cả hãng</option>
+                                        </select>
                                     </div>
                                 </div>
 
-                                <div class="accordion-item border-0 border-bottom">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed bg-white py-3" type="button"
-                                                data-bs-toggle="collapse" data-bs-target="#deGiay">
-                                            Màu sắc
-                                        </button>
-                                    </h2>
-                                    <div id="deGiay" class="accordion-collapse collapse"
-                                         data-bs-parent="#filterAccordion">
-                                        <div class="accordion-body py-2">
-                                            <h1>1</h1>
-                                            <input>
-                                        </div>
+                                <!-- Màu sắc -->
+                                <div class="filter-group mb-3">
+                                    <label class="filter-label d-flex justify-content-between align-items-center" 
+                                           data-bs-toggle="collapse" data-bs-target="#mauSacCollapse">
+                                        <span><i class="fas fa-palette me-2"></i>Màu sắc</span>
+                                        <i class="fas fa-chevron-down filter-icon"></i>
+                                    </label>
+                                    <div id="mauSacCollapse" class="collapse">
+                                        <select id="mauSacSelect" class="form-select filter-select" data-filter="mauSacId">
+                                            <option value="">Tất cả màu sắc</option>
+                                        </select>
                                     </div>
                                 </div>
 
-                                <div class="accordion-item border-0 border-bottom">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed bg-white py-3" type="button"
-                                                data-bs-toggle="collapse" data-bs-target="#kichCo">
-                                            Nút bấm
-                                        </button>
-                                    </h2>
-                                    <div id="nutBam" class="accordion-collapse collapse"
-                                         data-bs-parent="#filterAccordion">
-                                        <div class="accordion-body py-2">
-                                            <h1>1</h1>
-                                            <input>
-                                        </div>
+                                <!-- Nút bấm -->
+                                <div class="filter-group mb-3">
+                                    <label class="filter-label d-flex justify-content-between align-items-center" 
+                                           data-bs-toggle="collapse" data-bs-target="#nutBamCollapse">
+                                        <span><i class="fas fa-hand-pointer me-2"></i>Nút bấm</span>
+                                        <i class="fas fa-chevron-down filter-icon"></i>
+                                    </label>
+                                    <div id="nutBamCollapse" class="collapse">
+                                        <select id="nutBamSelect" class="form-select filter-select" data-filter="nutBamId">
+                                            <option value="">Tất cả nút bấm</option>
+                                        </select>
                                     </div>
                                 </div>
 
-                                <div class="accordion-item border-0 border-bottom">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed bg-white py-3" type="button"
-                                                data-bs-toggle="collapse" data-bs-target="#mauSac">
-                                            Màu sắc
-                                        </button>
-                                    </h2>
-                                    <div id="mauSac" class="accordion-collapse collapse"
-                                         data-bs-parent="#filterAccordion">
-                                        <div class="accordion-body py-2">
-                                            <h1>1</h1>
-                                            <input>
+                                <!-- Giá tiền -->
+                                <div class="filter-group mb-3">
+                                    <label class="filter-label d-flex justify-content-between align-items-center" 
+                                           data-bs-toggle="collapse" data-bs-target="#priceCollapse">
+                                        <span><i class="fas fa-dollar-sign me-2"></i>Khoảng giá</span>
+                                        <i class="fas fa-chevron-down filter-icon"></i>
+                                    </label>
+                                    <div id="priceCollapse" class="collapse show">
+                                        <div class="price-range-container">
+                                            <input type="range" class="form-range custom-range" min="0" max="1000000" step="10000"
+                                                   id="priceSlider">
+                                            <div class="price-display d-flex justify-content-between align-items-center mt-2">
+                                                <span class="price-min">0đ</span>
+                                                <span class="price-current" id="priceDisplay">1.000.000đ</span>
+                                                <span class="price-max">2.000.000đ</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <div class="px-3 py-3">
-                                    <label class="form-label mb-1">Giá tiền (Giá gốc)</label>
-                                    <input type="range" class="form-range" min="0" max="1000000" step="10000"
-                                           id="giaTienRange">
-                                    <div class="d-flex justify-content-between small">
-                                        <span>0đ</span>
-                                        <span>1.000.000đ</span>
                                     </div>
                                 </div>
                             </div>
@@ -311,98 +605,21 @@
                     </aside>
 
                     <div class="col-lg-8">
-                        <!-- Kiểm tra nếu có sản phẩm -->
-                        <div th:if="${sanPhamList != null and !sanPhamList.isEmpty()}">
-                            <div class="row">
-                                <!-- Lặp qua danh sách sản phẩm -->
-                                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2"
-                                     th:each="sanPham : ${sanPhamList}">
-                                    <div class="card shadow-sm">
-                                        <!-- Hình ảnh sản phẩm -->
-                                        <div class="position-relative">
-                                            <!-- Hiển thị ảnh sản phẩm từ database -->
-                                            <img th:if="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty() and sanPham.sanPhamChiTiet[0].hinhAnh != null and sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh != null}"
-                                                 th:src="@{${sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh}}"
-                                                 class="card-img-top"
-                                                 style="height: 210px; object-fit: contain;"
-                                                 th:alt="${sanPham.ten}">
-                                            <!-- Hiển thị ảnh mặc định nếu không có ảnh -->
-                                            <img th:unless="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty() and sanPham.sanPhamChiTiet[0].hinhAnh != null and sanPham.sanPhamChiTiet[0].hinhAnh.hinhAnh != null}"
-                                                 src="/user/assets/images/default_product.jpg"
-                                                 class="card-img-top"
-                                                 style="height: 210px; object-fit: contain;"
-                                                 th:alt="${sanPham.ten}">
-
-                                            <!-- Badge trạng thái -->
-                                            <span class="badge bg-success position-absolute top-0 start-0 m-2"
-                                                  th:if="${sanPham.trangThai}">Có sẵn</span>
-                                            <span class="badge bg-secondary position-absolute top-0 start-0 m-2"
-                                                  th:unless="${sanPham.trangThai}">Hết hàng</span>
-                                        </div>
-
-                                        <!-- Thông tin sản phẩm -->
-                                        <div class="p-3 d-flex flex-column flex-grow-1">
-                                            <!-- Tên sản phẩm -->
-                                            <h5 class="card-title " th:text="${sanPham.ten}">Tên sản phẩm</h5>
-
-                                            <!-- Mô tả ngắn -->
-                                            <div>
-                                                <p class="text-muted small line-clamp-2 mb-0"
-                                                   th:text="${sanPham.moTa != null ? (sanPham.moTa.length() > 60 ? sanPham.moTa.substring(0, 60) + '...' : sanPham.moTa) : 'Chưa có mô tả'}">
-                                                </p>
-                                            </div>
-
-                                            <!-- Thông tin chi tiết -->
-                                            <div class="d-flex justify-content-between">
-                                                <!-- Mã sản phẩm -->
-                                                <small class="text-muted d-block">
-                                                    <strong>Mã SP:</strong>
-                                                    <span th:text="${sanPham.ma != null ? (sanPham.ma.length() > 5 ? sanPham.moTa.substring(0, 5) + '...' : sanPham.ma) : 'Null'}">SP001</span>
-                                                </small>
-
-                                                <!-- Loại quạt -->
-                                                <small class="text-muted d-block"
-                                                       th:if="${sanPham.kieuQuat != null}">
-                                                    <strong>Loại:</strong>
-                                                    <span th:text="${sanPham.kieuQuat.ten != null ? (sanPham.kieuQuat.ten.length() > 10 ? sanPham.kieuQuat.ten.substring(0, 10) + '...' : sanPham.kieuQuat.ten) : 'Null'}"></span>
-                                                </small>
-                                            </div>
-
-                                            <!-- Giá sản phẩm -->
-                                            <div class="mt-2">
-                                                <h4 class="text-dark-emphasis mb-1 text-sm fw-bold"
-                                                    th:if="${sanPham.sanPhamChiTiet != null and !sanPham.sanPhamChiTiet.isEmpty() and sanPham.sanPhamChiTiet[0].gia != null}">
-                                                    <span th:text="${#numbers.formatDecimal(sanPham.sanPhamChiTiet[0].gia, 0, 'COMMA', 0, 'POINT')}">500,000</span>
-                                                    <small>đ</small>
-                                                </h4>
-                                            </div>
-
-                                            <!-- Nút hành động -->
-
-                                            <div class="d-flex justify-content-center gap-2 mt-2">
-                                                <a th:href="@{/fanTech/detail(id=${sanPham.id})}"
-                                                   class="btn btn-outline-dark btn-sm flex-grow-1 text-nowrap text-center"
-                                                   style="font-size: 0.85rem; padding: 0.5rem 0;">
-                                                    Xem chi tiết
-                                                </a>
-                                                <a href="#"
-                                                   class="btn btn-dark btn-sm text-nowrap text-center"
-                                                   style="font-size: 0.85rem; padding: 0.5rem 0.6rem; width: 38px;">
-                                                    <i class="fas fa-cart-plus"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- Product count -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 id="productCount" class="mb-0">
+                                <i class="loading-spinner me-2"></i>Đang tải...
+                            </h5>
                         </div>
-                    </div>
 
-                    <!-- Thông báo khi không có sản phẩm -->
-                    <div th:unless="${sanPhamList != null and !sanPhamList.isEmpty()}" class="text-center py-5">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Hiện tại chưa có sản phẩm nào để hiển thị.
+                        <!-- Products container -->
+                        <div id="productsContainer" class="row">
+                            <!-- Products will be loaded here by JavaScript -->
+                        </div>
+
+                        <!-- Pagination container -->
+                        <div id="paginationContainer" class="mt-4">
+                            <!-- Pagination will be loaded here by JavaScript -->
                         </div>
                     </div>
                 </div>
@@ -420,6 +637,9 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+<!-- Product Search and Filter JavaScript -->
+<script th:src="@{/user/assets/compiled/js/product-search.js}"></script>
 
 <!-- Custom JavaScript for dropdown -->
 <script>

@@ -193,7 +193,8 @@ public class BanHangTaiQuayController {
     @PostMapping("/thanh-toan")
     @ResponseBody
     public ResponseEntity<String> thanhToan(@RequestParam("idHD") Long idHD,
-                                           @RequestParam("phuongThucThanhToan") String phuongThucThanhToan) {
+                                           @RequestParam("phuongThucThanhToan") String phuongThucThanhToan,
+                                           @RequestParam(value = "shouldPrint", required = false, defaultValue = "false") Boolean shouldPrint) {
         try {
             // Kiểm tra xem hóa đơn có chi tiết nào không
             List<HoaDonChiTiet> listHDCT = hoaDonService.listHoaDonChiTiets(idHD);
@@ -221,7 +222,11 @@ public class BanHangTaiQuayController {
             } else {
                 // Thanh toán tiền mặt (mặc định)
                 banHangService.thanhToan(idHD);
-                return ResponseEntity.ok("Thanh toán thành công!");
+                String responseMessage = "Thanh toán thành công!";
+                if (shouldPrint) {
+                    responseMessage += " PRINT_INVOICE:" + idHD;
+                }
+                return ResponseEntity.ok(responseMessage);
             }
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

@@ -10,4 +10,10 @@ public interface SanPhamChiTietRepo extends JpaRepository<SanPhamChiTiet,Long> {
     //khoi
     @Query("SELECT spct FROM SanPhamChiTiet spct WHERE spct.trangThai = true")
     List<SanPhamChiTiet> findByTrangThaiTrue();
+    
+    @Query("SELECT MIN(spct.gia) FROM SanPhamChiTiet spct WHERE spct.trangThai = true")
+    Double findMinPrice();
+    
+    @Query("SELECT MAX(spct.gia) FROM SanPhamChiTiet spct WHERE spct.trangThai = true")
+    Double findMaxPrice();
 }
