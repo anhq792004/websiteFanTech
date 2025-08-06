@@ -39,8 +39,7 @@ public class SecurityConfig {
                                 "/request-reset",
                                 "/reset-password",
                                 "/access-denied",
-                                "/verify-account",
-                                "/profile/**").permitAll()
+                                "/verify-account").permitAll()
 
                         // PHÂN QUYỀN HÓA ĐƠN - CHỈ ADMIN MỚI TRUY CẬP ĐƯỢC
                         .requestMatchers("/admin/**").hasRole("ADMIN")
