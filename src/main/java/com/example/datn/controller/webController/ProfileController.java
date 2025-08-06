@@ -3,10 +3,13 @@ package com.example.datn.controller.webController;
 import com.example.datn.dto.request.AddDiaChiRequest;
 import com.example.datn.dto.request.UpdateDiaChiRequest;
 import com.example.datn.dto.request.UpdateInforKhachHangRequest;
+import com.example.datn.dto.request.UpdateInforRequest;
 import com.example.datn.entity.DiaChi;
 import com.example.datn.entity.HoaDon.HoaDon;
 import com.example.datn.entity.HoaDon.HoaDonChiTiet;
+import com.example.datn.entity.HoaDon.LichSuHoaDon;
 import com.example.datn.entity.KhachHang;
+import com.example.datn.entity.SanPham.SanPhamChiTiet;
 import com.example.datn.entity.TaiKhoan;
 import com.example.datn.repository.DiaChiRepo;
 import com.example.datn.service.DiaChiService;
@@ -21,12 +24,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -121,19 +126,53 @@ public class ProfileController {
         KhachHang khachHang = khachHangService.findByTaiKhoan(currentUser);
         List<HoaDon> hoaDons = hoaDonService.getHoaDonByIdKH(khachHang.getId());
         model.addAttribute("hoaDons", hoaDons);
+        model.addAttribute("khachHang", khachHang);
 
         return "user/infor/ordered";
     }
 
-    @GetMapping("/order-infor/detail")
-    public String detail(Model model,
+    @GetMapping("/ordered-detail")
+    public String detail(@RequestParam Long id,
+                         Model model,
                          HttpSession session) {
+        Optional<HoaDon> hoaDonOptional = hoaDonService.findHoaDonById(id);
+        HoaDon hoaDon = hoaDonOptional.orElseThrow(()
+                -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hóa đơn"));
+        model.addAttribute("hoaDon", hoaDon);
         TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
         KhachHang khachHang = khachHangService.findByTaiKhoan(currentUser);
+        //
+        List<HoaDonChiTiet> listHDCT = hoaDonService.listHoaDonChiTiets(id);
+        model.addAttribute("listHDCT", listHDCT);
+        //
         List<HoaDon> hoaDons = hoaDonService.getHoaDonByIdKH(khachHang.getId());
         model.addAttribute("hoaDons", hoaDons);
+        //timeline lịch sử hóa đơn
+        List<LichSuHoaDon> lichSuHoaDonList = hoaDonService.lichSuHoaDonList(id);
+        model.addAttribute("lichSuHoaDonList", lichSuHoaDonList);
 
-        return "user/infor/ordered";
+        //tong so luong san pham
+        Integer tongSoLuong = hoaDonService.tongSoLuong(id);
+        model.addAttribute("tongSoLuong", tongSoLuong);
+
+        model.addAttribute("khachHang", khachHang);
+        return "user/infor/orderedDetail";
+    }
+
+    @PostMapping("/updateInfor")
+    @ResponseBody
+    public ResponseEntity<?> updateInfor( @RequestBody UpdateInforRequest request) {
+        hoaDonService.updateInfor(request);
+        return ResponseEntity.ok("Cập nhật thông tin thành công");
+    }
+
+    @PostMapping("/huy")
+    @ResponseBody
+    public ResponseEntity<String> huy(@RequestParam("id") Long id,
+                                      @RequestParam("ghiChu") String ghiChu) {
+        hoaDonService.huyOnl(id, ghiChu);
+//        hoaDonService.hoanSoLuongSanPham(id);
+        return ResponseEntity.ok("Hóa đơn đã được hủy !");
     }
 
     // dia chi
@@ -145,6 +184,7 @@ public class ProfileController {
         List<DiaChi> listDiaChi = diaChiService.getDiaChiByIdKhachHang(khachHang.getId());
         model.addAttribute("khachHang", khachHang);
         model.addAttribute("listDiaChi", listDiaChi);
+
         return "user/infor/address";
     }
 
@@ -183,17 +223,22 @@ public class ProfileController {
 
     //phieu giam gia
     @GetMapping("/coupon")
-    public String coupon() {
-
+    public String coupon(Model model,
+                         HttpSession session) {
+        TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
+        KhachHang khachHang = khachHangService.findByTaiKhoan(currentUser);
+        model.addAttribute("khachHang", khachHang);
         return "user/infor/coupon";
     }
 
     @GetMapping("/change-password")
     public String changePassword(Model model, HttpSession session) {
         TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
+        KhachHang khachHang = khachHangService.findByTaiKhoan(currentUser);
         if (currentUser == null) {
             return "redirect:/login";
         }
+        model.addAttribute("khachHang", khachHang);
         model.addAttribute("showVerificationForm", false);
         model.addAttribute("showPasswordForm", false);
         return "user/infor/changePassword";

@@ -9,6 +9,7 @@
 
 <!-- SPECIFIC CSS -->
 <link rel="stylesheet" th:href="@{/user/assets/compiled/css/home_1.css}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
 <!-- FontAwesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -77,9 +78,10 @@
                                                 <span th:case="5" class="text-danger">Hủy</span>
                                             </td>
                                             <td class="px-4 py-2 border text-center">
-                                                <a th:href="@{/vin-fan/hoa-don-kh/{id}(id=${hoaDon.id})}"
-                                                   class="text-blue-500 hover:underline">Xem
-                                                    chi tiết</a>
+                                                <a th:href="@{/profile/ordered-detail(id=${hoaDon.id})}" type="button"
+                                                   class="btn btn-outline-warning" >
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
                                             </td>
                                         </tr>
                                         </tbody>

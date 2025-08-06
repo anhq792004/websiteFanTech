@@ -105,7 +105,7 @@ public class HoaDonServiceImpl implements HoaDonService {
 
     @Override
     public List<HoaDon> getHoaDonByIdKH(Long idKH) {
-        return hoaDonRepo.findByKhachHang_Id(idKH);
+        return hoaDonRepo.findByKhachHang_IdAndTrangThaiNot(idKH, 0);
     }
 
     @Override
@@ -359,6 +359,31 @@ public class HoaDonServiceImpl implements HoaDonService {
             lichSuHoaDon.setNgaySua(LocalDateTime.now());
             lichSuHoaDon.setMoTa(ghiChu);
             lichSuHoaDon.setNguoiTao(currentNhanVien.getTen());
+            lichSuHoaDonRepo.save(lichSuHoaDon);
+        } else {
+            throw new RuntimeException("Không tìm thấy hóa đơn với ID: " + id);
+        }
+    }
+
+    @Override
+    public void huyOnl(Long id, String ghiChu) {
+        Optional<HoaDon> optionalHoaDon = hoaDonRepo.findById(id);
+        if (optionalHoaDon.isPresent()) {
+            HoaDon hoaDon = optionalHoaDon.get();
+            List<HoaDonChiTiet> listHDCT = hoaDonChiTietRepo.findByHoaDon_Id(id);
+
+            // Cập nhật trạng thái hóa đơn sang HỦY
+            hoaDon.setGhiChu(ghiChu);
+            hoaDon.setTrangThai(getTrangThaiHoaDon().getHuy());
+            hoaDon.setNgaySua(LocalDateTime.now());
+            hoaDonRepo.save(hoaDon);
+
+            // Tạo một bản ghi lịch sử cho HoaDon hủy
+            LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
+            lichSuHoaDon.setHoaDon(hoaDon);
+            lichSuHoaDon.setTrangThai(getTrangThaiHoaDon().getHuy());
+            lichSuHoaDon.setNgaySua(LocalDateTime.now());
+            lichSuHoaDon.setMoTa(ghiChu);
             lichSuHoaDonRepo.save(lichSuHoaDon);
         } else {
             throw new RuntimeException("Không tìm thấy hóa đơn với ID: " + id);
