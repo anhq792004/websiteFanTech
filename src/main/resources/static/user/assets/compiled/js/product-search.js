@@ -148,9 +148,10 @@ class ProductSearch {
         const priceDisplay = document.getElementById('priceDisplay');
         
         if (priceSlider && priceDisplay) {
-            priceSlider.min = priceRange.min;
-            priceSlider.max = priceRange.max;
-            priceSlider.value = priceRange.max;
+            priceSlider.min = priceRange.min || 0;
+            // Cố định max = 5.000.000 VND
+            priceSlider.max = 5000000;
+            priceSlider.value = 5000000;
             
             this.updatePriceDisplay();
         }
@@ -201,8 +202,22 @@ class ProductSearch {
         // Clear existing products
         productsContainer.innerHTML = '';
 
-        // Render products
-        data.products.forEach(product => {
+        // Sắp xếp sản phẩm theo giá từ thấp đến cao
+        const sortedProducts = data.products.sort((a, b) => {
+            // Lấy giá nhỏ nhất của mỗi sản phẩm
+            const getMinPrice = (product) => {
+                if (!product.sanPhamChiTiet || product.sanPhamChiTiet.length === 0) return 0;
+                return Math.min(...product.sanPhamChiTiet.map(spct => spct.gia || 0));
+            };
+            
+            const priceA = getMinPrice(a);
+            const priceB = getMinPrice(b);
+            
+            return priceA - priceB; // Sắp xếp tăng dần (giá thấp lên đầu)
+        });
+
+        // Render products đã sắp xếp
+        sortedProducts.forEach(product => {
             const productCard = this.createProductCard(product);
             productsContainer.appendChild(productCard);
         });
@@ -217,91 +232,95 @@ class ProductSearch {
     createProductCard(product) {
         const card = document.createElement('div');
         card.className = 'col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-2';
-        
-        const firstVariant = product.sanPhamChiTiet && product.sanPhamChiTiet.length > 0 
-            ? product.sanPhamChiTiet[0] : null;
-        
-        const imageUrl = firstVariant && firstVariant.hinhAnh 
-            ? firstVariant.hinhAnh.hinhAnh 
+
+        // Lọc SanPhamChiTiet có giá nhỏ nhất
+        const cheapestVariant = product.sanPhamChiTiet && product.sanPhamChiTiet.length > 0
+            ? product.sanPhamChiTiet.reduce((min, current) =>
+                (current.gia && current.gia < min.gia) ? current : min, product.sanPhamChiTiet[0])
+            : null;
+
+        const imageUrl = cheapestVariant && cheapestVariant.hinhAnh
+            ? cheapestVariant.hinhAnh.hinhAnh
             : '/user/assets/images/default_product.jpg';
-        
-        const price = firstVariant ? firstVariant.gia : 0;
+
+        const price = cheapestVariant ? cheapestVariant.gia : 0;
         const status = product.trangThai ? 'Có sẵn' : 'Hết hàng';
         const statusClass = product.trangThai ? 'bg-success' : 'bg-secondary';
-        
+
         // Format description
         const description = product.moTa || 'Chưa có mô tả';
         const shortDescription = description.length > 60 ? description.substring(0, 60) + '...' : description;
-        
+
         // Format product code
         const productCode = product.ma || 'Null';
         const shortCode = productCode.length > 5 ? productCode.substring(0, 5) + '...' : productCode;
-        
+
         // Format product type
         const productType = product.kieuQuat ? product.kieuQuat.ten : 'Null';
         const shortType = productType.length > 10 ? productType.substring(0, 10) + '...' : productType;
-        
+
         card.innerHTML = `
-            <div class="card shadow-sm">
-                <!-- Hình ảnh sản phẩm -->
-                <div class="position-relative">
-                    <img src="${imageUrl}" 
-                         class="card-img-top" 
-                         style="height: 210px; object-fit: contain;" 
-                         alt="${product.ten}">
-                    
-                    <!-- Badge trạng thái -->
-                    <span class="badge ${statusClass} position-absolute top-0 start-0 m-2">${status}</span>
+        <div class="card shadow-sm">
+            <!-- Hình ảnh sản phẩm -->
+            <div class="position-relative">
+                <img src="${imageUrl}" 
+                     class="card-img-top" 
+                     style="height: 210px; object-fit: contain;" 
+                     alt="${product.ten}">
+                
+                <!-- Badge trạng thái -->
+                <span class="badge ${statusClass} position-absolute top-0 start-0 m-2">${status}</span>
+            </div>
+
+            <!-- Thông tin sản phẩm -->
+            <div class="p-3 d-flex flex-column flex-grow-1">
+                <!-- Tên sản phẩm -->
+                <h5 class="card-title">${product.ten}</h5>
+
+                <!-- Mô tả ngắn -->
+                <div>
+                    <p class="text-muted small line-clamp-2 mb-0">${shortDescription}</p>
                 </div>
 
-                <!-- Thông tin sản phẩm -->
-                <div class="p-3 d-flex flex-column flex-grow-1">
-                    <!-- Tên sản phẩm -->
-                    <h5 class="card-title">${product.ten}</h5>
+                <!-- Thông tin chi tiết -->
+                <div class="d-flex justify-content-between">
+                    <!-- Mã sản phẩm -->
+                    <small class="text-muted d-block">
+                        <strong>Mã SP:</strong> ${shortCode}
+                    </small>
 
-                    <!-- Mô tả ngắn -->
-                    <div>
-                        <p class="text-muted small line-clamp-2 mb-0">${shortDescription}</p>
-                    </div>
+                    <!-- Loại quạt -->
+                    <small class="text-muted d-block">
+                        <strong>Loại:</strong> ${shortType}
+                    </small>
+                </div>
 
-                    <!-- Thông tin chi tiết -->
-                    <div class="d-flex justify-content-between">
-                        <!-- Mã sản phẩm -->
-                        <small class="text-muted d-block">
-                            <strong>Mã SP:</strong> ${shortCode}
-                        </small>
+                <!-- Giá sản phẩm -->
+                <div class="mt-2">
+                    <h4 class="text-dark-emphasis mb-1 text-sm fw-bold">
+                        <span>${this.formatCurrency(price)}</span>
+                        <small>đ</small>
+                    </h4>
+                </div>
 
-                        <!-- Loại quạt -->
-                        <small class="text-muted d-block">
-                            <strong>Loại:</strong> ${shortType}
-                        </small>
-                    </div>
-
-                    <!-- Giá sản phẩm -->
-                    <div class="mt-2">
-                        <h4 class="text-dark-emphasis mb-1 text-sm fw-bold">
-                            <span>${this.formatCurrency(price)}</span>
-                            <small>đ</small>
-                        </h4>
-                    </div>
-
-                    <!-- Nút hành động -->
-                    <div class="d-flex justify-content-center gap-2 mt-2">
-                        <a href="/fanTech/detail?id=${product.id}"
-                           class="btn btn-outline-dark btn-sm flex-grow-1 text-nowrap text-center"
-                           style="font-size: 0.85rem; padding: 0.5rem 0;">
-                            Xem chi tiết
-                        </a>
-                        <a href="#"
-                           class="btn btn-dark btn-sm text-nowrap text-center"
-                           style="font-size: 0.85rem; padding: 0.5rem 0.6rem; width: 38px;">
-                            <i class="fas fa-cart-plus"></i>
-                        </a>
-                    </div>
+                <!-- Nút hành động -->
+                <div class="d-flex justify-content-center gap-2 mt-2">
+                    <a href="/fanTech/detail?id=${product.id}"
+                       class="btn btn-outline-dark btn-sm flex-grow-1 text-nowrap text-center"
+                       style="font-size: 0.85rem; padding: 0.5rem 0;">
+                        Xem chi tiết
+                    </a>
+                    <a href="#"
+                       class="btn btn-dark btn-sm text-nowrap text-center"
+                       style="font-size: 0.85rem; padding: 0.5rem 0.6rem; width: 38px;"
+                       onclick="addToCart(${product.id})">
+                        <i class="fas fa-cart-plus"></i>
+                    </a>
                 </div>
             </div>
-        `;
-        
+        </div>
+    `;
+
         return card;
     }
 

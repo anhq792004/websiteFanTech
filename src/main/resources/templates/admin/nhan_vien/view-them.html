@@ -30,8 +30,14 @@
                             <!--                            <div th:action="@{|/admin/nhan-vien/them|}" th:object="${nhanVien}" method="post">-->
                             <div class="row justify-content-around">
                                 <div class="col-md-4">
-                                    <div class="mb-3"> Image</div>
-                                    <!--                                            <input type="file" class="form-control" name="anh" th:field="*{anh}">-->
+                                    <div class="mb-3">
+                                        <label for="hinhAnh" class="form-label fw-bold">Ảnh nhân viên</label>
+                                        <input type="file" class="form-control" id="hinhAnh" name="hinhAnh" accept="image/*">
+                                        <div class="form-text">Chọn ảnh nhân viên (JPG, PNG, GIF)</div>
+                                        <div id="imagePreview" class="mt-2" style="display: none;">
+                                            <img id="previewImg" src="" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                                        </div>
+                                    </div>
                                     <div class="mb-3">
                                         <label for="ten" me="hoVaTen" class="form-label fw-bold"><span
                                                 class="text-danger">*</span> Tên nhân viên </label>

@@ -17,25 +17,32 @@ $(document).ready(function () {
             }
         });
 
-        const formData = {
-            ten: $('#ten').val(),
-            canCuocCongDan: $('#cccd').val(),
-            email: $('#email').val(),
-            soDienThoai: $('#sdt').val(),
-            ngaySinh: $('#ngaySinh').val(),
-            gioiTinh: $('#gioiTinh').val(),
-            tinhThanhPho: $('#city').val(),
-            quanHuyen: $('#district').val(),
-            xaPhuong: $('#ward').val(),
-            soNhaNgoDuong: $('#soNhaNgoDuong').val(),
-            chucVu: $('#chucVu').val()
-        };
+        // Tạo FormData để gửi cả text và file
+        const formData = new FormData();
+        formData.append('ten', $('#ten').val());
+        formData.append('canCuocCongDan', $('#cccd').val());
+        formData.append('email', $('#email').val());
+        formData.append('soDienThoai', $('#sdt').val());
+        formData.append('ngaySinh', $('#ngaySinh').val());
+        formData.append('gioiTinh', $('#gioiTinh').val());
+        formData.append('tinhThanhPho', $('#city').val());
+        formData.append('quanHuyen', $('#district').val());
+        formData.append('xaPhuong', $('#ward').val());
+        formData.append('soNhaNgoDuong', $('#soNhaNgoDuong').val());
+        formData.append('chucVu', $('#chucVu').val());
+        
+        // Thêm file ảnh nếu có
+        const hinhAnhFile = $('#hinhAnh')[0].files[0];
+        if (hinhAnhFile) {
+            formData.append('hinhAnh', hinhAnhFile);
+        }
 
         $.ajax({
             url: '/admin/nhan-vien/them',
             type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(formData),
+            data: formData,
+            processData: false,
+            contentType: false,
             success: function (response) {
                 Swal.fire({
                     toast: true,
@@ -120,25 +127,32 @@ $(document).ready(function () {
     $('#formUpdateNV').submit(function (e) {
         e.preventDefault();
 
-        const data = {
-            id: $('#id').val(),
-            ten: $('#name').val(),
-            soDienThoai: $('#soDienThoai').val(),
-            canCuocCongDan: $('#canCuocCongDan').val(),
-            ngaySinh: $('#ngaySinh').val(),
-            gioiTinh: $('#gioiTinh').val(),
-            tinhThanhPho: $('#city').val(),
-            quanHuyen: $('#district').val(),
-            xaPhuong: $('#ward').val(),
-            soNhaNgoDuong: $('#soNhaNgoDuong').val(),
-            chucVu: $('#chucVu').val()
-        };
+        // Tạo FormData để gửi cả text và file
+        const formData = new FormData();
+        formData.append('id', $('#id').val());
+        formData.append('ten', $('#name').val());
+        formData.append('soDienThoai', $('#soDienThoai').val());
+        formData.append('canCuocCongDan', $('#canCuocCongDan').val());
+        formData.append('ngaySinh', $('#ngaySinh').val());
+        formData.append('gioiTinh', $('#gioiTinh').val());
+        formData.append('tinhThanhPho', $('#city').val());
+        formData.append('quanHuyen', $('#district').val());
+        formData.append('xaPhuong', $('#ward').val());
+        formData.append('soNhaNgoDuong', $('#soNhaNgoDuong').val());
+        formData.append('chucVu', $('#chucVu').val());
+        
+        // Thêm file ảnh nếu có
+        const hinhAnhFile = $('#hinhAnh')[0].files[0];
+        if (hinhAnhFile) {
+            formData.append('hinhAnh', hinhAnhFile);
+        }
 
         $.ajax({
             url: '/admin/nhan-vien/update',
             type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
+            data: formData,
+            processData: false,
+            contentType: false,
             success: function (response) {
                 Swal.fire({
                     toast: true,
@@ -164,6 +178,54 @@ $(document).ready(function () {
                 });
             }
         });
+    });
+    
+    // Preview ảnh khi chọn file trong form update
+    $('#hinhAnh').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            // Kiểm tra loại file
+            if (!file.type.startsWith('image/')) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    title: 'Vui lòng chọn file hình ảnh hợp lệ',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+                this.value = '';
+                $('#imagePreview').hide();
+                return;
+            }
+            
+            // Kiểm tra kích thước file (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    title: 'Kích thước file không được vượt quá 10MB',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+                this.value = '';
+                $('#imagePreview').hide();
+                return;
+            }
+            
+            // Hiển thị preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#previewImg').attr('src', e.target.result);
+                $('#imagePreview').show();
+            };
+            reader.readAsDataURL(file);
+        } else {
+            $('#imagePreview').hide();
+        }
     });
 });
 

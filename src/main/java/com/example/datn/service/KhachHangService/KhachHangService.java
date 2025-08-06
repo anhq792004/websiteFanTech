@@ -7,6 +7,7 @@ import com.example.datn.entity.TaiKhoan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 
 public interface KhachHangService {
@@ -15,8 +16,12 @@ public interface KhachHangService {
     KhachHang findById(Long id);
 
     KhachHang addKH(AddKhachHangRequest request);
+    
+    KhachHang addKH(AddKhachHangRequest request, MultipartFile hinhAnh);
 
     void updateInforKhachHang(UpdateInforKhachHangRequest request);
+    
+    void updateInforKhachHang(UpdateInforKhachHangRequest request, MultipartFile hinhAnh);
 
     String generateCode();
 

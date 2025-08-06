@@ -19,8 +19,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,16 +83,39 @@ public class KhachHangController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> add(@RequestBody AddKhachHangRequest request,
-                                 Model model) {
+    public ResponseEntity<?> add(@RequestParam("ten") String ten,
+                                 @RequestParam("email") String email,
+                                 @RequestParam("soDienThoai") String soDienThoai,
+                                 @RequestParam("ngaySinh") String ngaySinh,
+                                 @RequestParam("gioiTinh") String gioiTinh,
+                                 @RequestParam("tinhThanhPho") String tinhThanhPho,
+                                 @RequestParam("quanHuyen") String quanHuyen,
+                                 @RequestParam("xaPhuong") String xaPhuong,
+                                 @RequestParam("soNhaNgoDuong") String soNhaNgoDuong,
+                                 @RequestParam(value = "hinhAnh", required = false) MultipartFile hinhAnh) {
         try {
-            String ngaySinhFormatted = "";
-            if (request.getNgaySinh() != null) {
+            // Tạo AddKhachHangRequest từ các tham số
+            AddKhachHangRequest request = new AddKhachHangRequest();
+            request.setTen(ten);
+            request.setEmail(email);
+            request.setSoDienThoai(soDienThoai);
+            
+            // Parse ngày sinh từ String sang Date
+            try {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                ngaySinhFormatted = sdf.format(request.getNgaySinh());
+                Date ngaySinhDate = sdf.parse(ngaySinh);
+                request.setNgaySinh(ngaySinhDate);
+            } catch (ParseException e) {
+                return ResponseEntity.badRequest().body("Định dạng ngày sinh không hợp lệ (dd/MM/yyyy)");
             }
-            model.addAttribute("ngaySinhFormatted", ngaySinhFormatted);
-            khachHangService.addKH(request);
+            
+            request.setGioiTinh(gioiTinh);
+            request.setTinhThanhPho(tinhThanhPho);
+            request.setQuanHuyen(quanHuyen);
+            request.setXaPhuong(xaPhuong);
+            request.setSoNhaNgoDuong(soNhaNgoDuong);
+            
+            khachHangService.addKH(request, hinhAnh);
             return ResponseEntity.ok().body("Thêm khách hàng thành công!");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -128,12 +154,34 @@ public class KhachHangController {
 
     @PostMapping("/update")
     @ResponseBody
-    public ResponseEntity<String> updateKhachHang(@RequestBody UpdateInforKhachHangRequest request) {
+    public ResponseEntity<String> updateKhachHang(@RequestParam("idKH") Long idKH,
+                                                   @RequestParam("ten") String ten,
+                                                   @RequestParam("soDienThoai") String soDienThoai,
+                                                   @RequestParam("ngaySinh") String ngaySinh,
+                                                   @RequestParam("gioiTinh") String gioiTinh,
+                                                   @RequestParam(value = "hinhAnh", required = false) MultipartFile hinhAnh) {
         try {
-            khachHangService.updateInforKhachHang(request);
+            // Tạo UpdateInforKhachHangRequest từ các tham số
+            UpdateInforKhachHangRequest request = new UpdateInforKhachHangRequest();
+            request.setIdKH(idKH);
+            request.setTen(ten);
+            request.setSoDienThoai(soDienThoai);
+            
+            // Parse ngày sinh từ String sang Date
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                Date ngaySinhDate = sdf.parse(ngaySinh);
+                request.setNgaySinh(ngaySinhDate);
+            } catch (ParseException e) {
+                return ResponseEntity.badRequest().body("Định dạng ngày sinh không hợp lệ (dd/MM/yyyy)");
+            }
+            
+            request.setGioiTinh(gioiTinh);
+            
+            khachHangService.updateInforKhachHang(request, hinhAnh);
             return ResponseEntity.ok("Cập nhật thành công");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Cập nhật thất bại");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Cập nhật thất bại: " + e.getMessage());
         }
     }
 

@@ -72,6 +72,7 @@ public class gioHangService {
                 newItem.setSoLuongTon(sanPhamChiTiet.getSoLuong());
                 // Sửa dòng này để gán hình ảnh
                 newItem.setHinhAnh(sanPhamChiTiet.getHinhAnh() != null ? sanPhamChiTiet.getHinhAnh().getHinhAnh() : "/images/default-product.jpg");
+                newItem.setCanNang(sanPhamChiTiet.getCanNang());
 
                 cart.add(newItem);
             }
@@ -144,41 +145,24 @@ public class gioHangService {
     }
 
     public Map<String, Object> getCartInfo(HttpSession session) {
-        Map<String, Object> cartInfo = new HashMap<>();
         List<gioHangDTO> cart = getCart(session);
-
-        if (cart.isEmpty()) {
-            cartInfo.put("isEmpty", true);
-            cartInfo.put("items", new ArrayList<>());
-            cartInfo.put("totalAmount", BigDecimal.ZERO);
-            cartInfo.put("itemCount", 0);
-            return cartInfo;
-        }
-
-        List<Map<String, Object>> items = new ArrayList<>();
-        BigDecimal totalAmount = BigDecimal.ZERO;
-
-        for (gioHangDTO item : cart) {
-            Map<String, Object> itemMap = new HashMap<>();
-            itemMap.put("sanPhamChiTietId", item.getSanPhamChiTietId());
-            itemMap.put("tenSanPham", item.getTenSanPham());
-            itemMap.put("mauSac", item.getMauSac());
-            itemMap.put("congSuat", item.getCongSuat());
-            itemMap.put("hang", item.getHang());
-            itemMap.put("gia", item.getGia());
-            itemMap.put("soLuong", item.getSoLuong());
-            itemMap.put("soLuongTon", item.getSoLuongTon());
-            itemMap.put("tongTien", item.getTongTien());
-            itemMap.put("hinhAnh", item.getHinhAnh());
-            items.add(itemMap);
-            totalAmount = totalAmount.add(item.getTongTien());
-        }
-
-        cartInfo.put("isEmpty", false);
-        cartInfo.put("items", items);
-        cartInfo.put("totalAmount", totalAmount);
+        Map<String, Object> cartInfo = new HashMap<>();
+        cartInfo.put("items", cart);
+        cartInfo.put("isEmpty", cart.isEmpty());
+        cartInfo.put("totalAmount", getTotalAmount(session));
         cartInfo.put("itemCount", getCartItemCount(session));
-
+        cartInfo.put("totalWeight", getTotalWeight(session)); // Thêm dòng này
         return cartInfo;
+    }
+
+    public float getTotalWeight(HttpSession session) {
+        List<gioHangDTO> cart = getCart(session);
+        float totalWeight = 0f;
+        for (gioHangDTO item : cart) {
+            if (item.getCanNang() != null && item.getSoLuong() != null) {
+                totalWeight += item.getCanNang() * item.getSoLuong();
+            }
+        }
+        return totalWeight;
     }
 }
