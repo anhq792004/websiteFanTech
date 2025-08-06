@@ -27,7 +27,7 @@ $(document).ready(function () {
             tinhThanhPho: $('#city').val(),
             quanHuyen: $('#district').val(),
             xaPhuong: $('#ward').val(),
-            soNhaNgoDuong: $('#diaChiCuThe').val(),
+            soNhaNgoDuong: $('#soNhaNgoDuong').val(),
             chucVu: $('#chucVu').val()
         };
 
