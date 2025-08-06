@@ -59,6 +59,7 @@ public interface HoaDonRepo extends JpaRepository<HoaDon,Long> {
             "where hd.id = :hoaDonId")
     LichSuThanhToanResponse findThanhToanHoaDonId(@Param("hoaDonId") long id);
 
-    List<HoaDon> findByKhachHang_Id(Long idKH);
+    List<HoaDon> findByKhachHang_IdAndTrangThaiNot(Long idKH, Integer trangThai);
+
 
 }
