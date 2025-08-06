@@ -20,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,7 @@ public class KhachHangController {
 
     @GetMapping("/view-them")
     public String showThemKhachHangForm(Model model) {
+
         model.addAttribute("khachHang", new KhachHang());
         return "admin/khach_hang/view-them";
     }
@@ -63,17 +65,30 @@ public class KhachHangController {
     @GetMapping("/detail")
     public String detail(@RequestParam Long id, Model model) {
         KhachHang khachHang = khachHangService.findById(id);
-        model.addAttribute("khachHang", khachHang);
-
+        // ✅ Format ngày sinh nếu có
+        String ngaySinhFormatted = "";
+        if (khachHang.getNgaySinh() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            ngaySinhFormatted = sdf.format(khachHang.getNgaySinh());
+        }
         List<DiaChi> listDiaChi = diaChiService.getDiaChiByIdKhachHang(id);
+        model.addAttribute("ngaySinhFormatted", ngaySinhFormatted); // ✅ Truyền thêm biến này vào model
+        model.addAttribute("khachHang", khachHang);
         model.addAttribute("listDiaChi", listDiaChi);
 
         return "admin/khach_hang/detail";
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> add(@RequestBody AddKhachHangRequest request) {
+    public ResponseEntity<?> add(@RequestBody AddKhachHangRequest request,
+                                 Model model) {
         try {
+            String ngaySinhFormatted = "";
+            if (request.getNgaySinh() != null) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                ngaySinhFormatted = sdf.format(request.getNgaySinh());
+            }
+            model.addAttribute("ngaySinhFormatted", ngaySinhFormatted);
             khachHangService.addKH(request);
             return ResponseEntity.ok().body("Thêm khách hàng thành công!");
         } catch (IllegalArgumentException e) {

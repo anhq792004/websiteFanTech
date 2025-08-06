@@ -2,6 +2,7 @@ package com.example.datn.controller.webController;
 
 import com.example.datn.dto.request.AddDiaChiRequest;
 import com.example.datn.dto.request.UpdateDiaChiRequest;
+import com.example.datn.dto.request.UpdateInforKhachHangRequest;
 import com.example.datn.entity.DiaChi;
 import com.example.datn.entity.HoaDon.HoaDon;
 import com.example.datn.entity.HoaDon.HoaDonChiTiet;
@@ -14,12 +15,14 @@ import com.example.datn.service.KhachHangService.KhachHangService;
 import com.example.datn.service.taiKhoanService.TaiKhoanService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -43,97 +46,38 @@ public class ProfileController {
      */
     @GetMapping
     public String showProfile(Model model, HttpSession session) {
-        // Lấy thông tin tài khoản từ session
         TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
 
         if (currentUser == null) {
             return "redirect:/login";
         }
 
-        // Tìm khách hàng theo tài khoản
         KhachHang khachHang = khachHangService.findByTaiKhoan(currentUser);
 
-        if (khachHang == null) {
-            // Nếu chưa có thông tin khách hàng, tạo mới
-            khachHang = new KhachHang();
-            khachHang.setTaiKhoan(currentUser);
-            khachHang.setMa(generateCustomerCode());
-            khachHang.setNgayTao(new Date());
-            khachHang.setTrangThai(true);
-            khachHang = khachHangService.save(khachHang);
+        // ✅ Format ngày sinh nếu có
+        String ngaySinhFormatted = "";
+        if (khachHang.getNgaySinh() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            ngaySinhFormatted = sdf.format(khachHang.getNgaySinh());
         }
 
         model.addAttribute("khachHang", khachHang);
-        return "user/infor/profile"; // Tên template
+        model.addAttribute("ngaySinhFormatted", ngaySinhFormatted); // ✅ Truyền thêm biến này vào model
+        return "user/infor/profile";
     }
+
 
     /**
      * Hiển thị trang chỉnh sửa thông tin
      */
-    @GetMapping("/edit")
-    public String showEditProfile(Model model, HttpSession session) {
-        TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
-
-        if (currentUser == null) {
-            return "redirect:/login";
-        }
-
-        KhachHang khachHang = khachHangService.findByTaiKhoan(currentUser);
-
-        if (khachHang == null) {
-            // Tạo mới nếu chưa có
-            khachHang = new KhachHang();
-            khachHang.setTaiKhoan(currentUser);
-            khachHang.setMa(generateCustomerCode());
-            khachHang.setNgayTao(new Date());
-            khachHang.setTrangThai(true);
-        }
-
-        model.addAttribute("khachHang", khachHang);
-        return "user/infor/updateTTKH";
-    }
-
-    /**
-     * Xử lý cập nhật thông tin
-     */
     @PostMapping("/update")
-    public String updateProfile(@ModelAttribute KhachHang khachHang,
-                                HttpSession session,
-                                RedirectAttributes redirectAttributes) {
+    @ResponseBody
+    public ResponseEntity<String> update(@RequestBody UpdateInforKhachHangRequest request) {
         try {
-            TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
-
-            if (currentUser == null) {
-                return "redirect:/login";
-            }
-
-            // Lấy thông tin khách hàng hiện tại từ database
-            KhachHang existingKhachHang = khachHangService.findByTaiKhoan(currentUser);
-
-            if (existingKhachHang == null) {
-                // Tạo mới nếu chưa có
-                existingKhachHang = new KhachHang();
-                existingKhachHang.setTaiKhoan(currentUser);
-                existingKhachHang.setMa(generateCustomerCode());
-                existingKhachHang.setNgayTao(new Date());
-                existingKhachHang.setTrangThai(true);
-            }
-
-            // Cập nhật thông tin
-            existingKhachHang.setTen(khachHang.getTen());
-            existingKhachHang.setSoDienThoai(khachHang.getSoDienThoai());
-            existingKhachHang.setGioiTinh(khachHang.getGioiTinh());
-            existingKhachHang.setNgaySinh(khachHang.getNgaySinh());
-
-            // Lưu vào database
-            khachHangService.save(existingKhachHang);
-
-            redirectAttributes.addFlashAttribute("message", "Cập nhật thông tin thành công!");
-            return "redirect:/profile";
-
+            khachHangService.updateInforKhachHang(request);
+            return ResponseEntity.ok("Cập nhật thành công");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi cập nhật thông tin!");
-            return "redirect:/profile/edit";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Cập nhật thất bại");
         }
     }
 
@@ -159,7 +103,7 @@ public class ProfileController {
 
     @GetMapping("/order-infor/detail")
     public String detail(Model model,
-                             HttpSession session) {
+                         HttpSession session) {
         TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
         KhachHang khachHang = khachHangService.findByTaiKhoan(currentUser);
         List<HoaDon> hoaDons = hoaDonService.getHoaDonByIdKH(khachHang.getId());
@@ -167,6 +111,7 @@ public class ProfileController {
 
         return "user/infor/ordered";
     }
+
     // dia chi
     @GetMapping("/address")
     public String address(Model model,
@@ -178,6 +123,7 @@ public class ProfileController {
         model.addAttribute("listDiaChi", listDiaChi);
         return "user/infor/address";
     }
+
     @PostMapping("/add-dia-chi")
     public ResponseEntity<?> addDiaChi(@RequestBody AddDiaChiRequest request) {
         try {
@@ -315,7 +261,7 @@ public class ProfileController {
 
         // Lấy chi tiết hóa đơn
         List<HoaDonChiTiet> listHDCT = hoaDonService.listHoaDonChiTiets(id);
-        
+
         // Tính tổng số lượng
         Integer tongSoLuong = hoaDonService.tongSoLuong(id);
 

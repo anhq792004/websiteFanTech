@@ -48,4 +48,50 @@ $(document).ready(function () {
     });
 });
 
+$('#formUpdateKH').submit(function (e) {
+    e.preventDefault();
+    $('#formUpdateKH button[type="submit"]').prop('disabled', true);
+
+    const data = {
+        idKH: $('#idKH').val(),
+        ten: $('#name').val(),
+        gioiTinh: $('#gioiTinh').val(),
+        soDienThoai: $('#soDienThoai').val(),
+        ngaySinh: $('#ngaySinh').val(),
+    };
+
+    $.ajax({
+        url: '/profile/update',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (response) {
+            Swal.fire({
+                toast: false,
+                icon: 'success',
+                title: response,
+                position: 'center',
+                showConfirmButton: false,
+                timer: 500,
+                timerProgressBar: true
+            }).then(() => {
+                location.reload();
+            });
+        },
+        error: function (xhr) {
+            Swal.fire({
+                toast: false,
+                icon: 'error',
+                title: xhr.responseText,
+                position: 'center',
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true
+            });
+            $('#formUpdateKH button[type="submit"]').prop('disabled', false);
+
+        }
+    });
+});
+
 

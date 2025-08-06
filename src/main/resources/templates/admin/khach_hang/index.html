@@ -65,6 +65,7 @@
                                     <th>Họ và tên</th>
                                     <th>Số điện thoại</th>
                                     <th>Giới tính</th>
+                                    <th>Ngày sinh</th>
                                     <th>Email</th>
                                     <th>Trạng thái</th>
                                     <th>Hành động</th>
@@ -77,6 +78,7 @@
                                     <td th:text="${khachHang.ten}"></td>
                                     <td th:text="${khachHang.soDienThoai}"></td>
                                     <td th:text="${khachHang.gioiTinh}"></td>
+                                    <td th:text="${#dates.format(khachHang.ngaySinh, 'dd/MM/yyyy')}"></td>
                                     <td th:text="${khachHang.taiKhoan.email}"></td>
                                     <td th:text="${khachHang.trangThai ? 'Đang hoạt động' : 'Ngưng hoạt động'}"></td>
                                     <td>

@@ -16,7 +16,7 @@ public interface KhachHangRepo extends JpaRepository<KhachHang, Long> {
     @Query("SELECT kh FROM KhachHang kh " +
             "WHERE (LOWER(kh.ma) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(kh.ten) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-//            "OR LOWER(kh.taiKhoan.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(kh.taiKhoan.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(kh.soDienThoai) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "AND (:trangThai IS NULL OR kh.trangThai = :trangThai) ")
     Page<KhachHang> searchKhachHang(String keyword, Boolean trangThai, Pageable pageable);
@@ -24,7 +24,7 @@ public interface KhachHangRepo extends JpaRepository<KhachHang, Long> {
     @Query("SELECT kh FROM KhachHang kh " +
             "WHERE (LOWER(kh.ma) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(kh.ten) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-//            "OR LOWER(kh.taiKhoan.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(kh.taiKhoan.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(kh.soDienThoai) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<KhachHang> searchKhachHangKhongCoTrangThai(String keyword, Pageable pageable);
 

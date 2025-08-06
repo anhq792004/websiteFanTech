@@ -58,9 +58,9 @@
                                     <div class="row mb-3">
                                         <div class="col-md-6">
                                             <label for="ngaySinh" class="form-label fw-bold">Ngày sinh</label>
-                                            <input type="date" class="form-control" placeholder=""
-                                                   aria-label="ngaySinh"
-                                                   id="ngaySinh" th:field="*{ngaySinh}">
+                                            <input type="text" class="form-control flatpickr" id="ngaySinh"
+                                                   name="ngaySinh" placeholder="Ngày sinh"
+                                                   th:value="${ngaySinhFormatted}" required>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="gioiTinh" class="form-label fw-bold">Giới tính</label>
@@ -218,8 +218,8 @@
     </div>
 </div>
 <div>
-    <script th:replace="/admin/fragments/script :: script"></script>
 
+    <script th:replace="/admin/fragments/script :: script"></script>
     <script th:src="@{/admin/assets/compiled/js/diaChi.js}"></script>
     <script th:src="@{/admin/assets/compiled/js/KhachHang/update.js}"></script>
     <script th:inline="javascript">
@@ -418,103 +418,12 @@
             });
         });
     </script>
-<!--    <script th:inline="javascript">-->
-<!--        // Lấy danh sách địa chỉ từ Thymeleaf (chuyển từ dạng Thymeleaf sang JSON)-->
-
-<!--        const listDiaChi = /*[[${listDiaChi}]]*/ [];-->
-
-<!--        listDiaChi.forEach(function (diaChi, index) {-->
-<!--            // Lấy giá trị từ các trường input dựa theo chỉ số-->
-<!--            const idTinh = document.getElementById('tinh' + index).value;-->
-
-<!--            // Phần tử hiển thị kết quả-->
-<!--            const citis = document.getElementById('city' + index);-->
-
-<!--            // Cấu hình Axios để lấy dữ liệu từ GitHub-->
-<!--            const Parameter = {-->
-<!--                url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",-->
-<!--                method: "GET",-->
-<!--                responseType: "application/json",-->
-<!--            };-->
-
-<!--            // Gọi API để lấy dữ liệu địa giới hành chính-->
-<!--            axios(Parameter).then(function (result) {-->
-<!--                renderCity(result.data, idTinh, citis);-->
-<!--            });-->
-
-<!--            // Hàm xử lý dữ liệu địa giới hành chính-->
-<!--            function renderCity(data, idTinh, citis) {-->
-<!--                const selectedCity = data.find(city => city.Id == idTinh);-->
-<!--                if (selectedCity) {-->
-<!--                    citis.textContent = "Địa chỉ: " + selectedCity.Name;-->
-<!--                } else {-->
-<!--                    citis.textContent = "Địa chỉ: Không tìm thấy";-->
-<!--                }-->
-<!--            }-->
-<!--        });-->
-<!--        const cities2 = document.getElementById("city2");-->
-<!--        const districts2 = document.getElementById("district2");-->
-<!--        const wards2 = document.getElementById("ward2");-->
-
-<!--        const parameter = {-->
-<!--            url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",-->
-<!--            method: "GET",-->
-<!--            responseType: "json",-->
-<!--        };-->
-
-<!--        axios(parameter).then(function (result) {-->
-<!--            renderCity2(result.data);-->
-<!--        });-->
-
-<!--        function renderCity2(data) {-->
-<!--            for (const city of data) {-->
-<!--                cities2.options[cities2.options.length] = new Option(city.Name, city.Id);-->
-<!--            }-->
-<!--            cities2.onchange = function () {-->
-<!--                districts2.length = 1;-->
-<!--                wards2.length = 1;-->
-<!--                if (this.value !== "") {-->
-<!--                    const result = data.find(n => n.Id === this.value);-->
-<!--                    if (result) {-->
-<!--                        for (const district of result.Districts) {-->
-<!--                            districts2.options[districts2.options.length] = new Option(district.Name, district.Id);-->
-<!--                        }-->
-<!--                    }-->
-<!--                }-->
-<!--            };-->
-
-<!--            districts2.onchange = function () {-->
-<!--                wards2.length = 1;-->
-<!--                const selectedCity = data.find(n => n.Id === cities2.value);-->
-<!--                if (this.value !== "") {-->
-<!--                    const result = selectedCity.Districts.find(n => n.Id === this.value);-->
-<!--                    if (result) {-->
-<!--                        for (const ward of result.Wards) {-->
-<!--                            wards2.options[wards2.options.length] = new Option(ward.Name, ward.Id);-->
-<!--                        }-->
-<!--                    }-->
-<!--                }-->
-<!--            };-->
-<!--        }-->
-
-
-<!--        // function diachiMacDinh() {-->
-<!--        //     var nameButton = document.getElementsByName("checkDiaChiMacDinh")-->
-<!--        //     // var buttonMacDinh = document.getElementsByName("checkDiaChiMacDinh")-->
-<!--        //     for (var i = 0; i < nameButton.length; i++) {-->
-<!--        //         if (nameButton.values() == null) {-->
-<!--        //             console.log("khong co dc mac dinh")-->
-<!--        //         } else if (nameButton.values() == true) {-->
-<!--        //             buttonMacDinh[i].parentElement.style.color = "red"-->
-<!--        //         } else {-->
-<!--        //             buttons[i].parentElement.style.color = "blue";-->
-<!--        //         }-->
-<!--        //     }-->
-<!--        // }-->
-
-<!--        // window.onload = diachiMacDinh-->
-<!--    </script>-->
-
+    <script>
+        flatpickr("#ngaySinh", {
+            dateFormat: "d/m/Y", // Ensure the correct format
+            maxDate: "today",
+        });
+    </script>
 
 </div>
 </body>
