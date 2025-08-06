@@ -53,6 +53,7 @@ public interface HoaDonRepo extends JpaRepository<HoaDon,Long> {
     @Query("SELECT new com.example.datn.dto.response.LichSuThanhToanResponse(" +
             "hd.tongTienSauGiamGia, hd.ngayTao, COALESCE(hd.loaiHoaDon, TRUE), " +
             "hd.phuongThucThanhToan, " +
+            "hd.nguoiTao, " +
             "hd.trangThai) " +
             "FROM HoaDon hd " +
             "where hd.id = :hoaDonId")

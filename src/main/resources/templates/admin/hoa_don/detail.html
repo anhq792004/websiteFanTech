@@ -21,8 +21,8 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h2>Theo dõi đơn hàng</h2>
                         <div>
-                            <a th:href="@{/hoa-don/print/{id}(id=${hoaDon.id})}" 
-                               target="_blank" 
+                            <a th:href="@{/hoa-don/print/{id}(id=${hoaDon.id})}"
+                               target="_blank"
                                class="btn btn-outline-success me-2">
                                 In hóa đơn
                             </a>
@@ -230,7 +230,7 @@
                                 <td th:class="${item.loaiHoaDon ? 'text-danger' : 'text-primary'}"
                                     th:text="${item.loaiHoaDon ? 'Tại quầy' : 'Online'}">
                                 </td>
-                                <!--                                <td th:text="${item.nguoiTao}"></td>-->
+                                <td th:text="${item.nguoiTao}"></td>
                             </tr>
                             </tbody>
                         </table>
