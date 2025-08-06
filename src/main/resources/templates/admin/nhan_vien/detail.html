@@ -30,23 +30,20 @@
                             <div class="row justify-content-around">
                                 <input type="hidden" name="id" id="id" th:value="${nhanVien.id}">
                                 <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label for="hinhAnh" class="form-label fw-bold">Ảnh nhân viên</label>
-                                        <input type="file" class="form-control" id="hinhAnh" name="hinhAnh" accept="image/*">
-                                        <div class="form-text">Chọn ảnh mới (JPG, PNG, GIF)</div>
-                                        
-                                        <!-- Hiển thị ảnh hiện tại -->
-                                        <div class="mt-2" th:if="${nhanVien.anh != null and nhanVien.anh != ''}">
-                                            <label class="form-label fw-bold">Ảnh hiện tại:</label>
-                                            <img th:src="${nhanVien.anh}" alt="Ảnh nhân viên" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
-                                        </div>
-                                        
-                                        <!-- Preview ảnh mới -->
-                                        <div id="imagePreview" class="mt-2" style="display: none;">
-                                            <label class="form-label fw-bold">Ảnh mới:</label>
-                                            <img id="previewImg" src="" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
-                                        </div>
+                                    <!-- Input file ẩn để lưu ảnh -->
+                                    <input type="file" id="hinhAnh" name="hinhAnh" accept="image/*" style="display: none;">
+                                    
+                                    <!-- Ảnh tròn có thể click -->
+                                    <div class="text-center mb-3">
+                                        <img th:src="${nhanVien.anh != null and nhanVien.anh != '' ? nhanVien.anh : '/admin/assets/images/avatar.jpg'}" 
+                                             alt="Avatar" class="img-fluid rounded-circle mb-2" id="employeeAvatar"
+                                             style="width: 120px; height: 120px; object-fit: cover; cursor: pointer; transition: all 0.3s ease;"
+                                             title="Click để thay đổi ảnh nhân viên"
+                                             onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)'"
+                                             onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
+                                        <div class="form-text">Click vào ảnh để thay đổi ảnh nhân viên</div>
                                     </div>
+                                    
                                     <div class="mb-3">
                                         <label class="form-label fw-bold"><span class="text-danger">*</span> Tên nhân
                                             viên</label>

@@ -163,7 +163,7 @@ $(document).ready(function () {
                     timer: 1000,
                     timerProgressBar: true
                 }).then(() => {
-                    location.reload();
+                    window.location.href = '/admin/nhan-vien/index';
                 });
             },
             error: function (xhr) {
@@ -200,12 +200,12 @@ $(document).ready(function () {
                 return;
             }
             
-            // Kiểm tra kích thước file (max 10MB)
-            if (file.size > 10 * 1024 * 1024) {
+            // Kiểm tra kích thước file (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
                 Swal.fire({
                     toast: true,
                     icon: 'error',
-                    title: 'Kích thước file không được vượt quá 10MB',
+                    title: 'Kích thước file không được vượt quá 5MB',
                     position: 'top-end',
                     showConfirmButton: false,
                     timer: 3000,
@@ -219,14 +219,135 @@ $(document).ready(function () {
             // Hiển thị preview
             const reader = new FileReader();
             reader.onload = function(e) {
-                $('#previewImg').attr('src', e.target.result);
-                $('#imagePreview').show();
+                // Thay thế ảnh trong ô chính
+                $('#employeeAvatar').attr('src', e.target.result);
+                $('#imagePreview').hide(); // Ẩn preview riêng
+                
+                // Hiển thị thông báo
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: 'Đã chọn ảnh thành công!',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
             };
             reader.readAsDataURL(file);
         } else {
             $('#imagePreview').hide();
         }
     });
+    
+    // Click vào ảnh avatar nhân viên để chọn ảnh
+    $('#employeeAvatar').on('click', function() {
+        // Kiểm tra xem có phải ảnh mặc định không
+        const currentSrc = $(this).attr('src');
+        const isDefaultAvatar = currentSrc.includes('avatar.jpg');
+        
+        if (isDefaultAvatar) {
+            // Hiển thị thông báo đặc biệt cho lần đầu thêm ảnh
+            Swal.fire({
+                title: 'Thêm ảnh nhân viên',
+                text: 'Hãy chọn một ảnh để tạo ảnh đại diện cho nhân viên!',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Chọn ảnh',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    openFileSelector();
+                }
+            });
+        } else {
+            // Thông báo thay đổi ảnh
+            Swal.fire({
+                title: 'Thay đổi ảnh nhân viên',
+                text: 'Bạn muốn thay đổi ảnh đại diện hiện tại?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Thay đổi',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    openFileSelector();
+                }
+            });
+        }
+    });
+    
+    // Hàm mở file selector
+    function openFileSelector() {
+        // Tạo input file ẩn
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+        
+        fileInput.onchange = function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Kiểm tra loại file
+                if (!file.type.startsWith('image/')) {
+                    Swal.fire({
+                        toast: true,
+                        icon: 'error',
+                        title: 'Vui lòng chọn file hình ảnh hợp lệ',
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                    return;
+                }
+                
+                // Kiểm tra kích thước file (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.fire({
+                        toast: true,
+                        icon: 'error',
+                        title: 'Kích thước file không được vượt quá 5MB',
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                    return;
+                }
+                
+                // Hiển thị preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Thay thế ảnh trong ô chính
+                    $('#employeeAvatar').attr('src', e.target.result);
+                    $('#imagePreview').hide(); // Ẩn preview riêng
+                    
+                    // Hiển thị thông báo
+                    Swal.fire({
+                        toast: true,
+                        icon: 'success',
+                        title: 'Đã chọn ảnh thành công! Vui lòng nhấn "Lưu" để cập nhật.',
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                };
+                reader.readAsDataURL(file);
+                
+                // Gán file vào input file trong form
+                $('#hinhAnh')[0].files = e.target.files;
+            }
+            
+            // Xóa input file ẩn
+            document.body.removeChild(fileInput);
+        };
+        
+        // Thêm input file vào body và trigger click
+        document.body.appendChild(fileInput);
+        fileInput.click();
+    }
 });
 
 function checkEmailExists(email) {
