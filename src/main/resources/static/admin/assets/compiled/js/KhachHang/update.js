@@ -83,7 +83,7 @@ $('#formUpdateKH').submit(function (e) {
                 timer: 1500,
                 timerProgressBar: true
             }).then(() => {
-                window.location.href = '/admin/khach-hang/index';
+                window.location.href = '/khach-hang/index';
             });
         },
         error: function (xhr) {
