@@ -120,12 +120,12 @@ $('#hinhAnh').on('change', function() {
             return;
         }
         
-        // Kiểm tra kích thước file (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
+        // Kiểm tra kích thước file (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
             Swal.fire({
                 toast: false,
                 icon: 'error',
-                title: 'Kích thước file không được vượt quá 10MB',
+                title: 'Kích thước file không được vượt quá 5MB',
                 position: 'center',
                 showConfirmButton: false,
                 timer: 3000,

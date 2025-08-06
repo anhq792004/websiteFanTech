@@ -80,10 +80,10 @@ $('#formUpdateKH').submit(function (e) {
                 title: response,
                 position: 'top-end',
                 showConfirmButton: false,
-                timer: 500,
+                timer: 1500,
                 timerProgressBar: true
             }).then(() => {
-                location.reload();
+                window.location.href = '/admin/khach-hang/index';
             });
         },
         error: function (xhr) {
@@ -121,12 +121,12 @@ $('#hinhAnh').on('change', function() {
             return;
         }
         
-        // Kiểm tra kích thước file (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
+        // Kiểm tra kích thước file (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
             Swal.fire({
                 toast: true,
                 icon: 'error',
-                title: 'Kích thước file không được vượt quá 10MB',
+                title: 'Kích thước file không được vượt quá 5MB',
                 position: 'top-end',
                 showConfirmButton: false,
                 timer: 3000,
