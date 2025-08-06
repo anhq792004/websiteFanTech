@@ -34,8 +34,12 @@
                             <div class="row justify-content-around">
                                 <div class="col-md-5 gap-3">
                                     <div class="mb-3">
-                                        Ảnh
-                                        <!--                      <img th:src="@{${nhanVien.anhUrl}}" alt="Ảnh nhân viên" width="100" />-->
+                                        <label for="hinhAnh" class="form-label fw-bold">Ảnh khách hàng</label>
+                                        <input type="file" class="form-control" id="hinhAnh" name="hinhAnh" accept="image/*">
+                                        <div class="form-text">Chọn ảnh khách hàng (JPG, PNG, GIF)</div>
+                                        <div id="imagePreview" class="mt-2" style="display: none;">
+                                            <img id="previewImg" src="" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                                        </div>
                                     </div>
                                     <div class="col mb-3">
                                         <label for="name" class="form-label fw-bold"><span

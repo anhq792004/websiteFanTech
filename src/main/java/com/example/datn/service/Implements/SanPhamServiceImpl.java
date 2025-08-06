@@ -338,12 +338,14 @@ public class SanPhamServiceImpl implements SanPhamService {
     public Map<String, Double> getPriceRange() {
         Map<String, Double> priceRange = new HashMap<>();
         
-        // Lấy giá min và max từ sản phẩm chi tiết
-        Double minPrice = sanPhamChiTietRepo.findMinPrice();
-        Double maxPrice = sanPhamChiTietRepo.findMaxPrice();
+        // Lấy giá min từ sản phẩm chi tiết
+        Double minPrice = 0.0;
+        
+        // Cố định max = 5.000.000 VND theo yêu cầu
+        Double maxPrice = 5000000.0;
         
         priceRange.put("min", minPrice != null ? minPrice : 0.0);
-        priceRange.put("max", maxPrice != null ? maxPrice : 10000000.0);
+        priceRange.put("max", maxPrice);
         
         return priceRange;
     }

@@ -31,8 +31,21 @@
                                 <input type="hidden" name="id" id="id" th:value="${nhanVien.id}">
                                 <div class="col-md-4">
                                     <div class="mb-3">
-                                        Ảnh
-                                        <!--                      <img th:src="@{${nhanVien.anhUrl}}" alt="Ảnh nhân viên" width="100" />-->
+                                        <label for="hinhAnh" class="form-label fw-bold">Ảnh nhân viên</label>
+                                        <input type="file" class="form-control" id="hinhAnh" name="hinhAnh" accept="image/*">
+                                        <div class="form-text">Chọn ảnh mới (JPG, PNG, GIF)</div>
+                                        
+                                        <!-- Hiển thị ảnh hiện tại -->
+                                        <div class="mt-2" th:if="${nhanVien.anh != null and nhanVien.anh != ''}">
+                                            <label class="form-label fw-bold">Ảnh hiện tại:</label>
+                                            <img th:src="${nhanVien.anh}" alt="Ảnh nhân viên" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                                        </div>
+                                        
+                                        <!-- Preview ảnh mới -->
+                                        <div id="imagePreview" class="mt-2" style="display: none;">
+                                            <label class="form-label fw-bold">Ảnh mới:</label>
+                                            <img id="previewImg" src="" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                                        </div>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold"><span class="text-danger">*</span> Tên nhân
