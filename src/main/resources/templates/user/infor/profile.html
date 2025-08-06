@@ -52,6 +52,16 @@
                         <div class="card-body mt-3">
                             <form id="formUpdateKH">
                                 <input type="hidden" name="idKH" id="idKH" th:value="${khachHang.id}">
+                                
+                                <!-- Input file ẩn để lưu ảnh -->
+                                <input type="file" id="hinhAnh" name="hinhAnh" accept="image/*" style="display: none;">
+                                
+                                <!-- Preview ảnh mới -->
+                                <div id="imagePreview" class="mb-4" style="display: none;">
+                                    <label class="form-label fw-bold">Ảnh mới:</label>
+                                    <img id="previewImg" src="" alt="Preview" class="img-thumbnail" style="max-width: 150px; max-height: 150px;">
+                                </div>
+                                
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Tên</label>
                                     <input type="text" class="form-control" placeholder="Nhập tên" name="name"

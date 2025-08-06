@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 public interface NhanVienService {
@@ -18,10 +19,14 @@ public interface NhanVienService {
     NhanVien findNhanVienById(Long id);
 
     void updateNhanVien(UpdateNhanVienRequest request);
+    
+    void updateNhanVien(UpdateNhanVienRequest request, MultipartFile hinhAnh);
 
     boolean thayDoiTrangThaiNhanVien(Long id);
 
     void addNhanVien(AddNhanVienRequest nhanVien);
+    
+    void addNhanVien(AddNhanVienRequest nhanVien, MultipartFile hinhAnh);
 
     String generateCode();
 

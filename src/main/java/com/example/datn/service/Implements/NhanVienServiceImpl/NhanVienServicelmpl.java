@@ -11,6 +11,7 @@ import com.example.datn.repository.ChucVuRepo;
 import com.example.datn.repository.DiaChiRepo;
 import com.example.datn.repository.NhanVienRepo;
 import com.example.datn.repository.TaiKhoanRepo;
+import com.example.datn.service.FileUploadService;
 import com.example.datn.service.NhanVienService.NhanVienService;
 import com.example.datn.service.taiKhoanService.EmailService;
 import jakarta.mail.MessagingException;
@@ -22,7 +23,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -36,6 +39,7 @@ public class NhanVienServicelmpl implements NhanVienService {
     private final ChucVuRepo chucVuRepo;
     private final TaiKhoanRepo taiKhoanRepo;
     private final DiaChiRepo diaChiRepo;
+    private final FileUploadService fileUploadService;
 
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
@@ -54,6 +58,11 @@ public class NhanVienServicelmpl implements NhanVienService {
 
     @Override
     public void updateNhanVien(UpdateNhanVienRequest request) {
+        updateNhanVien(request, null);
+    }
+    
+    @Override
+    public void updateNhanVien(UpdateNhanVienRequest request, MultipartFile hinhAnh) {
         Optional<NhanVien> nhanVienOptional = nhanVienRepo.findById(request.getId());
 
         if (nhanVienOptional.isPresent() ){
@@ -64,6 +73,23 @@ public class NhanVienServicelmpl implements NhanVienService {
             nhanVien.setNgaySinh(request.getNgaySinh());
             nhanVien.setGioiTinh(request.getGioiTinh());
             nhanVien.setCanCuocCongDan(request.getCanCuocCongDan());
+            
+            // Xử lý upload ảnh mới nếu có
+            if (hinhAnh != null && !hinhAnh.isEmpty()) {
+                try {
+                    // Xóa ảnh cũ nếu có
+                    if (nhanVien.getAnh() != null && !nhanVien.getAnh().isEmpty()) {
+                        fileUploadService.deleteFile(nhanVien.getAnh());
+                    }
+                    
+                    // Lưu ảnh mới
+                    String imagePath = fileUploadService.saveFile(hinhAnh);
+                    nhanVien.setAnh(imagePath);
+                } catch (IOException e) {
+                    throw new RuntimeException("Lỗi khi lưu ảnh: " + e.getMessage());
+                }
+            }
+            
             DiaChi dc = nhanVien.getDiaChi();
             if (dc == null) {
                 dc = new DiaChi();
@@ -106,6 +132,11 @@ public class NhanVienServicelmpl implements NhanVienService {
 
     @Override
     public void addNhanVien(AddNhanVienRequest request) {
+        addNhanVien(request, null);
+    }
+    
+    @Override
+    public void addNhanVien(AddNhanVienRequest request, MultipartFile hinhAnh) {
         // Kiểm tra email đã tồn tại
         if (taiKhoanRepo.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email đã được sử dụng. Vui lòng chọn email khác!");
@@ -144,6 +175,17 @@ public class NhanVienServicelmpl implements NhanVienService {
         nhanVien.setNgayTao(LocalDateTime.now());
         nhanVien.setTrangThai(true);
         nhanVien.setDiaChi(diaChi);
+        
+        // Xử lý upload ảnh nếu có
+        if (hinhAnh != null && !hinhAnh.isEmpty()) {
+            try {
+                String imagePath = fileUploadService.saveFile(hinhAnh);
+                nhanVien.setAnh(imagePath);
+            } catch (IOException e) {
+                throw new RuntimeException("Lỗi khi lưu ảnh: " + e.getMessage());
+            }
+        }
+        
         nhanVienRepo.save(nhanVien);
 
         // Gửi email chứa mật khẩu

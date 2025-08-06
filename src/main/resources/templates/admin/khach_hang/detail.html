@@ -31,7 +31,23 @@
                             <div class="row justify-content-around">
                                 <div class="col-md-7">
                                     <input type="hidden" name="idKH" id="idKH" th:value="${khachHang.id}">
-                                    <div class="mb-3"> Image</div>
+                                    <div class="mb-3">
+                                        <label for="hinhAnh" class="form-label fw-bold">Ảnh khách hàng</label>
+                                        <input type="file" class="form-control" id="hinhAnh" name="hinhAnh" accept="image/*">
+                                        <div class="form-text">Chọn ảnh mới (JPG, PNG, GIF)</div>
+                                        
+                                        <!-- Hiển thị ảnh hiện tại -->
+                                        <div class="mt-2" th:if="${khachHang.anh != null and khachHang.anh != ''}">
+                                            <label class="form-label fw-bold">Ảnh hiện tại:</label>
+                                            <img th:src="${khachHang.anh}" alt="Ảnh khách hàng" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                                        </div>
+                                        
+                                        <!-- Preview ảnh mới -->
+                                        <div id="imagePreview" class="mt-2" style="display: none;">
+                                            <label class="form-label fw-bold">Ảnh mới:</label>
+                                            <img id="previewImg" src="" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                                        </div>
+                                    </div>
 
                                     <div class="mb-3">
                                         <label for="name" class="form-label fw-bold"><span
@@ -220,6 +236,9 @@
 <div>
 
     <script th:replace="/admin/fragments/script :: script"></script>
+    <script th:src="@{/admin/assets/compiled/js/KhachHang/khachHang.js}"></script>
+    <script th:src="@{/admin/assets/compiled/js/KhachHang/update.js}"></script>
+    <script th:src="@{/admin/assets/compiled/js/components.js}"></script>
     <script th:src="@{/admin/assets/compiled/js/diaChi.js}"></script>
     <script th:src="@{/admin/assets/compiled/js/KhachHang/update.js}"></script>
     <script th:inline="javascript">
