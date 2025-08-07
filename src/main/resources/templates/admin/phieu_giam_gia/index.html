@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:insert="~{/admin/fragments/head :: head}">
-    <!-- Đảm bảo Bootstrap CSS được bao gồm trong fragment head -->
-</head>
+<head th:insert="~{/admin/fragments/head :: head}"></head>
+<link rel="stylesheet" th:href="@{/admin/assets/compiled/css/phanTrang.css}">
 <body>
 <!-- Site wrapper -->
 <div class="wrapper">
@@ -18,9 +17,6 @@
             <!-- Card tiêu đề -->
             <section class="row">
                 <div class="card">
-                    <div class="card-header">
-                        <h1>Quản lý phiếu giảm giá</h1>
-                    </div>
                     <div class="card-body">
                         <!-- Form tìm kiếm và lọc -->
                         <form method="GET" th:action="@{/admin/phieu-giam-gia/index}" class="mb-4">
@@ -61,27 +57,17 @@
                                 </div>
                             </div>
                         </form>
-
-                        <!-- Hiển thị thông báo -->
-                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-                            <span th:text="${success}"></span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <span th:text="${error}"></span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-
                         <!-- Nút thêm mới và thông tin kết quả -->
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <a class="btn btn-outline-success" th:href="@{/admin/phieu-giam-gia/create}">
-                                <i class="fas fa-plus"></i>
+                                <i class="fas fa-plus"></i>Thêm Mới
                             </a>
                             <div class="text-muted">
                                 <i class="fas fa-info-circle"></i>
                                 Tìm thấy <span th:text="${#lists.size(dsPhieuGiamGia)}">0</span> phiếu giảm giá
                             </div>
                         </div>
+                        <h5 class="card-title">Danh sách phiếu giảm giá</h5>
 
                         <!-- Bảng hiển thị dữ liệu -->
                         <div class="table-responsive">
@@ -94,7 +80,6 @@
                                     <th>Giá trị giảm</th>
                                     <th>Loại giảm</th>
                                     <th>Số lượng</th>
-                                    <th>Số lượng đã sử dụng</th>
                                     <th>Giá trị đơn hàng tối thiểu</th>
                                     <th>Loại phiếu</th>
                                     <th>Trạng thái</th>
@@ -109,43 +94,40 @@
                                 </tr>
                                 <tr th:each="pgg : ${dsPhieuGiamGia}">
                                     <td>
-                                        <span class="badge bg-info" th:text="${pgg.ma}"></span>
+                                        <span th:text="${pgg.ma}"></span>
                                     </td>
                                     <td th:text="${#dates.format(pgg.ngayBatDau, 'dd/MM/yyyy')}"></td>
                                     <td th:text="${#dates.format(pgg.ngayKetThuc, 'dd/MM/yyyy')}"></td>
                                     <td>
                                         <!-- Nếu loại giảm là phần trăm (true), hiển thị dấu % -->
-                                        <span th:if="${pgg.loaiGiamGia}" class="text-success fw-bold" th:text="${pgg.giaTriGiam} + ' %'"></span>
+                                        <span th:if="${pgg.loaiGiamGia}" th:text="${pgg.giaTriGiam} + ' %'"></span>
                                         <!-- Nếu loại giảm là tiền mặt (false), hiển thị VND -->
-                                        <span th:unless="${pgg.loaiGiamGia}" class="giaVND text-success fw-bold" th:text="${pgg.giaTriGiam}"></span>
+                                        <span th:unless="${pgg.loaiGiamGia}" th:text="${pgg.giaTriGiam}"></span>
                                     </td>
                                     <td>
-                                        <span th:if="${pgg.loaiGiamGia}" class="badge bg-warning">Phần trăm</span>
-                                        <span th:unless="${pgg.loaiGiamGia}" class="badge bg-primary">Tiền mặt</span>
+                                        <span th:if="${pgg.loaiGiamGia}">Phần trăm</span>
+                                        <span th:unless="${pgg.loaiGiamGia}">Tiền cố định</span>
                                     </td>
                                     <td>
-                                        <span class="badge bg-secondary" th:text="${pgg.soLuong}"></span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-dark" th:text="${pgg.soLuongDaSuDung}"></span>
+                                        <span th:text="${pgg.soLuong}"></span>
                                     </td>
                                     <td class="giaVND" th:text="${pgg.giaTriDonHangToiThieu}"></td>
                                     <td>
-                                        <span th:if="${pgg.loaiPhieu}" class="badge bg-success">Công khai</span>
-                                        <span th:unless="${pgg.loaiPhieu}" class="badge bg-warning">Riêng tư</span>
+                                        <span th:if="${pgg.loaiPhieu}">Công khai</span>
+                                        <span th:unless="${pgg.loaiPhieu}">Cá nhân</span>
                                     </td>
                                     <td>
-                                        <span th:if="${pgg.trangThai}" class="badge bg-success">
+                                        <span th:if="${pgg.trangThai}">
                                             <i class="fas fa-check"></i> Hoạt động
                                         </span>
-                                        <span th:unless="${pgg.trangThai}" class="badge bg-danger">
+                                        <span th:unless="${pgg.trangThai}">
                                             <i class="fas fa-times"></i> Không hoạt động
                                         </span>
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
                                             <a th:href="@{'/admin/phieu-giam-gia/edit/' + ${pgg.id}}"
-                                               class="btn btn-warning btn-sm" title="Sửa">
+                                               class="btn btn-outline-warning btn-sm" title="Sửa">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </div>
@@ -153,6 +135,60 @@
                                 </tr>
                                 </tbody>
                             </table>
+                            <nav class="mt-3">
+                                <ul class="pagination">
+                                    <!-- Nút Previous -->
+                                    <li th:class="${currentPage == 0} ? 'page-item disabled' : 'page-item'">
+                                        <a class="page-link"
+                                           th:href="@{/admin/phieu-giam-gia/index(page=${currentPage - 1}, size=${pageSize}, search=${search}, trangThai=${trangThai}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </li>
+
+                                    <!-- Hiển thị trang đầu tiên nếu currentPage > 2 -->
+                                    <li th:if="${currentPage > 2}" class="page-item">
+                                        <a class="page-link"
+                                           th:href="@{/admin/phieu-giam-gia/index(page=0, size=${pageSize}, search=${search}, trangThai=${trangThai}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}">
+                                            1
+                                        </a>
+                                    </li>
+
+                                    <!-- Dấu ... nếu currentPage > 3 -->
+                                    <li th:if="${currentPage > 3}" class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+
+                                    <!-- Các trang xung quanh currentPage -->
+                                    <li th:each="i : ${#numbers.sequence(currentPage - 2 > 0 ? currentPage - 2 : 0, currentPage + 2 < totalPages - 1 ? currentPage + 2 : totalPages - 1)}"
+                                        th:class="${currentPage == i} ? 'page-item active' : 'page-item'">
+                                        <a class="page-link"
+                                           th:href="@{/admin/phieu-giam-gia/index(page=${i}, size=${pageSize}, search=${search}, trangThai=${trangThai}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}"
+                                           th:text="${i + 1}">
+                                        </a>
+                                    </li>
+
+                                    <!-- Dấu ... nếu currentPage < totalPages - 3 -->
+                                    <li th:if="${currentPage < totalPages - 3}" class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+
+                                    <!-- Trang cuối -->
+                                    <li th:if="${currentPage + 2 < totalPages - 1}" class="page-item">
+                                        <a class="page-link"
+                                           th:href="@{/admin/phieu-giam-gia/index(page=${totalPages - 1}, size=${pageSize}, search=${search}, trangThai=${trangThai}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}"
+                                           th:text="${totalPages}">
+                                        </a>
+                                    </li>
+
+                                    <!-- Nút Next -->
+                                    <li th:class="${currentPage + 1 >= totalPages} ? 'page-item disabled' : 'page-item'">
+                                        <a class="page-link"
+                                           th:href="@{/admin/phieu-giam-gia/index(page=${currentPage + 1}, size=${pageSize}, search=${search}, trangThai=${trangThai}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
                         </div>
                     </div>
                 </div>
@@ -251,11 +287,6 @@
         document.querySelector('form').submit();
     }
 
-    // Hàm export dữ liệu (có thể thêm sau)
-    function exportData() {
-        // Placeholder cho chức năng export
-        alert('Chức năng export sẽ được phát triển trong tương lai');
-    }
 </script>
 </body>
 </html>

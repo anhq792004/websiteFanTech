@@ -1,6 +1,8 @@
 package com.example.datn.repository;
 
 import com.example.datn.entity.PhieuGiamGia;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -29,9 +31,10 @@ public interface PhieuGiamGiaRepo extends JpaRepository<PhieuGiamGia,Long> {
             "(:ngayBatDau IS NULL OR pgg.ngayBatDau >= :ngayBatDau) AND " +
             "(:ngayKetThuc IS NULL OR pgg.ngayKetThuc <= :ngayKetThuc) " +
             "ORDER BY pgg.ngayTao DESC")
-    List<PhieuGiamGia> findWithFilters(@Param("search") String search,
+    Page<PhieuGiamGia> findWithFilters(@Param("search") String search,
                                        @Param("trangThai") Boolean trangThai,
                                        @Param("ngayBatDau") Date ngayBatDau,
-                                       @Param("ngayKetThuc") Date ngayKetThuc);
+                                       @Param("ngayKetThuc") Date ngayKetThuc,
+                                       Pageable pageable);
 
 }
