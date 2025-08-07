@@ -174,4 +174,65 @@ public class ThongKeRepoImpl implements ThongKeRepo {
         Query query = entityManager.createQuery(sql);
         return ((Number) query.getSingleResult()).longValue();
     }
+    
+    @Override
+    public long countDonHangDangGiaoHang() {
+        String sql = "SELECT COUNT(hd) FROM HoaDon hd WHERE hd.trangThai = 3"; // Trạng thái đang giao hàng
+        Query query = entityManager.createQuery(sql);
+        return ((Number) query.getSingleResult()).longValue();
+    }
+    
+    @Override
+    public long countDonHangDaHuy() {
+        String sql = "SELECT COUNT(hd) FROM HoaDon hd WHERE hd.trangThai = 5"; // Trạng thái đã hủy
+        Query query = entityManager.createQuery(sql);
+        return ((Number) query.getSingleResult()).longValue();
+    }
+    
+    @Override
+    public long countDonHangHoanThanh() {
+        String sql = "SELECT COUNT(hd) FROM HoaDon hd WHERE hd.trangThai = 4"; // Trạng thái hoàn thành
+        Query query = entityManager.createQuery(sql);
+        return ((Number) query.getSingleResult()).longValue();
+    }
+    
+    @Override
+    public long countPhieuGiamGiaDangHoatDong() {
+        String sql = "SELECT COUNT(pgg) FROM PhieuGiamGia pgg WHERE pgg.trangThai = true AND pgg.ngayKetThuc >= CURRENT_DATE";
+        Query query = entityManager.createQuery(sql);
+        return ((Number) query.getSingleResult()).longValue();
+    }
+    
+    @Override
+    public long countSanPhamBanChay() {
+        // Đếm số sản phẩm có trong top 5 bán chạy tháng này
+        String sql = """
+            SELECT COUNT(DISTINCT sp.id) FROM SanPham sp
+            JOIN SanPhamChiTiet spct ON spct.sanPham.id = sp.id
+            JOIN HoaDonChiTiet hdct ON hdct.sanPhamChiTiet.id = spct.id
+            JOIN HoaDon hd ON hd.id = hdct.hoaDon.id
+            WHERE hd.trangThai = 4 
+            AND YEAR(hd.ngayTao) = YEAR(CURRENT_DATE) 
+            AND MONTH(hd.ngayTao) = MONTH(CURRENT_DATE)
+            GROUP BY sp.id
+            ORDER BY SUM(hdct.soLuong) DESC
+        """;
+        Query query = entityManager.createQuery(sql);
+        query.setMaxResults(5);
+        return query.getResultList().size();
+    }
+    
+    @Override
+    public long countSanPhamHetHang() {
+        String sql = "SELECT COUNT(spct) FROM SanPhamChiTiet spct WHERE spct.soLuong = 0";
+        Query query = entityManager.createQuery(sql);
+        return ((Number) query.getSingleResult()).longValue();
+    }
+    
+    @Override
+    public long countTongDonHang() {
+        String sql = "SELECT COUNT(hd) FROM HoaDon hd";
+        Query query = entityManager.createQuery(sql);
+        return ((Number) query.getSingleResult()).longValue();
+    }
 } 
