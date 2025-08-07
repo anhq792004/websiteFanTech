@@ -15,10 +15,8 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/admin")
 public class NutBamController {
     private final NutBamService nutBamService;
-
     @GetMapping("/nut-bam/index")
     public String index(
             @RequestParam(value = "name", required = false) String name,
@@ -33,6 +31,8 @@ public class NutBamController {
         model.addAttribute("status", status);
         return "admin/thuoc_tinh/nut_bam";
     }
+
+
 
     @GetMapping("/nut-bam/list")
     public String list(Model model) {
@@ -64,25 +64,25 @@ public class NutBamController {
     @PostMapping("/nut-bam/them")
     public String them(@ModelAttribute NutBam nutBam) {
         nutBamService.save(nutBam);
-        return "redirect:/admin/nut-bam/index";
+        return "redirect:/nut-bam/index";
     }
 
     @PostMapping("/nut-bam/sua")
     public String sua(@ModelAttribute NutBam nutBam) {
         nutBamService.save(nutBam);
-        return "redirect:/admin/nut-bam/index";
+        return "redirect:/nut-bam/index";
     }
 
     @PostMapping("/nut-bam/xoa/{id}")
     public String xoa(@PathVariable("id") Long id) {
         nutBamService.delete(id);
-        return "redirect:/admin/nut-bam/index";
+        return "redirect:/nut-bam/index";
     }
 
     @PostMapping("/nut-bam/thay-doi-trang-thai/{id}")
     public String thayDoiTrangThai(@PathVariable("id") Long id) {
         nutBamService.thayDoiTrangThai(id);
-        return "redirect:/admin/nut-bam/index";
+        return "redirect:/nut-bam/index";
     }
     
     @PostMapping("/nut-bam/add")

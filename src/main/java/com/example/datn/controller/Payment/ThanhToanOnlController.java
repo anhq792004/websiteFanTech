@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import com.example.datn.dto.gioHangDTO;
 
 @Controller
 @RequestMapping("/checkout")
@@ -137,7 +138,18 @@ public class ThanhToanOnlController {
             BigDecimal totalAmount = (BigDecimal) cartInfo.get("totalAmount");
             BigDecimal finalAmount = totalAmount;
             BigDecimal discountAmount = BigDecimal.ZERO;
+            BigDecimal shippingFee = BigDecimal.ZERO;
             PhieuGiamGia usedVoucher = null;
+
+            // Tính phí vận chuyển
+            float totalWeight = (Float) cartInfo.get("totalWeight");
+            if (totalAmount.compareTo(new BigDecimal("2000000")) < 0) {
+                // Dưới 2 triệu: tính phí ship theo kg
+                shippingFee = new BigDecimal(totalWeight / 1000).multiply(new BigDecimal("10000"));
+            } else {
+                // Trên 2 triệu: free ship
+                shippingFee = BigDecimal.ZERO;
+            }
 
             // Xử lý phiếu giảm giá
             if (voucherId != null) {
@@ -165,14 +177,17 @@ public class ThanhToanOnlController {
                     phieuGiamGiaRepo.save(voucher);
                     usedVoucher = voucher;
                     discountAmount = phieuGiamGiaService.calculateDiscountAmount(voucher, totalAmount);
-                    finalAmount = totalAmount.subtract(discountAmount);
-                    System.out.println("DEBUG: Calculated - totalAmount: " + totalAmount +
-                            ", discountAmount: " + discountAmount +
-                            ", finalAmount: " + finalAmount);
                 } else {
                     System.out.println("DEBUG: Voucher with ID " + voucherId + " not found");
                 }
             }
+
+            // Tính tổng tiền cuối cùng
+            finalAmount = totalAmount.add(shippingFee).subtract(discountAmount);
+            System.out.println("DEBUG: Calculated - totalAmount: " + totalAmount +
+                    ", shippingFee: " + shippingFee +
+                    ", discountAmount: " + discountAmount +
+                    ", finalAmount: " + finalAmount);
 
             DiaChi diaChi = new DiaChi();
             diaChi.setKhachHang(khachHang);
@@ -199,7 +214,7 @@ public class ThanhToanOnlController {
             hoaDon.setNguoiTao(khachHang.getTen());
             hoaDon.setTongTien(totalAmount);
             hoaDon.setTongTienSauGiamGia(finalAmount);
-            hoaDon.setPhiVanChuyen(BigDecimal.ZERO);
+            hoaDon.setPhiVanChuyen(shippingFee); // Lưu phí vận chuyển vào hóa đơn
             hoaDon.setPhieuGiamGia(usedVoucher); // Lưu phiếu giảm giá vào hóa đơn
 
             HoaDon savedHoaDon = hoaDonRepo.save(hoaDon);
@@ -208,16 +223,16 @@ public class ThanhToanOnlController {
                     ", tongTienSauGiamGia: " + savedHoaDon.getTongTienSauGiamGia() +
                     ", phieuGiamGiaId: " + (savedHoaDon.getPhieuGiamGia() != null ? savedHoaDon.getPhieuGiamGia().getId() : "null"));
 
-            List<Map<String, Object>> cartItems = (List<Map<String, Object>>) cartInfo.get("items");
+            List<gioHangDTO> cartItems = (List<gioHangDTO>) cartInfo.get("items");
             if (cartItems == null || cartItems.isEmpty()) {
                 throw new RuntimeException("Giỏ hàng không chứa sản phẩm để lưu chi tiết hóa đơn");
             }
 
-            for (Map<String, Object> item : cartItems) {
+            for (gioHangDTO item : cartItems) {
                 HoaDonChiTiet hoaDonChiTiet = new HoaDonChiTiet();
                 hoaDonChiTiet.setHoaDon(savedHoaDon);
 
-                Long sanPhamChiTietId = ((Number) item.get("sanPhamChiTietId")).longValue();
+                Long sanPhamChiTietId = item.getSanPhamChiTietId();
                 Optional<SanPhamChiTiet> sanPhamChiTietOpt = sanPhamChiTietRepo.findById(sanPhamChiTietId);
                 if (!sanPhamChiTietOpt.isPresent()) {
                     throw new RuntimeException("Không tìm thấy sản phẩm với ID: " + sanPhamChiTietId);
@@ -225,7 +240,7 @@ public class ThanhToanOnlController {
                 SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietOpt.get();
 
                 // Validate stock
-                int soLuong = ((Number) item.get("soLuong")).intValue();
+                int soLuong = item.getSoLuong();
                 if (sanPhamChiTiet.getSoLuong() < soLuong) {
                     throw new RuntimeException("Sản phẩm " + sanPhamChiTiet.getSanPham().getTen() + " không đủ số lượng tồn kho");
                 }
@@ -269,6 +284,7 @@ public class ThanhToanOnlController {
                     response.put("orderId", savedHoaDon.getId());
                     response.put("finalAmount", finalAmount);
                     response.put("discountAmount", discountAmount);
+                    response.put("shippingFee", shippingFee);
                     response.put("paymentMethod", "MOMO");
                     response.put("payUrl", transaction.getPayUrl());
                     response.put("transactionId", transaction.getId());
@@ -287,6 +303,7 @@ public class ThanhToanOnlController {
                 response.put("orderId", savedHoaDon.getId());
                 response.put("finalAmount", finalAmount);
                 response.put("discountAmount", discountAmount);
+                response.put("shippingFee", shippingFee);
                 response.put("paymentMethod", "COD");
                 response.put("redirectUrl", "/checkout/success?id=" + savedHoaDon.getId());
             }

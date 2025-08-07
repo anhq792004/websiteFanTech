@@ -22,6 +22,8 @@ public class AdminApiController {
     private final MauSacService mauSacService;
     private final CongSuatService congSuatService;
     private final HangService hangService;
+    private final KieuQuatService kieuQuatService;
+    private final NutBamService nutBamService;
     
     // Endpoint kiểm tra hoạt động
     @GetMapping("/check")
@@ -37,7 +39,6 @@ public class AdminApiController {
         return ResponseEntity.ok(mauSacService.findAllMauSac());
     }
 
-
     @GetMapping("/cong-suat")
     public ResponseEntity<List<CongSuat>> getAllCongSuat() {
         return ResponseEntity.ok(congSuatService.findAllCongSuat());
@@ -46,5 +47,15 @@ public class AdminApiController {
     @GetMapping("/hang")
     public ResponseEntity<List<Hang>> getAllHang() {
         return ResponseEntity.ok(hangService.findAllHang());
+    }
+    
+    @GetMapping("/kieu-quat")
+    public ResponseEntity<List<KieuQuat>> getAllKieuQuat() {
+        return ResponseEntity.ok(kieuQuatService.findAllKieuQuat());
+    }
+    
+    @GetMapping("/nut-bam")
+    public ResponseEntity<List<NutBam>> getAllNutBam() {
+        return ResponseEntity.ok(nutBamService.findAll());
     }
 } 

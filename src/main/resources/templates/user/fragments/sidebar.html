@@ -1,9 +1,13 @@
 <aside th:fragment="sidebar" xmlns:th="http://www.thymeleaf.org">
     <div class="card border-0 shadow-sm ">
         <div class="card-header bg-white border-0 text-center">
-            <img src="avatar.png" alt="Avatar" class="img-fluid rounded-circle mb-2"
-                 style="width: 100px;">
-            <h5>AnhQ</h5>
+            <img th:src="${khachHang != null and khachHang.anh != null and khachHang.anh != '' ? khachHang.anh : '/user/assets/images/avatar.jpg'}" 
+                 alt="Avatar" class="img-fluid rounded-circle mb-2" id="sidebarAvatar"
+                 style="width: 100px; height: 100px; object-fit: cover; cursor: pointer; transition: all 0.3s ease;"
+                 title="Click để thay đổi ảnh đại diện"
+                 onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)'"
+                 onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
+            <h5 th:text="${khachHang != null ? khachHang.ten : 'User'}">AnhQ</h5>
             <span class=" mt-2">Thông tin tài khoản</span>
         </div>
         <ul class="list-group list-group-flush mt-3">

@@ -54,6 +54,61 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Card thống kê khác -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card card-summary mb-3" style="background: #e8f5e8; border: none;">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title" style="color: #28a745;">Phiếu giảm giá</h6>
+                                        <h3 id="cardPhieuGiamGia" style="color: #28a745;">0</h3>
+                                        <small class="text-muted">Đang hoạt động</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card card-summary mb-3" style="background: #fff3cd; border: none;">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title" style="color: #ffc107;">Sản phẩm bán chạy</h6>
+                                        <h3 id="cardSanPhamBanChay" style="color: #ffc107;">0</h3>
+                                        <small class="text-muted">Top 5 tháng này</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card card-summary mb-3" style="background: #f8d7da; border: none;">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title" style="color: #dc3545;">Sản phẩm hết hàng</h6>
+                                        <h3 id="cardSanPhamHetHang" style="color: #dc3545;">0</h3>
+                                        <small class="text-muted">Cần nhập thêm</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card card-summary mb-3" style="background: #e3f0ff; border: none;">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title" style="color: #3b5998;">Tổng đơn hàng</h6>
+                                        <h3 id="cardTongDonHang" style="color: #3b5998;">0</h3>
+                                        <small class="text-muted">Tất cả trạng thái</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Card trạng thái đơn hàng -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Thống kê trạng thái đơn hàng</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="chartTrangThaiDonHang" style="max-height: 400px;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Biểu đồ doanh thu từng ngày trong tháng -->
                         <div class="row mb-4">
                             <div class="col-md-6">
@@ -92,11 +147,12 @@
         <footer th:replace="/admin/fragments/footer :: footer"></footer>
     </div>
 </div>
-
-<!-- Load scripts -->
-<script th:src="@{/admin/assets/compiled/js/chart.umd.min.js}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/simplePagination.js/1.6/jquery.simplePagination.min.js"></script>
+<!-- Load scripts -->
+<script th:src="@{/admin/assets/compiled/js/chart.umd.min.js}"></script>
+
 
 <script>
 window.addEventListener('load', function() {
@@ -112,14 +168,85 @@ window.addEventListener('load', function() {
     async function loadCardTongQuan() {
         console.log('Loading card tổng quan...');
         const res = await fetch('/api/thong-ke/doanh-thu-tong-hop');
-        if (res.ok) {
-            const data = await res.json();
-            console.log('Card data:', data);
-            document.getElementById('cardTongDoanhThu').innerText = data.tongDoanhThu.toLocaleString() + ' VND';
-            document.getElementById('cardDoanhThuHomNay').innerText = data.doanhThuHomNay.toLocaleString() + ' VND';
-            document.getElementById('cardDoanhThuTuanNay').innerText = data.doanhThuTuanNay.toLocaleString() + ' VND';
-            document.getElementById('cardDoanhThuThangNay').innerText = data.doanhThuThangNay.toLocaleString() + ' VND';
+        const data = res.ok ? await res.json() : {};
+        console.log('Card tổng quan data:', data);
+        document.getElementById('cardTongDoanhThu').textContent = data.tongDoanhThu?.toLocaleString() + ' VND' || '0 VND';
+        document.getElementById('cardDoanhThuHomNay').textContent = data.doanhThuHomNay?.toLocaleString() + ' VND' || '0 VND';
+        document.getElementById('cardDoanhThuTuanNay').textContent = data.doanhThuTuanNay?.toLocaleString() + ' VND' || '0 VND';
+        document.getElementById('cardDoanhThuThangNay').textContent = data.doanhThuThangNay?.toLocaleString() + ' VND' || '0 VND';
+    }
+    
+    // Load trạng thái đơn hàng
+    async function loadTrangThaiDonHang() {
+        console.log('Loading trạng thái đơn hàng...');
+        const res = await fetch('/api/thong-ke/trang-thai-don-hang');
+        const data = res.ok ? await res.json() : {};
+        console.log('Trạng thái đơn hàng data:', data);
+        
+        // Tạo biểu đồ tròn
+        const chartData = {
+            labels: ['Đang giao hàng', 'Đã hủy', 'Hoàn thành'],
+            datasets: [{
+                data: [data.dangGiaoHang || 0, data.daHuy || 0, data.hoanThanh || 0],
+                backgroundColor: [
+                    '#fff3cd', // Vàng nhạt cho đang giao hàng
+                    '#f8d7da', // Đỏ nhạt cho đã hủy
+                    '#d1edff'  // Xanh nhạt cho hoàn thành
+                ],
+                borderColor: [
+                    '#856404', // Vàng đậm
+                    '#721c24', // Đỏ đậm
+                    '#0c5460'  // Xanh đậm
+                ],
+                borderWidth: 2
+            }]
+        };
+        
+        if (chartTrangThaiDonHang) {
+            chartTrangThaiDonHang.destroy();
         }
+        
+        chartTrangThaiDonHang = new Chart(document.getElementById('chartTrangThaiDonHang').getContext('2d'), {
+            type: 'pie',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return `${label}: ${value} đơn hàng (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Load thống kê khác
+    async function loadThongKeKhac() {
+        console.log('Loading thống kê khác...');
+        const res = await fetch('/api/thong-ke/thong-ke-khac');
+        const data = res.ok ? await res.json() : {};
+        console.log('Thống kê khác data:', data);
+        
+        document.getElementById('cardPhieuGiamGia').textContent = data.phieuGiamGia || '0';
+        document.getElementById('cardSanPhamBanChay').textContent = data.sanPhamBanChay || '0';
+        document.getElementById('cardSanPhamHetHang').textContent = data.sanPhamHetHang || '0';
+        document.getElementById('cardTongDonHang').textContent = data.tongDonHang || '0';
     }
     // Helper: fill select tháng/năm
     function fillMonthYearSelects() {
@@ -139,7 +266,7 @@ window.addEventListener('load', function() {
         }
     }
     // Chart.js instance
-    let chartNgay, chartThang, chartKhoang;
+    let chartNgay, chartThang, chartKhoang, chartTrangThaiDonHang;
     // Load chart doanh thu từng ngày trong tháng
     async function loadChartNgay() {
         console.log('Loading chart ngày...');
@@ -264,6 +391,8 @@ window.addEventListener('load', function() {
     console.log('Initializing charts...');
     fillMonthYearSelects();
     loadCardTongQuan();
+    loadTrangThaiDonHang(); // Call the new function here
+    loadThongKeKhac(); // Call the new function here
     loadChartNgay();
     loadChartThang();
     document.getElementById('selectMonth').onchange = loadChartNgay;

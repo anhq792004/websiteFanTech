@@ -148,9 +148,10 @@ class ProductSearch {
         const priceDisplay = document.getElementById('priceDisplay');
         
         if (priceSlider && priceDisplay) {
-            priceSlider.min = priceRange.min;
-            priceSlider.max = priceRange.max;
-            priceSlider.value = priceRange.max;
+            priceSlider.min = priceRange.min || 0;
+            // Cố định max = 5.000.000 VND
+            priceSlider.max = 5000000;
+            priceSlider.value = 5000000;
             
             this.updatePriceDisplay();
         }
@@ -201,8 +202,22 @@ class ProductSearch {
         // Clear existing products
         productsContainer.innerHTML = '';
 
-        // Render products
-        data.products.forEach(product => {
+        // Sắp xếp sản phẩm theo giá từ thấp đến cao
+        const sortedProducts = data.products.sort((a, b) => {
+            // Lấy giá nhỏ nhất của mỗi sản phẩm
+            const getMinPrice = (product) => {
+                if (!product.sanPhamChiTiet || product.sanPhamChiTiet.length === 0) return 0;
+                return Math.min(...product.sanPhamChiTiet.map(spct => spct.gia || 0));
+            };
+            
+            const priceA = getMinPrice(a);
+            const priceB = getMinPrice(b);
+            
+            return priceA - priceB; // Sắp xếp tăng dần (giá thấp lên đầu)
+        });
+
+        // Render products đã sắp xếp
+        sortedProducts.forEach(product => {
             const productCard = this.createProductCard(product);
             productsContainer.appendChild(productCard);
         });

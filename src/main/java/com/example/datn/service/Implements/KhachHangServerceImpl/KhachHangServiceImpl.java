@@ -10,6 +10,7 @@ import com.example.datn.repository.ChucVuRepo;
 import com.example.datn.repository.DiaChiRepo;
 import com.example.datn.repository.KhachHangRepo.KhachHangRepo;
 import com.example.datn.repository.TaiKhoanRepo;
+import com.example.datn.service.FileUploadService;
 import com.example.datn.service.KhachHangService.KhachHangService;
 import com.example.datn.service.taiKhoanService.EmailService;
 import jakarta.mail.MessagingException;
@@ -20,7 +21,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Optional;
@@ -41,6 +44,8 @@ public class KhachHangServiceImpl implements KhachHangService {
     private final EmailService emailService;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final FileUploadService fileUploadService;
 
 
     @Override
@@ -69,6 +74,11 @@ public class KhachHangServiceImpl implements KhachHangService {
 
     @Override
     public KhachHang addKH(AddKhachHangRequest request) {
+        return addKH(request, null);
+    }
+    
+    @Override
+    public KhachHang addKH(AddKhachHangRequest request, MultipartFile hinhAnh) {
         // Kiểm tra email trùng
         if (taiKhoanRepo.findByEmail(request.getEmail()) != null) {
             throw new RuntimeException("Email đã được sử dụng");
@@ -102,6 +112,17 @@ public class KhachHangServiceImpl implements KhachHangService {
         khachHang.setSoDienThoai(request.getSoDienThoai());
         khachHang.setNgaySinh(request.getNgaySinh());
         khachHang.setTrangThai(true);
+        
+        // Xử lý upload ảnh nếu có
+        if (hinhAnh != null && !hinhAnh.isEmpty()) {
+            try {
+                String imagePath = fileUploadService.saveFile(hinhAnh);
+                khachHang.setAnh(imagePath);
+            } catch (IOException e) {
+                throw new RuntimeException("Lỗi khi lưu ảnh: " + e.getMessage());
+            }
+        }
+        
         khachHangRepo.save(khachHang);
 
         // Tạo địa chỉ
@@ -132,6 +153,11 @@ public class KhachHangServiceImpl implements KhachHangService {
 
     @Override
     public void updateInforKhachHang(UpdateInforKhachHangRequest request) {
+        updateInforKhachHang(request, null);
+    }
+    
+    @Override
+    public void updateInforKhachHang(UpdateInforKhachHangRequest request, MultipartFile hinhAnh) {
         Optional<KhachHang> khachHangOptional = khachHangRepo.findById(request.getIdKH());
 
         if (khachHangOptional.isPresent() ){
@@ -140,6 +166,22 @@ public class KhachHangServiceImpl implements KhachHangService {
             khachHang.setSoDienThoai(request.getSoDienThoai());
             khachHang.setNgaySinh(request.getNgaySinh());
             khachHang.setGioiTinh(request.getGioiTinh());
+            
+            // Xử lý upload ảnh mới nếu có
+            if (hinhAnh != null && !hinhAnh.isEmpty()) {
+                try {
+                    // Xóa ảnh cũ nếu có
+                    if (khachHang.getAnh() != null && !khachHang.getAnh().isEmpty()) {
+                        fileUploadService.deleteFile(khachHang.getAnh());
+                    }
+                    
+                    // Lưu ảnh mới
+                    String imagePath = fileUploadService.saveFile(hinhAnh);
+                    khachHang.setAnh(imagePath);
+                } catch (IOException e) {
+                    throw new RuntimeException("Lỗi khi lưu ảnh: " + e.getMessage());
+                }
+            }
 
             khachHangRepo.save(khachHang);
         }

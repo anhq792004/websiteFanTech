@@ -20,7 +20,7 @@ public class gioHangDTO {
     Integer soLuong;
     String hinhAnh;
     Integer soLuongTon; // Số lượng tồn kho
-
+    Float canNang; // Cân nặng sản phẩm
 
 
     // Tính tổng tiền cho item này
