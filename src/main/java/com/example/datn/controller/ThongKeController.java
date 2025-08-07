@@ -77,6 +77,25 @@ public class ThongKeController {
             public final long doanhThuThangNay = thongKeService.doanhThuThangNay();
         });
     }
+    
+    @GetMapping("/trang-thai-don-hang")
+    public ResponseEntity<?> trangThaiDonHang() {
+        return ResponseEntity.ok(new Object() {
+            public final long dangGiaoHang = thongKeService.countDonHangDangGiaoHang();
+            public final long daHuy = thongKeService.countDonHangDaHuy();
+            public final long hoanThanh = thongKeService.countDonHangHoanThanh();
+        });
+    }
+    
+    @GetMapping("/thong-ke-khac")
+    public ResponseEntity<?> thongKeKhac() {
+        return ResponseEntity.ok(new Object() {
+            public final long phieuGiamGia = thongKeService.countPhieuGiamGiaDangHoatDong();
+            public final long sanPhamBanChay = thongKeService.countSanPhamBanChay();
+            public final long sanPhamHetHang = thongKeService.countSanPhamHetHang();
+            public final long tongDonHang = thongKeService.countTongDonHang();
+        });
+    }
 }
 
 @Controller

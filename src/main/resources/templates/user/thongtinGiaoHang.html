@@ -771,6 +771,7 @@
 
                 if (result.success) {
                     document.getElementById('discount').textContent = -result.discountAmount;
+                    document.getElementById('shippingFee').textContent = result.shippingFee;
                     document.getElementById('totalAmount').textContent = result.finalAmount;
 
                     if (result.paymentMethod === 'MOMO') {

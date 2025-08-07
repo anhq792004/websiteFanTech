@@ -21,4 +21,14 @@ public interface ThongKeService {
     long doanhThuHomNay();
     long doanhThuTuanNay();
     long doanhThuThangNay();
+    // Đếm đơn hàng theo trạng thái
+    long countDonHangDangGiaoHang();
+    long countDonHangDaHuy();
+    long countDonHangHoanThanh();
+    
+    // Thống kê khác
+    long countPhieuGiamGiaDangHoatDong();
+    long countSanPhamBanChay();
+    long countSanPhamHetHang();
+    long countTongDonHang();
 } 

@@ -70,4 +70,39 @@ public class ThongKeServiceImpl implements ThongKeService {
     public long doanhThuThangNay() {
         return thongKeRepo.doanhThuThangNay();
     }
+    
+    @Override
+    public long countDonHangDangGiaoHang() {
+        return thongKeRepo.countDonHangDangGiaoHang();
+    }
+    
+    @Override
+    public long countDonHangDaHuy() {
+        return thongKeRepo.countDonHangDaHuy();
+    }
+    
+    @Override
+    public long countDonHangHoanThanh() {
+        return thongKeRepo.countDonHangHoanThanh();
+    }
+    
+    @Override
+    public long countPhieuGiamGiaDangHoatDong() {
+        return thongKeRepo.countPhieuGiamGiaDangHoatDong();
+    }
+    
+    @Override
+    public long countSanPhamBanChay() {
+        return thongKeRepo.countSanPhamBanChay();
+    }
+    
+    @Override
+    public long countSanPhamHetHang() {
+        return thongKeRepo.countSanPhamHetHang();
+    }
+    
+    @Override
+    public long countTongDonHang() {
+        return thongKeRepo.countTongDonHang();
+    }
 } 
