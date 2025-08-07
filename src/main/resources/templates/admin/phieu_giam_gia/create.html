@@ -17,234 +17,258 @@
         <header th:replace="/admin/fragments/header :: header"></header>
         <div class="page-content">
             <section class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4>Thêm phiếu giảm giá</h4>
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Thêm phiếu giảm giá</h2>
+                    </div>
+                    <form id="phieuGiamGiaForm" th:action="@{/admin/phieu-giam-gia/save}" method="post" class="mb-4"
+                          th:object="${phieuGiamGia}" novalidate>
+                        <input type="hidden" th:field="*{id}"/>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="ma">Mã phiếu giảm giá</label>
+                                    <input type="text" class="form-control" id="ma" th:field="*{ma}" readonly/>
+                                    <small class="text-muted">Mã được tạo tự động</small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="ten">Tên <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="ten" th:field="*{ten}"/>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <form id="phieuGiamGiaForm" th:action="@{/admin/phieu-giam-gia/save}" method="post" th:object="${phieuGiamGia}" novalidate>
-                                <input type="hidden" th:field="*{id}"/>
 
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group">
-                                            <label for="ma">Mã phiếu giảm giá</label>
-                                            <input type="text" class="form-control" id="ma" th:field="*{ma}" readonly/>
-                                            <small class="text-muted">Mã được tạo tự động</small>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group">
-                                            <label for="ten">Tên <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="ten" th:field="*{ten}"/>
-                                        </div>
-                                    </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="ngayBatDau">Ngày bắt đầu <span
+                                            class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="ngayBatDau"
+                                           th:field="*{ngayBatDau}" min=""/>
                                 </div>
+                            </div>
 
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group">
-                                            <label for="ngayBatDau">Ngày bắt đầu <span class="text-danger">*</span></label>
-                                            <input type="date" class="form-control" id="ngayBatDau" th:field="*{ngayBatDau}"/>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-group">
-                                            <label for="ngayKetThuc">Ngày kết thúc <span class="text-danger">*</span></label>
-                                            <input type="date" class="form-control" id="ngayKetThuc" th:field="*{ngayKetThuc}"/>
-                                        </div>
-                                    </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="ngayKetThuc">Ngày kết thúc <span
+                                            class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="ngayKetThuc"
+                                           th:field="*{ngayKetThuc}"/>
                                 </div>
+                            </div>
+                        </div>
 
-                                <div class="row">
-                                    <div class="col-md-4 mb-3">
-                                        <div class="form-group">
-                                            <label for="soLuong">Số lượng <span class="text-danger">*</span></label>
-                                            <input type="number" class="form-control" id="soLuong" th:field="*{soLuong}"/>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4 mb-3">
-                                        <div class="form-group">
-                                            <label for="giaTriGiam">Giá trị giảm <span class="text-danger">*</span></label>
-                                            <input type="number" step="0.01" class="form-control" id="giaTriGiam" th:field="*{giaTriGiam}"/>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4 mb-3">
-                                        <div class="form-group">
-                                            <label for="loaiGiamGia">Loại giảm giá</label>
-                                            <select class="form-select" id="loaiGiamGia" th:field="*{loaiGiamGia}">
-                                                <option th:value="true">Phần trăm</option>
-                                                <option th:value="false">Tiền mặt</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="soLuong">Số lượng <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="soLuong"
+                                           th:field="*{soLuong}"/>
                                 </div>
+                            </div>
 
-                                <div class="row">
-                                    <div class="col-md-4 mb-3">
-                                        <div class="form-group">
-                                            <label for="giaTriDonHangToiThieu">Giá trị đơn hàng tối thiểu <span class="text-danger">*</span></label>
-                                            <input type="number" class="form-control" id="giaTriDonHangToiThieu" th:field="*{giaTriDonHangToiThieu}" step="0.01"/>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4 mb-3">
-                                        <div class="form-group">
-                                            <label for="loaiPhieu">Loại phiếu</label>
-                                            <select class="form-select" id="loaiPhieu" th:field="*{loaiPhieu}">
-                                                <option th:value="true">Công khai</option>
-                                                <option th:value="false">Cá nhân</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4 mb-3">
-                                        <div class="form-group">
-                                            <label for="trangThai">Trạng thái</label>
-                                            <select class="form-select" id="trangThai" th:field="*{trangThai}">
-                                                <option th:value="true">Hoạt động</option>
-                                                <option th:value="false">Không hoạt động</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="giaTriGiam">Giá trị giảm <span
+                                            class="text-danger">*</span></label>
+                                    <input type="number" step="0.01" class="form-control" id="giaTriGiam"
+                                           th:field="*{giaTriGiam}"/>
                                 </div>
+                            </div>
 
-                                <div class="row">
-                                    <div class="col-md-6 mb-3" id="giaTriGiamToiDaGroup">
-                                        <div class="form-group">
-                                            <label for="giaTriGiamToiDa">Giá trị giảm tối đa (VNĐ) <span class="text-danger" id="giaTriGiamToiDaRequired">*</span></label>
-                                            <input type="number" step="0.01" class="form-control" id="giaTriGiamToiDa" th:field="*{giaTriGiamToiDa}" placeholder="Chỉ áp dụng với giảm phần trăm"/>
-                                            <small class="text-muted">Áp dụng nếu loại giảm là phần trăm (%)</small>
-                                        </div>
-                                    </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="loaiGiamGia">Loại giảm giá</label>
+                                    <select class="form-select" id="loaiGiamGia" th:field="*{loaiGiamGia}">
+                                        <option th:value="true">Phần trăm</option>
+                                        <option th:value="false">Tiền mặt</option>
+                                    </select>
                                 </div>
+                            </div>
+                        </div>
 
-                                <!-- Phần chọn khách hàng cho phiếu cá nhân -->
-                                <div class="row" id="khachHangSelection" style="display: none;">
-                                    <div class="col-12">
-                                        <div class="card border-info">
-                                            <div class="card-header bg-info text-white">
-                                                <h5 class="mb-0">
-                                                    <i class="fas fa-users"></i> Chọn khách hàng nhận phiếu giảm giá
-                                                </h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <!-- Thanh công cụ -->
-                                                <div class="row mb-3">
-                                                    <div class="col-md-6">
-                                                        <div class="input-group">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="giaTriDonHangToiThieu">Giá trị đơn hàng tối thiểu <span
+                                            class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="giaTriDonHangToiThieu"
+                                           th:field="*{giaTriDonHangToiThieu}" step="0.01"/>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="loaiPhieu">Loại phiếu</label>
+                                    <select class="form-select" id="loaiPhieu" th:field="*{loaiPhieu}">
+                                        <option th:value="true">Công khai</option>
+                                        <option th:value="false">Cá nhân</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="trangThai">Trạng thái</label>
+                                    <select class="form-select" id="trangThai" th:field="*{trangThai}">
+                                        <option th:value="true">Hoạt động</option>
+                                        <option th:value="false">Không hoạt động</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3" id="giaTriGiamToiDaGroup">
+                                <div class="form-group">
+                                    <label for="giaTriGiamToiDa">Giá trị giảm tối đa (VNĐ) <span
+                                            class="text-danger" id="giaTriGiamToiDaRequired">*</span></label>
+                                    <input type="number" step="0.01" class="form-control" id="giaTriGiamToiDa"
+                                           th:field="*{giaTriGiamToiDa}"
+                                           placeholder="Chỉ áp dụng với giảm phần trăm"/>
+                                    <small class="text-muted">Áp dụng nếu loại giảm là phần trăm (%)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Phần chọn khách hàng cho phiếu cá nhân -->
+                        <div class="row" id="khachHangSelection" style="display: none;">
+                            <div class="col-12">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-users"></i> Chọn khách hàng nhận phiếu giảm giá
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Thanh công cụ -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <div class="input-group">
                                                             <span class="input-group-text">
                                                                 <i class="fas fa-search"></i>
                                                             </span>
-                                                            <input type="text" class="form-control" id="searchKhachHang" placeholder="Tìm kiếm khách hàng theo tên, email, SĐT...">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="btn-group" role="group">
-                                                            <button type="button" class="btn btn-outline-primary btn-sm" id="selectAllKhachHang">
-                                                                <i class="fas fa-check-square"></i> Chọn tất cả
-                                                            </button>
-                                                            <button type="button" class="btn btn-outline-secondary btn-sm" id="clearAllKhachHang">
-                                                                <i class="fas fa-times"></i> Bỏ chọn
-                                                            </button>
-                                                        </div>
-                                                        <span class="badge bg-primary ms-2">
+                                                    <input type="text" class="form-control" id="searchKhachHang"
+                                                           placeholder="Tìm kiếm khách hàng theo tên, email, SĐT...">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-outline-primary btn-sm"
+                                                            id="selectAllKhachHang">
+                                                        <i class="fas fa-check-square"></i> Chọn tất cả
+                                                    </button>
+                                                    <button type="button"
+                                                            class="btn btn-outline-secondary btn-sm"
+                                                            id="clearAllKhachHang">
+                                                        <i class="fas fa-times"></i> Bỏ chọn
+                                                    </button>
+                                                </div>
+                                                <span class="badge bg-primary ms-2">
                                                             <i class="fas fa-user-check"></i>
                                                             Đã chọn: <span id="selectedCount">0</span>
                                                         </span>
-                                                    </div>
-                                                </div>
+                                            </div>
+                                        </div>
 
-                                                <!-- Bảng danh sách khách hàng -->
-                                                <div class="table-responsive">
-                                                    <table class="table table-hover table-striped">
-                                                        <thead class="table-dark">
-                                                        <tr>
-                                                            <th width="50">
-                                                                <input type="checkbox" class="form-check-input" id="selectAllHeader">
-                                                            </th>
-                                                            <th>Tên khách hàng</th>
-                                                            <th>Số điện thoại</th>
-                                                            <th>Email</th>
-                                                            <th>Trạng thái</th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody id="khachHangTableBody">
-                                                        <tr th:each="kh : ${dsKhachHang}" class="khach-hang-row">
-                                                            <td>
-                                                                <input class="form-check-input khach-hang-checkbox" type="checkbox" th:id="'kh_' + ${kh.id}" th:value="${kh.id}" name="selectedKhachHang" th:checked="${dsKhachHangDaCoPhieu != null && #lists.contains(dsKhachHangDaCoPhieu.![khachHang.id], kh.id)}">
-                                                            </td>
-                                                            <td>
-                                                                <div class="d-flex align-items-center">
-                                                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
-                                                                        <i class="fas fa-user"></i>
-                                                                    </div>
-                                                                    <div>
-                                                                        <div class="fw-bold khach-hang-name" th:text="${kh.ten}"></div>
-                                                                        <small class="text-muted">ID: <span th:text="${kh.id}"></span></small>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <span class="khach-hang-phone" th:text="${kh.soDienThoai}"></span>
-                                                            </td>
-                                                            <td>
+                                        <!-- Bảng danh sách khách hàng -->
+                                        <div class="table-responsive">
+                                            <table class="table table-hover table-striped">
+                                                <thead class="table-dark">
+                                                <tr>
+                                                    <th width="50">
+                                                        <input type="checkbox" class="form-check-input"
+                                                               id="selectAllHeader">
+                                                    </th>
+                                                    <th>Tên khách hàng</th>
+                                                    <th>Số điện thoại</th>
+                                                    <th>Email</th>
+                                                    <th>Trạng thái</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody id="khachHangTableBody">
+                                                <tr th:each="kh : ${dsKhachHang}" class="khach-hang-row">
+                                                    <td>
+                                                        <input class="form-check-input khach-hang-checkbox"
+                                                               type="checkbox" th:id="'kh_' + ${kh.id}"
+                                                               th:value="${kh.id}" name="selectedKhachHang"
+                                                               th:checked="${dsKhachHangDaCoPhieu != null && #lists.contains(dsKhachHangDaCoPhieu.![khachHang.id], kh.id)}">
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                                <i class="fas fa-user"></i>
+                                                            </div>
+                                                            <div>
+                                                                <div class="fw-bold khach-hang-name"
+                                                                     th:text="${kh.ten}"></div>
+                                                                <small class="text-muted">ID: <span
+                                                                        th:text="${kh.id}"></span></small>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                                <span class="khach-hang-phone"
+                                                                      th:text="${kh.soDienThoai}"></span>
+                                                    </td>
+                                                    <td>
                                                                 <span class="badge bg-success" th:if="${kh.trangThai}">
                                                                     <i class="fas fa-check-circle"></i> Hoạt động
                                                                 </span>
-                                                                <span class="badge bg-secondary" th:unless="${kh.trangThai}">
+                                                        <span class="badge bg-secondary"
+                                                              th:unless="${kh.trangThai}">
                                                                     <i class="fas fa-pause-circle"></i> Tạm dừng
                                                                 </span>
-                                                            </td>
-                                                        </tr>
-                                                        </tbody>
-                                                    </table>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <!-- Pagination -->
+                                        <nav aria-label="Customer pagination">
+                                            <ul class="pagination justify-content-center"
+                                                id="customerPagination">
+                                                <!-- Pagination will be generated by JavaScript -->
+                                            </ul>
+                                        </nav>
+
+                                        <!-- Thông tin thống kê -->
+                                        <div class="row mt-3">
+                                            <div class="col-md-6">
+                                                <div class="alert alert-info mb-0">
+                                                    <i class="fas fa-info-circle"></i>
+                                                    <strong>Thống kê:</strong>
+                                                    Hiển thị <span id="showingCount">0</span> / <span
+                                                        id="totalCount">0</span> khách hàng
                                                 </div>
-
-                                                <!-- Pagination -->
-                                                <nav aria-label="Customer pagination">
-                                                    <ul class="pagination justify-content-center" id="customerPagination">
-                                                        <!-- Pagination will be generated by JavaScript -->
-                                                    </ul>
-                                                </nav>
-
-                                                <!-- Thông tin thống kê -->
-                                                <div class="row mt-3">
-                                                    <div class="col-md-6">
-                                                        <div class="alert alert-info mb-0">
-                                                            <i class="fas fa-info-circle"></i>
-                                                            <strong>Thống kê:</strong>
-                                                            Hiển thị <span id="showingCount">0</span> / <span id="totalCount">0</span> khách hàng
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="alert alert-success mb-0">
-                                                            <i class="fas fa-user-check"></i>
-                                                            <strong>Đã chọn:</strong> <span id="selectedCountDetail">0</span> khách hàng
-                                                        </div>
-                                                    </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="alert alert-success mb-0">
+                                                    <i class="fas fa-user-check"></i>
+                                                    <strong>Đã chọn:</strong> <span
+                                                        id="selectedCountDetail">0</span> khách hàng
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="mt-4">
-                                    <button type="submit" class="btn btn-primary me-2">
-                                        <i class="fas fa-save"></i> Lưu
-                                    </button>
-                                    <a th:href="@{/admin/phieu-giam-gia/index}" class="btn btn-secondary">
-                                        <i class="fas fa-arrow-left"></i> Hủy
-                                    </a>
-                                </div>
-                            </form>
+                            </div>
                         </div>
-                    </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-save"></i> Lưu
+                            </button>
+                            <a th:href="@{/admin/phieu-giam-gia/index}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Hủy
+                            </a>
+                        </div>
+                    </form>
                 </div>
             </section>
         </div>
@@ -265,6 +289,8 @@
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('phieuGiamGiaForm');
         const ngayBatDau = document.getElementById('ngayBatDau');
+        const today = new Date().toISOString().split('T')[0];
+        ngayBatDau.setAttribute('min', today);
         const ngayKetThuc = document.getElementById('ngayKetThuc');
         const loaiPhieu = document.getElementById('loaiPhieu');
         const khachHangSelection = document.getElementById('khachHangSelection');
@@ -430,9 +456,20 @@
                 }
             }
 
-            // Nếu không có lỗi, submit form
+            // Nếu không có lỗi, hiển thị thông báo thành công và submit form
             if (!hasErrors) {
-                form.submit();
+                await Swal.fire({
+                    title: 'Thành công!',
+                    text: 'Thông tin phiếu giảm giá hợp lệ. Đang lưu dữ liệu...',
+                    icon: 'success',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+
+                // Delay một chút để người dùng thấy thông báo trước khi submit
+                setTimeout(() => {
+                    form.submit();
+                }, 1500);
             }
         });
 

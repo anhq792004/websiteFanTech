@@ -6,6 +6,9 @@ import com.example.datn.repository.KhachHangRepo.KhachHangRepo;
 import com.example.datn.repository.PhieuGiamGiaKhachHangRepo;
 import com.example.datn.repository.PhieuGiamGiaRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -35,9 +38,12 @@ public class PhieuGiamGiaController {
                                   @RequestParam(value = "search", required = false) String search,
                                   @RequestParam(value = "trangThai", required = false) Boolean trangThai,
                                   @RequestParam(value = "ngayBatDau", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date ngayBatDau,
-                                  @RequestParam(value = "ngayKetThuc", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date ngayKetThuc) {
+                                  @RequestParam(value = "ngayKetThuc", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date ngayKetThuc,
+                                  @RequestParam(value = "page", defaultValue = "0") int page,
+                                  @RequestParam(value = "size", defaultValue = "5") int size) {
 
-        List<PhieuGiamGia> dsPhieuGiamGia;
+        Pageable pageable = PageRequest.of(page, size, Sort.by("ma").ascending());
+        Page<PhieuGiamGia> pagePhieuGiamGia;
         Date currentDate = new Date();
 
         // Tìm kiếm và lọc dữ liệu
@@ -45,26 +51,30 @@ public class PhieuGiamGiaController {
                 trangThai != null ||
                 ngayBatDau != null ||
                 ngayKetThuc != null) {
-
-            dsPhieuGiamGia = phieuGiamGiaRepo.findWithFilters(
+            pagePhieuGiamGia = phieuGiamGiaRepo.findWithFilters(
                     search != null ? search.trim() : null,
                     trangThai,
                     ngayBatDau,
-                    ngayKetThuc
+                    ngayKetThuc,
+                    pageable
             );
         } else {
-            dsPhieuGiamGia = phieuGiamGiaRepo.findAll();
+            pagePhieuGiamGia = phieuGiamGiaRepo.findAll(pageable);
         }
 
         // Cập nhật trạng thái cho các phiếu hết hạn
-        for (PhieuGiamGia pgg : dsPhieuGiamGia) {
+        for (PhieuGiamGia pgg : pagePhieuGiamGia.getContent()) {
             if (pgg.getNgayKetThuc() != null && pgg.getNgayKetThuc().before(currentDate) && pgg.isTrangThai()) {
                 pgg.setTrangThai(false);
                 phieuGiamGiaRepo.save(pgg);
             }
         }
 
-        model.addAttribute("dsPhieuGiamGia", dsPhieuGiamGia);
+        model.addAttribute("dsPhieuGiamGia", pagePhieuGiamGia.getContent());
+        model.addAttribute("currentPage", pagePhieuGiamGia.getNumber());
+        model.addAttribute("totalPages", pagePhieuGiamGia.getTotalPages());
+        model.addAttribute("totalItems", pagePhieuGiamGia.getTotalElements());
+        model.addAttribute("pageSize", size);
 
         // Thêm các giá trị tìm kiếm vào model để giữ trong form
         model.addAttribute("search", search);
