@@ -32,6 +32,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -219,6 +221,29 @@ public class ProfileController {
     ) {
         diaChiService.update(request);
         return "redirect:/profile/address";
+    }
+
+    /**
+     * Đặt địa chỉ mặc định cho khách hàng hiện tại (client)
+     */
+    @PostMapping("/set-default-address")
+    @ResponseBody
+    public ResponseEntity<?> setDefaultAddressClient(@RequestParam Long diaChiId, HttpSession session) {
+        TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Chưa đăng nhập");
+        }
+        KhachHang khachHang = khachHangService.findByTaiKhoan(currentUser);
+        DiaChi diaChi = diaChiRepo.findById(diaChiId).orElse(null);
+        if (diaChi == null || !diaChi.getKhachHang().getId().equals(khachHang.getId())) {
+            return ResponseEntity.badRequest().body("Địa chỉ không hợp lệ");
+        }
+        khachHang.setDiaChiMacDinhId(diaChiId);
+        khachHangService.save(khachHang);
+        Map<String, Object> res = new HashMap<>();
+        res.put("success", true);
+        res.put("message", "Cập nhật địa chỉ mặc định thành công");
+        return ResponseEntity.ok(res);
     }
 
     //phieu giam gia

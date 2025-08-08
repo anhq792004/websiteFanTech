@@ -133,6 +133,10 @@ public class KhachHangServiceImpl implements KhachHangService {
         diaChi.setXa(request.getXaPhuong());
         diaChi.setSoNhaNgoDuong(request.getSoNhaNgoDuong());
         diaChiRepo.save(diaChi);
+        
+        // Đặt địa chỉ đầu tiên làm mặc định
+        khachHang.setDiaChiMacDinhId(diaChi.getId());
+        khachHangRepo.save(khachHang);
 
         // Gửi email
         try {

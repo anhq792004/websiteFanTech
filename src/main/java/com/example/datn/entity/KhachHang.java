@@ -51,4 +51,7 @@ public class KhachHang {
 
     @Column(name = "hinh_anh")
     String anh;
+    
+    @Column(name = "dia_chi_mac_dinh_id")
+    Long diaChiMacDinhId;
 }

@@ -36,23 +36,37 @@ public class ThongKeController {
     }
 
     @GetMapping("/top-ban-chay")
-    public ResponseEntity<List<TopSanPhamBanChayResponse>> getTopSanPhamBanChay(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-            @RequestParam(required = false) String type,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(required = false) String month
-    ) {
-        if (from != null && to != null) {
-            return ResponseEntity.ok(thongKeService.topSanPhamBanChayTrongKhoang(from, to));
-        } else if ("ngay".equalsIgnoreCase(type) && date != null) {
-            return ResponseEntity.ok(thongKeService.topSanPhamBanChayTheoNgay(date));
-        } else if ("thang".equalsIgnoreCase(type) && month != null) {
-            YearMonth ym = YearMonth.parse(month);
-            return ResponseEntity.ok(thongKeService.topSanPhamBanChayTheoThang(ym));
-        } else {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<?> topBanChay(
+            @RequestParam(defaultValue = "day") String scope,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to,
+            @RequestParam(defaultValue = "5") int limit) {
+        List<TopSanPhamBanChayResponse> result;
+        LocalDate today = LocalDate.now();
+        switch (scope) {
+            case "month" -> result = thongKeService.topSanPhamBanChayThang(today.getYear(), today.getMonthValue());
+            case "week" -> {
+                LocalDate start = today.minusDays(today.getDayOfWeek().getValue() - 1);
+                LocalDate end = start.plusDays(6);
+                result = thongKeService.topSanPhamBanChayKhoang(start, end);
+            }
+            case "custom" -> {
+                LocalDate start = LocalDate.parse(from);
+                LocalDate end = LocalDate.parse(to);
+                result = thongKeService.topSanPhamBanChayKhoang(start, end);
+            }
+            default -> result = thongKeService.topSanPhamBanChayNgay(today);
         }
+        if (limit > 0 && result.size() > limit) {
+            result = result.subList(0, limit);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/sap-het-hang")
+    public ResponseEntity<?> sapHetHang(@RequestParam(defaultValue = "10") int threshold,
+                                        @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(thongKeService.danhSachSapHetHang(threshold, limit));
     }
 
     @GetMapping("/doanh-thu-ngay-trong-thang")
