@@ -1,5 +1,6 @@
 package com.example.datn.repository;
 
+import com.example.datn.dto.response.LowStockProductResponse;
 import com.example.datn.dto.response.TopSanPhamBanChayResponse;
 import com.example.datn.dto.response.ThongKeTongQuanResponse;
 import com.example.datn.dto.response.DoanhThuNgayResponse;
@@ -41,4 +42,7 @@ public interface ThongKeRepo {
     long countSanPhamBanChay();
     long countSanPhamHetHang();
     long countTongDonHang();
+
+    // New: danh sách sắp hết hàng
+    List<LowStockProductResponse> sanPhamSapHetHang(int threshold, int limit);
 } 

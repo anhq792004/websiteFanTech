@@ -41,6 +41,9 @@ public class SecurityConfig {
                                 "/access-denied",
                                 "/verify-account").permitAll()
 
+                        // API thống kê - Admin và Employee có thể truy cập
+                        .requestMatchers("/api/thong-ke/**").hasAnyRole("ADMIN", "EMPLOYE")
+
                         // PHÂN QUYỀN HÓA ĐƠN - CHỈ ADMIN MỚI TRUY CẬP ĐƯỢC
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 

@@ -137,11 +137,33 @@ public class KhachHangController {
         return khachHangService.changeStatus(id);
     }
 
-    @GetMapping("/xoa/{id}")
-    public String xoa(@RequestParam("khachHangId") Integer khachHangId,
-                      @PathVariable("id") Long id) {
-        diaChiRepo.deleteById(id);
-        return "redirect:/khach-hang/detail?id=" + khachHangId;
+    @PostMapping("/xoa-dia-chi")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> xoaDiaChi(@RequestParam Long diaChiId, 
+                                                         @RequestParam Long khachHangId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // Kiểm tra xem địa chỉ này có phải địa chỉ mặc định không
+            KhachHang khachHang = khachHangService.findById(khachHangId);
+            if (khachHang != null && khachHang.getDiaChiMacDinhId() != null && 
+                khachHang.getDiaChiMacDinhId().equals(diaChiId)) {
+                response.put("success", false);
+                response.put("message", "Không thể xóa địa chỉ mặc định. Vui lòng đặt địa chỉ khác làm mặc định trước khi xóa.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            // Xóa địa chỉ
+            diaChiRepo.deleteById(diaChiId);
+            
+            response.put("success", true);
+            response.put("message", "Xóa địa chỉ thành công");
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi hệ thống: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     @PostMapping("/cap-nhat-dia-chi")
@@ -192,5 +214,43 @@ public class KhachHangController {
         boolean exists = taiKhoanRepo.existsByEmail(email);
         response.put("exists", exists);
         return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping("/set-default-address")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> setDefaultAddress(
+            @RequestParam Long khachHangId, 
+            @RequestParam Long diaChiId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // Kiểm tra khách hàng tồn tại
+            KhachHang khachHang = khachHangService.findById(khachHangId);
+            if (khachHang == null) {
+                response.put("success", false);
+                response.put("message", "Không tìm thấy khách hàng");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            // Kiểm tra địa chỉ có thuộc về khách hàng này không
+            DiaChi diaChi = diaChiRepo.findById(diaChiId).orElse(null);
+            if (diaChi == null || !diaChi.getKhachHang().getId().equals(khachHangId)) {
+                response.put("success", false);
+                response.put("message", "Địa chỉ không hợp lệ");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            // Cập nhật địa chỉ mặc định
+            khachHang.setDiaChiMacDinhId(diaChiId);
+            khachHangService.save(khachHang);
+            
+            response.put("success", true);
+            response.put("message", "Đặt địa chỉ mặc định thành công");
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi hệ thống: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 }
