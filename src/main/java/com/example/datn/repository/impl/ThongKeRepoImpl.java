@@ -2,6 +2,7 @@ package com.example.datn.repository.impl;
 
 import com.example.datn.dto.response.DoanhThuNgayResponse;
 import com.example.datn.dto.response.DoanhThuThangResponse;
+import com.example.datn.dto.response.LowStockProductResponse;
 import com.example.datn.dto.response.TopSanPhamBanChayResponse;
 import com.example.datn.dto.response.ThongKeTongQuanResponse;
 import com.example.datn.repository.ThongKeRepo;
@@ -234,5 +235,30 @@ public class ThongKeRepoImpl implements ThongKeRepo {
         String sql = "SELECT COUNT(hd) FROM HoaDon hd";
         Query query = entityManager.createQuery(sql);
         return ((Number) query.getSingleResult()).longValue();
+    }
+
+    @Override
+    public List<LowStockProductResponse> sanPhamSapHetHang(int threshold, int limit) {
+        String sql = """
+            SELECT new com.example.datn.dto.response.LowStockProductResponse(
+                spct.id,
+                sp.id,
+                sp.ten,
+                spct.soLuong,
+                CAST(spct.gia AS double),
+                ha.hinhAnh,
+                COALESCE(cs.ten,'')
+            )
+            FROM SanPhamChiTiet spct
+            JOIN spct.sanPham sp
+            LEFT JOIN spct.hinhAnh ha
+            LEFT JOIN spct.congSuat cs
+            WHERE spct.trangThai = true AND spct.soLuong <= :threshold
+            ORDER BY spct.soLuong ASC
+        """;
+        Query query = entityManager.createQuery(sql, com.example.datn.dto.response.LowStockProductResponse.class);
+        query.setParameter("threshold", threshold);
+        query.setMaxResults(limit);
+        return query.getResultList();
     }
 } 

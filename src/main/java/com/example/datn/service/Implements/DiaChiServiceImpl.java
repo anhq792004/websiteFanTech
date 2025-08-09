@@ -29,7 +29,26 @@ public class DiaChiServiceImpl implements DiaChiService {
     public boolean xoaDiaChiTheoKhachHang(Long idDiaChi, Long idKhachHang) {
         Optional<DiaChi> diaChiOptional = diaChiRepo.findByIdAndKhachHang_Id(idDiaChi, idKhachHang);
         if (diaChiOptional.isPresent()) {
+            KhachHang khachHang = khachHangRepo.findById(idKhachHang).orElse(null);
+            
+            // Xóa địa chỉ
             diaChiRepo.delete(diaChiOptional.get());
+            
+            // Nếu địa chỉ bị xóa là địa chỉ mặc định, chọn địa chỉ khác làm mặc định
+            if (khachHang != null && khachHang.getDiaChiMacDinhId() != null && 
+                khachHang.getDiaChiMacDinhId().equals(idDiaChi)) {
+                
+                List<DiaChi> remainingAddresses = diaChiRepo.findByKhachHang_Id(idKhachHang);
+                if (!remainingAddresses.isEmpty()) {
+                    // Đặt địa chỉ đầu tiên còn lại làm mặc định
+                    khachHang.setDiaChiMacDinhId(remainingAddresses.get(0).getId());
+                } else {
+                    // Không còn địa chỉ nào, xóa mặc định
+                    khachHang.setDiaChiMacDinhId(null);
+                }
+                khachHangRepo.save(khachHang);
+            }
+            
             return true;
         }
         return false;
@@ -60,6 +79,12 @@ public class DiaChiServiceImpl implements DiaChiService {
         dc.setKhachHang(kh);
 
         diaChiRepo.save(dc);
+        
+        // Nếu khách hàng chưa có địa chỉ mặc định, đặt địa chỉ này làm mặc định
+        if (kh.getDiaChiMacDinhId() == null) {
+            kh.setDiaChiMacDinhId(dc.getId());
+            khachHangRepo.save(kh);
+        }
     }
 
 
