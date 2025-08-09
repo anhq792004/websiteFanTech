@@ -322,6 +322,7 @@
             this.loadAddressData();
             this.bindEvents();
             this.loadAvailableVouchers();
+            this.prefillDefaultAddress();
         }
 
         bindEvents() {
@@ -363,6 +364,57 @@
             } catch (error) {
                 console.error("Lỗi tải dữ liệu địa chỉ:", error);
                 this.showAlert('Lỗi tải dữ liệu địa chỉ', 'danger');
+            }
+        }
+
+        // Prefill địa chỉ mặc định của khách hàng
+        async prefillDefaultAddress() {
+            try {
+                const res = await fetch('/checkout/default-address');
+                if (!res.ok) return;
+                const json = await res.json();
+                if (!json.success || !json.data) return;
+
+                const { hoTen, soDienThoai, tinh, huyen, xa, soNhaNgoDuong } = json.data;
+
+                // Điền họ tên, SĐT
+                const nameEl = document.getElementById('hoTen');
+                const phoneEl = document.getElementById('soDienThoai');
+                if (nameEl && !nameEl.value) nameEl.value = hoTen || '';
+                if (phoneEl && !phoneEl.value) phoneEl.value = soDienThoai || '';
+
+                // Nếu đã có danh mục địa chỉ tải xong thì set, ngược lại chờ và thử lại
+                const waitUntil = async (predicate, timeout = 3000) => {
+                    const start = Date.now();
+                    return new Promise(resolve => {
+                        const iv = setInterval(() => {
+                            if (predicate() || Date.now() - start > timeout) {
+                                clearInterval(iv);
+                                resolve();
+                            }
+                        }, 50);
+                    });
+                };
+
+                await waitUntil(() => Array.isArray(this.addressData) && this.addressData.length > 0);
+
+                // Set tỉnh/huyện/xã theo ID lưu trong DB
+                const citySelect = document.getElementById('tinhThanh');
+                const districtSelect = document.getElementById('quanHuyen');
+                const wardSelect = document.getElementById('phuongXa');
+
+                if (citySelect && districtSelect && wardSelect) {
+                    citySelect.value = tinh || '';
+                    this.loadDistricts();
+                    districtSelect.value = huyen || '';
+                    this.loadWards();
+                    wardSelect.value = xa || '';
+                }
+
+                const detailEl = document.getElementById('diaChiChiTiet');
+                if (detailEl && !detailEl.value) detailEl.value = soNhaNgoDuong || '';
+            } catch (e) {
+                console.warn('Prefill default address error:', e);
             }
         }
 
