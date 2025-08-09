@@ -21,18 +21,19 @@
                         <div class="dataTable-top">
                             <form method="get" action="/khach-hang/index">
                                 <div class="row">
-                                    <div class="col-6">
+                                    <div class="col-7">
                                         <input type="text" id="searchInput" class="form-control" name="search"
                                                placeholder="Tìm kiếm khách hàng..." th:value="${search}">
                                     </div>
                                     <div class="col-3">
-                                        <select class="form-select" id="trangThai" name="trangThai">
+                                        <select class="form-select" id="trangThai" name="trangThai"
+                                                th:value="${trangThai}">
                                             <option value="">Tất cả trạng thái</option>
                                             <option value="true">Đang hoạt động</option>
                                             <option value="false">Ngừng hoạt động</option>
                                         </select>
                                     </div>
-                                    <div class="col-3 d-flex">
+                                    <div class="col-2 d-flex">
                                         <div>
                                             <button class="btn btn-outline-primary" type="submit"
                                                     style="width: 70px; margin-right: 10px">
