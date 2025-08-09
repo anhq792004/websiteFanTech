@@ -22,19 +22,14 @@
                         <div class="dataTable-top">
                             <form method="get" action="/admin/nhan-vien/index">
                                 <div class="row">
-                                    <div class="col-4">
+                                    <div class="col-7">
                                         <input type="text" id="searchInput" class="form-control" name="search"
                                                placeholder="Tìm kiếm nhân viên..." th:value="${search}">
                                     </div>
+
                                     <div class="col-3">
-                                        <select class="form-select" id="chucVuIndex" name="chucVu">
-                                            <option value="">Tất cả chức vụ</option>
-                                            <option value="true">Quản lý</option>
-                                            <option value="false">Nhân viên</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-3">
-                                        <select class="form-select" id="trangThai" name="trangThai">
+                                        <select class="form-select" id="trangThai" name="trangThai"
+                                                th:value="${trangThai}">
                                             <option value="">Tất cả trạng thái</option>
                                             <option value="true">Đang làm việc</option>
                                             <option value="false">Đã nghỉ việc</option>
