@@ -19,6 +19,7 @@ import com.example.datn.service.MomoService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -68,6 +69,9 @@ public class ThanhToanOnlController {
     @Autowired
     private SanPhamChiTietRepo sanPhamChiTietRepo;
 
+    @Autowired
+    private com.example.datn.service.KhachHangService.KhachHangService khachHangService;
+
     // Hiển thị trang checkout
     @GetMapping("")
     public String checkout(HttpSession session, Model model) {
@@ -85,6 +89,46 @@ public class ThanhToanOnlController {
         }
 
         return "user/thongtinGiaoHang";
+    }
+
+    // Lấy địa chỉ mặc định của khách hàng đang đăng nhập
+    @GetMapping("/default-address")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getDefaultAddress(HttpSession session) {
+        Map<String, Object> res = new HashMap<>();
+        TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            res.put("success", false);
+            res.put("message", "Chưa đăng nhập");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
+        }
+
+        KhachHang kh = khachHangService.findByTaiKhoan(currentUser);
+        if (kh == null || kh.getDiaChiMacDinhId() == null) {
+            res.put("success", false);
+            res.put("message", "Không có địa chỉ mặc định");
+            return ResponseEntity.ok(res);
+        }
+
+        Optional<DiaChi> dcOpt = diaChiRepo.findById(kh.getDiaChiMacDinhId());
+        if (dcOpt.isEmpty()) {
+            res.put("success", false);
+            res.put("message", "Không tìm thấy địa chỉ");
+            return ResponseEntity.ok(res);
+        }
+
+        DiaChi dc = dcOpt.get();
+        Map<String, Object> data = new HashMap<>();
+        data.put("hoTen", kh.getTen());
+        data.put("soDienThoai", kh.getSoDienThoai());
+        data.put("tinh", dc.getTinh());
+        data.put("huyen", dc.getHuyen());
+        data.put("xa", dc.getXa());
+        data.put("soNhaNgoDuong", dc.getSoNhaNgoDuong());
+
+        res.put("success", true);
+        res.put("data", data);
+        return ResponseEntity.ok(res);
     }
 
     // API lấy thông tin giỏ hàng cho checkout
