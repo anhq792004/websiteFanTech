@@ -1,6 +1,8 @@
 <head th:fragment="head" xmlns:th="http://www.thymeleaf.org">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}"/>
     <title>FanTech Shop</title>
     <link rel="icon" type="image/png"
           href="https://png.pngtree.com/png-vector/20221011/ourmid/pngtree-letter-v-logo-icon-vector-png-image_6295820.png">
