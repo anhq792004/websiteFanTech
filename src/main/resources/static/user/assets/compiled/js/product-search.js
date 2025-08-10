@@ -281,12 +281,26 @@ class ProductSearch {
             <!-- Thông tin sản phẩm -->
             <div class="p-3 d-flex flex-column flex-grow-1">
                 <!-- Tên sản phẩm -->
-                <h5 class="card-title">${product.ten}</h5>
+                <h5 class="card-title line-clamp-1">${product.ten}</h5>
 
                 <!-- Mô tả ngắn -->
                 <div>
                     <p class="text-muted small line-clamp-2 mb-0">${shortDescription}</p>
                 </div>
+                <style>
+                    .line-clamp-1 {
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        min-height: 2.5em; /* Tùy chỉnh để đảm bảo 2 dòng */
+                    }
+                    .line-clamp-2 {
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        min-height: 3em; /* Tùy chỉnh để đảm bảo 2 dòng */
+                    }
+                </style>
 
                 <!-- Thông tin chi tiết -->
                 <div class="d-flex justify-content-between">
@@ -479,7 +493,7 @@ function addToCartServer(cartItem, button) {
     fetch('/cart/add', {
         method: 'POST',
         body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
     })
         .then(response => response.ok ? response.json() : Promise.reject())
         .then(data => {
@@ -509,7 +523,7 @@ function showNotification(message, type = 'info') {
 
 // Hàm lấy lớp Bootstrap cho thông báo
 function getBootstrapAlertClass(type) {
-    return { 'success': 'success', 'error': 'danger', 'warning': 'warning' }[type] || 'info';
+    return {'success': 'success', 'error': 'danger', 'warning': 'warning'}[type] || 'info';
 }
 
 // Hàm lấy biểu tượng thông báo
@@ -530,6 +544,6 @@ function updateCartCount(count) {
 }
 
 // Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     new ProductSearch();
 });
