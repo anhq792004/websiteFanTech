@@ -78,21 +78,11 @@
     </div>
     <div class="login-form">
         <h2 class="text-center">Nhập mã OTP</h2>
-
-        <!-- Hiển thị thông báo lỗi -->
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <span th:text="${error}"></span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-
-        <form th:action="@{/forgot-password/verify-code}" method="post" id="verifyCodeForm">
+        <form id="verifyCodeForm" th:action="@{/forgot-password/verify-code}" method="post">
             <input type="hidden" th:name="email" th:value="${email}">
             <div class="form-group">
-                <label for="code" class="form-label fw-bold"><span class="text-danger ">*</span> <strong>Mã xác
-                    nhận:</strong></label>
-                <input type="text" class="form-control" id="code" name="code" required>
+                <label for="code" class="form-label fw-bold"><span class="text-danger ">*</span> <strong>Mã xác nhận:</strong></label>
+                <input type="text" class="form-control" id="code" name="code">
             </div>
             <button type="submit" class="btn btn-primary btn-block">Xác nhận</button>
         </form>
@@ -108,52 +98,56 @@
         timerProgressBar: true
     });
 
-    // Hiển thị thông báo lỗi từ server
-    const serverError = /*[[${error}]]*/ null;
-    if (serverError) {
-        Toast.fire({
-            icon: 'error',
-            title: serverError
-        });
-    }
-
-    // Hiển thị thông báo thành công từ server
-    const serverSuccess = /*[[${success}]]*/ null;
-    if (serverSuccess) {
-        Swal.fire({
-            icon: 'success',
-            title: serverSuccess,
-            timer: 2000,
-            showConfirmButton: false
-        }).then(() => {
-            window.location.href = '/forgot-password/new-password';
-        });
-    }
-
     document.getElementById('verifyCodeForm').addEventListener('submit', function (e) {
+        e.preventDefault(); // Ngăn form submit mặc định
+
         const code = document.getElementById('code').value.trim();
+        const email = document.querySelector('input[name="email"]').value;
 
         if (!code) {
-            e.preventDefault();
             Toast.fire({
                 icon: 'warning',
-                title: 'Vui lòng nhập mã xác nhận'
+                title: 'Vui lòng nhập mã xác nhận',
+                timer: 2000
             });
             return;
         }
 
-        Swal.fire({
-            title: 'Đang xác thực...',
-            text: 'Vui lòng chờ trong giây lát',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        return true;
+        // Gửi AJAX request
+        fetch('/forgot-password/verify-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                'email': email,
+                'code': code
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Toast.fire({
+                        icon: 'success',
+                        title: data.message,
+                        timer: 2000
+                    }).then(() => {
+                        window.location.href = '/forgot-password/new-password';
+                    });
+                } else {
+                    Toast.fire({
+                        icon: 'error',
+                        title: data.message
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Có lỗi xảy ra. Vui lòng thử lại.'
+                });
+            });
     });
 </script>
 

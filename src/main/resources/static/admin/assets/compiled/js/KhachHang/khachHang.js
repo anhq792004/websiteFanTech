@@ -1,7 +1,7 @@
 $(document).ready(function () {
     // Hàm kiểm tra định dạng số điện thoại (10 chữ số)
     function isValidPhoneNumber(phone) {
-        const phoneRegex = /^[0-9]{10}$/;
+        const phoneRegex = /^[0-9]{10,12}$/;
         return phoneRegex.test(phone);
     }
 
@@ -58,10 +58,26 @@ $(document).ready(function () {
             $('#btnIcon').removeClass('d-none');
             return;
         }
+        if (!ten.length > 100) {
+            showToast('error', 'Tên không được dài quá 100 ký tư');
+            $('#btnNV').prop('disabled', false);
+            $('#btnSpinner').addClass('d-none');
+            $('#btnIcon').removeClass('d-none');
+            return;
+        }
         if (!email) {
             showToast('error', 'Vui lòng nhập email');
             $('#email').addClass('is-invalid');
             $('#email-error').text('Vui lòng nhập email').show();
+            $('#submitBtn').prop('disabled', false);
+            $('#btnSpinner').addClass('d-none');
+            $('#btnIcon').removeClass('d-none');
+            return;
+        }
+        if (!email.length > 100) {
+            showToast('error', 'email không dài quá 100 ký tự');
+            $('#email').addClass('is-invalid');
+            $('#email-error').text('email không dài quá 100 ký tự').show();
             $('#submitBtn').prop('disabled', false);
             $('#btnSpinner').addClass('d-none');
             $('#btnIcon').removeClass('d-none');
@@ -118,6 +134,13 @@ $(document).ready(function () {
         }
         if (!diaChiCuThe) {
             showToast('error', 'Vui lòng nhập địa chỉ cụ thể');
+            $('#submitBtn').prop('disabled', false);
+            $('#btnSpinner').addClass('d-none');
+            $('#btnIcon').removeClass('d-none');
+            return;
+        }
+        if (!diaChiCuThe.length > 100) {
+            showToast('error', 'Địa chỉ cụ thể không được dài quá 100 ký tự');
             $('#submitBtn').prop('disabled', false);
             $('#btnSpinner').addClass('d-none');
             $('#btnIcon').removeClass('d-none');
