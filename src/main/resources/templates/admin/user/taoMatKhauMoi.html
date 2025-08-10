@@ -66,26 +66,43 @@
 
 </head>
 <body>
-<div class="form-container">
-    <h2 class="form-title">Tạo mật khẩu mới</h2>
+<div class="container">
+    <div class="row w-100 align-items-center">
+        <!-- Cột chứa form -->
+        <div class="col-md-6 d-flex justify-content-center">
+            <div class="card card-custom">
+                <div class="card-body">
+                    <h2 class="text-center mb-4"><strong>Tạo mật khẩu mới</strong></h2>
+                    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <!-- Hiển thị thông báo lỗi -->
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                    <form th:action="@{/forgot-password/change-password}" method="post" id="changePasswordForm">
+                        <input type="hidden" th:name="email" th:value="${email}">
+                        <div class="form-group">
+                            <label for="newPassword">Mật khẩu mới:</label>
+                            <input type="password" class="form-control" id="newPassword" name="newPassword">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Xác nhận mật khẩu mới:</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
 
-    <!-- Form nhập mật khẩu mới -->
-    <form th:action="@{/forgot-password/change-password}" method="post" id="changePasswordForm">
-        <input type="hidden" th:name="email" th:value="${email}">
-        <div class="form-group">
-            <label for="newPassword">Mật khẩu mới:</label>
-            <input type="password" class="form-control" id="newPassword" name="newPassword">
+                        </div>
+                        <button type="submit" class="btn btn-submit w-100 py-2">Gửi</button>
+                    </form>
+                    <div class="mt-3 text-center">
+                        <p><a th:href="@{/login}">Quay lại đăng nhập</a></p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="confirmPassword">Xác nhận mật khẩu mới:</label>
-            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
 
+        <!-- Cột chứa ảnh -->
+        <div class="col-md-6 d-none d-md-block text-center">
+            <img src="http://res.cloudinary.com/dhqhqnxvh/image/upload/v1736857675/wf41zjxpjqrlwyxcteia.png"
+                 class="img-fluid" alt="Logo">
         </div>
     </div>
 </div>
+
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
