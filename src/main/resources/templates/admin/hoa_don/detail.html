@@ -34,40 +34,42 @@
                     </div>
                     <div class="modal fade" id="myModal1" tabindex="-1" aria-labelledby="exampleModalLabel"
                          aria-hidden="true">
-                        <div class="modal-dialog modal-xl" style="height: 500px">
+                        <div class="modal-dialog modal-xl">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="exampleModalLabel1">Lịch sử thao tác</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                                             aria-label="Close"></button>
                                 </div>
-                                <ul class="timeline-1" th:each="history : ${lichSuHoaDonList}">
-                                    <!-- Item 1 -->
-                                    <li>
-                                        <div class="direction-r">
-                                            <div class="flag-wrapper">
-                                                <span class="hexa"></span>
-                                                <span class="flag"
-                                                      th:switch="${history.trangThai}">
-                                                        <span th:case="1" class="text-warning">Chờ xác nhận</span>
-                                                        <span th:case="2" class="text-primary">Đã xác nhận</span>
-                                                        <span th:case="3" class="text-success">Đang giao hàng</span>
-                                                        <span th:case="4" class="text-danger-emphasis">Hoàn thành</span>
-                                                        <span th:case="5" class="text-secondary">Hủy</span>
-                                                </span>
-                                                <span class="time-wrapper">
-                                                    <span class="time-1"
-                                                          th:text="${#temporals.format(history.ngayTao, 'dd-MM-yyyy')}">
-
-                                                    </span>
-                                                </span>
-                                            </div>
-                                            <div class="desc" th:text="${history.moTa}">
-
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul>
+                                <div class="modal-body">
+                                    <form>
+                                        <table class="table table-striped dataTable-table mt-3">
+                                            <thead>
+                                            <tr>
+                                                <th>STT</th>
+                                                <th>Trạng thái</th>
+                                                <th>Ngày</th>
+                                                <th>Người xác nhận</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="item, iter : ${lichSuHoaDonList}">
+                                                <td th:text="${iter.count}"></td>
+                                                <td th:switch="${item.trangThai}">
+                                                    <span th:case="0" th:text="'Hóa đơn chờ'"></span>
+                                                    <span th:case="1" th:text="'Đang chờ xác nhận'"></span>
+                                                    <span th:case="2" th:text="'Đã xác nhận'"></span>
+                                                    <span th:case="3" th:text="'Đang giao hàng'"></span>
+                                                    <span th:case="4" th:text="'Hoàn thành'"></span>
+                                                    <span th:case="5" th:text="'Hủy'"></span>
+                                                </td>
+                                                <td th:text="${item.ngayTao}"></td>
+                                                <td th:text="${item.nguoiTao}"></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </form>
+                                </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng
                                     </button>
@@ -406,7 +408,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                 </div>
-                <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                <div class="modal-body">
                     <div class="input-group mb-3">
                         <input type="text" class="form-control" id="searchQuery"
                                placeholder="Tìm kiếm sản phẩm...">
@@ -434,38 +436,40 @@
                         </div>
                     </div>
                     <hr>
-                    <table class="table table-striped dataTable-table">
-                        <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Tên sản phẩm</th>
-                            <th>Giá</th>
-                            <th>Công xuất</th>
-                            <th>Màu</th>
-                            <th>Số lượng</th>
-                            <th>Thao tác</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="item, iter : ${findSPCTByIdSanPham}">
-                            <td th:text="${iter.count}"></td>
-                            <td th:text="${item.sanPham.ten}"></td>
-                            <td th:text="${#numbers.formatDecimal(item.gia, 0, 'COMMA', 0, 'POINT')} + ' đ'">h1</td>
-                            <td th:text="${item.congSuat.ten}"></td>
-                            <td th:text="${item.mauSac.ten}"></td>
-                            <td th:text="${item.soLuong}"></td>
-                            <td>
-                                <button type="button"
-                                        class="btn btn-outline-success btn-add-sanPham"
-                                        th:data-id-hd="${hoaDon.id}"
-                                        th:data-id-sp="${item.id}"
-                                        th:data-gia="${item.gia}">
-                                    Thêm
-                                </button>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <div style="max-height: 60vh; overflow-y: auto;">
+                        <table class="table table-striped dataTable-table">
+                            <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Giá</th>
+                                <th>Công xuất</th>
+                                <th>Màu</th>
+                                <th>Số lượng</th>
+                                <th>Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody id="productTable">
+                            <tr th:each="item, iter : ${findSPCTByIdSanPham}">
+                                <td th:text="${iter.count}"></td>
+                                <td th:text="${item.sanPham.ten}"></td>
+                                <td th:text="${#numbers.formatDecimal(item.gia, 0, 'COMMA', 0, 'POINT')} + ' đ'">h1</td>
+                                <td th:text="${item.congSuat.ten}"></td>
+                                <td th:text="${item.mauSac.ten}"></td>
+                                <td th:text="${item.soLuong}"></td>
+                                <td>
+                                    <button type="button"
+                                            class="btn btn-outline-success btn-add-sanPham"
+                                            th:data-id-hd="${hoaDon.id}"
+                                            th:data-id-sp="${item.id}"
+                                            th:data-gia="${item.gia}">
+                                        Thêm
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -550,5 +554,67 @@
         }
     });
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchQueryInput = document.getElementById("searchQuery");
+        const nameFilterInput = document.querySelector('input[aria-label="name"]');
+        const colorFilterInput = document.querySelector('input[aria-label="color"]');
+        const capacityFilterInput = document.querySelector('input[aria-label="capacity"]');
+        const priceFilterInput = document.querySelector('input[aria-label="price"]');
+        const rows = document.querySelectorAll("#productTable tr");
+
+        // Hàm bỏ dấu + viết thường
+        function normalizeText(str) {
+            return str
+                .normalize("NFD")                // Tách dấu
+                .replace(/[\u0300-\u036f]/g, "") // Xóa dấu
+                .toLowerCase();                  // Viết thường
+        }
+
+        function filterTable() {
+            const searchValue = normalizeText(searchQueryInput.value.trim());
+            const nameValue = normalizeText(nameFilterInput.value.trim());
+            const colorValue = normalizeText(colorFilterInput.value.trim());
+            const capacityValue = normalizeText(capacityFilterInput.value.trim());
+            const priceValue = priceFilterInput.value.trim();
+
+            rows.forEach(row => {
+                const name = normalizeText(row.cells[1].textContent.trim());
+                const price = row.cells[2].textContent.replace(/\D/g, ""); // chỉ lấy số
+                const capacity = normalizeText(row.cells[3].textContent.trim());
+                const color = normalizeText(row.cells[4].textContent.trim());
+
+                let match = true;
+
+                // Tìm kiếm tổng
+                if (searchValue && !(
+                    name.includes(searchValue) ||
+                    color.includes(searchValue) ||
+                    capacity.includes(searchValue) ||
+                    price.includes(searchValue)
+                )) {
+                    match = false;
+                }
+
+                // Lọc chi tiết
+                if (nameValue && !name.includes(nameValue)) match = false;
+                if (colorValue && !color.includes(colorValue)) match = false;
+                if (capacityValue && !capacity.includes(capacityValue)) match = false;
+                if (priceValue && !price.includes(priceValue.replace(/\D/g, ""))) match = false;
+
+                row.style.display = match ? "" : "none";
+            });
+        }
+
+        [searchQueryInput, nameFilterInput, colorFilterInput, capacityFilterInput, priceFilterInput]
+            .forEach(input => {
+                input.addEventListener("keyup", filterTable);
+            });
+
+        document.getElementById("searchButton").addEventListener("click", filterTable);
+    });
+</script>
+
+
 </body>
 </html>

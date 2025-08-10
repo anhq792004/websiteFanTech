@@ -278,14 +278,9 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="col-12">
-                    <label for="inputSearch" class="form-label">Tìm kiếm sản phẩm</label>
+                <div class="col-12 mb-3">
                     <input type="text" class="form-control" id="inputSearch" placeholder="Tìm kiếm sản phẩm">
                 </div>
-                <!-- Debug info -->
-                <!--                <div class="alert alert-info mt-2">-->
-                <!--                    <p>Số lượng sản phẩm: <span th:text="${findSPCTByIdSanPham != null ? findSPCTByIdSanPham.size() : 'không có dữ liệu'}"></span></p>-->
-                <!--                </div>-->
                 <div style="max-height: 60vh; overflow-y: auto;">
                     <table class="table table-striped dataTable-table">
                         <thead>
@@ -463,6 +458,40 @@
 
     // Khởi tạo khi trang load (nếu có dữ liệu từ server)
     window.addEventListener('DOMContentLoaded', capNhatTen);
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("inputSearch");
+        const rows = document.querySelectorAll("tbody tr");
+
+        // Hàm bỏ dấu + viết thường
+        function normalizeText(str) {
+            return str
+                .normalize("NFD")                // Tách dấu
+                .replace(/[\u0300-\u036f]/g, "") // Xóa dấu
+                .toLowerCase();                  // Viết thường
+        }
+
+        function filterTable() {
+            const searchValue = normalizeText(searchInput.value.trim());
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td");
+                let match = false;
+
+                cells.forEach(cell => {
+                    const cellText = normalizeText(cell.textContent.trim());
+                    if (cellText.includes(searchValue)) {
+                        match = true;
+                    }
+                });
+
+                row.style.display = match ? "" : "none";
+            });
+        }
+
+        searchInput.addEventListener("keyup", filterTable);
+    });
 </script>
 
 
