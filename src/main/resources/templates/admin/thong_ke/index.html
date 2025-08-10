@@ -33,7 +33,7 @@
                                 <div class="card card-summary mb-3" style="background: #e6f9f0; border: none;">
                                     <div class="card-body text-center">
                                         <h6 class="card-title" style="color: #1abc9c;">Doanh thu hôm nay</h6>
-                                        <h3 id="cardDoanhThuHomNay" style="color: #1abc9c;">0 VND</h3>
+                                        <h3 id="cardDoanhThuHomNay" style="color: #1abc9c;">0 đ</h3>
                                     </div>
                                 </div>
                             </div>
@@ -41,7 +41,7 @@
                                 <div class="card card-summary mb-3" style="background: #f0f7fa; border: none;">
                                     <div class="card-body text-center">
                                         <h6 class="card-title" style="color: #2980b9;">Doanh thu tuần này</h6>
-                                        <h3 id="cardDoanhThuTuanNay" style="color: #2980b9;">0 VND</h3>
+                                        <h3 id="cardDoanhThuTuanNay" style="color: #2980b9;">0 đ</h3>
                                     </div>
                                 </div>
                             </div>
@@ -49,7 +49,7 @@
                                 <div class="card card-summary mb-3" style="background: #fff7e6; border: none;">
                                     <div class="card-body text-center">
                                         <h6 class="card-title" style="color: #f39c12;">Doanh thu tháng này</h6>
-                                        <h3 id="cardDoanhThuThangNay" style="color: #f39c12;">0 VND</h3>
+                                        <h3 id="cardDoanhThuThangNay" style="color: #f39c12;">0 đ</h3>
                                     </div>
                                 </div>
                             </div>
@@ -238,10 +238,10 @@ window.addEventListener('load', function() {
         const res = await fetch('/api/thong-ke/doanh-thu-tong-hop');
         const data = res.ok ? await res.json() : {};
         console.log('Card tổng quan data:', data);
-        document.getElementById('cardTongDoanhThu').textContent = data.tongDoanhThu?.toLocaleString() + ' VND' || '0 VND';
-        document.getElementById('cardDoanhThuHomNay').textContent = data.doanhThuHomNay?.toLocaleString() + ' VND' || '0 VND';
-        document.getElementById('cardDoanhThuTuanNay').textContent = data.doanhThuTuanNay?.toLocaleString() + ' VND' || '0 VND';
-        document.getElementById('cardDoanhThuThangNay').textContent = data.doanhThuThangNay?.toLocaleString() + ' VND' || '0 VND';
+        document.getElementById('cardTongDoanhThu').textContent = data.tongDoanhThu?.toLocaleString() + ' đ' || '0 đ';
+        document.getElementById('cardDoanhThuHomNay').textContent = data.doanhThuHomNay?.toLocaleString() + ' đ' || '0 đ';
+        document.getElementById('cardDoanhThuTuanNay').textContent = data.doanhThuTuanNay?.toLocaleString() + ' đ' || '0 đ';
+        document.getElementById('cardDoanhThuThangNay').textContent = data.doanhThuThangNay?.toLocaleString() + ' đ' || '0 đ';
     }
     
     // Load trạng thái đơn hàng
@@ -366,7 +366,7 @@ window.addEventListener('load', function() {
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return value.toLocaleString() + ' VND';
+                                return value.toLocaleString() + ' đ';
                             }
                         }
                     } 
@@ -405,7 +405,7 @@ window.addEventListener('load', function() {
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return value.toLocaleString() + ' VND';
+                                return value.toLocaleString() + ' đ';
                             }
                         }
                     } 
@@ -446,7 +446,7 @@ window.addEventListener('load', function() {
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return value.toLocaleString() + ' VND';
+                                return value.toLocaleString() + ' đ';
                             }
                         }
                     } 
