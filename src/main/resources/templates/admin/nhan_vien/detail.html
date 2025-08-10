@@ -159,81 +159,160 @@
     <script th:src="@{/admin/assets/compiled/js/nhanVien.js}"></script>
 
     <script th:inline="javascript">
-        document.addEventListener("DOMContentLoaded", function () {
-            const idTinh = document.getElementById("tinh").value;
-            const idHuyen = document.getElementById("huyen").value;
-            const idXa = document.getElementById("xa").value;
+        $(document).ready(function () {
+            $('#formUpdateNV').on('submit', function (event) {
+                event.preventDefault();
 
-            const citis = document.getElementById("city");
-            const districts = document.getElementById("district");
-            const wards = document.getElementById("ward");
+                // Lấy giá trị các trường
+                const id = $('#id').val().trim();
+                const ten = $('#name').val().trim();
+                const sdt = $('#soDienThoai').val().trim();
+                const cccd = $('#canCuocCongDan').val().trim();
+                const ngaySinh = $('#ngaySinh').val().trim();
+                const tinhThanhPho = $('#city').val().trim();
+                const quanHuyen = $('#district').val().trim();
+                const xaPhuong = $('#ward').val().trim();
+                const soNhaNgoDuong = $('#soNhaNgoDuong').val().trim();
+                const gioiTinh = $('#gioiTinh').val().trim();
+                const chucVu = $('#chucVu').val().trim();
+                const hinhAnhFile = $('#hinhAnh')[0].files[0];
 
-            const Parameter = {
-                url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",
-                method: "GET",
-                responseType: "application/json",
-            };
-
-            axios(Parameter).then(function (result) {
-                const data = result.data;
-                renderCity(data);
-
-                // Set selected Tỉnh
-                citis.value = idTinh;
-                citis.dispatchEvent(new Event('change'));
-
-                // Chờ render Huyện rồi set selected Huyện
-                setTimeout(function () {
-                    districts.value = idHuyen;
-                    districts.dispatchEvent(new Event('change'));
-                }, 300);
-
-                // Chờ render Xã rồi set selected Xã
-                setTimeout(function () {
-                    wards.value = idXa;
-                }, 600);
-            });
-
-            function renderCity(data) {
-                // Render tỉnh
-                for (const city of data) {
-                    citis.options[citis.options.length] = new Option(city.Name, city.Id);
+                // Kiểm tra các trường bắt buộc
+                if (!ten) {
+                    showToast('error', 'Vui lòng nhập tên nhân viên');
+                    return;
+                }
+                if (ten.length > 100) {
+                    showToast('error', 'Tên không được dài quá 100 ký tự');
+                    return;
+                }
+                if (!sdt) {
+                    showToast('error', 'Vui lòng nhập số điện thoại');
+                    return;
+                }
+                if (!isValidPhoneNumber(sdt)) {
+                    showToast('error', 'Số điện thoại phải có từ 10 đến 12 chữ số');
+                    return;
+                }
+                if (!cccd) {
+                    showToast('error', 'Vui lòng nhập số CCCD');
+                    return;
+                }
+                if (!isValidCCCD(cccd)) {
+                    showToast('error', 'Số CCCD phải có 12 chữ số');
+                    return;
+                }
+                if (!ngaySinh) {
+                    showToast('error', 'Vui lòng nhập ngày sinh');
+                    return;
+                }
+                if (!isValidDate(ngaySinh)) {
+                    showToast('error', 'Ngày sinh không hợp lệ hoặc trong tương lai');
+                    return;
+                }
+                if (!tinhThanhPho) {
+                    showToast('error', 'Vui lòng chọn Tỉnh/Thành phố');
+                    return;
+                }
+                if (!quanHuyen) {
+                    showToast('error', 'Vui lòng chọn Quận/Huyện');
+                    return;
+                }
+                if (!xaPhuong) {
+                    showToast('error', 'Vui lòng chọn Xã/Phường');
+                    return;
+                }
+                if (!soNhaNgoDuong) {
+                    showToast('error', 'Vui lòng nhập địa chỉ cụ thể');
+                    return;
+                }
+                if (soNhaNgoDuong.length > 100) {
+                    showToast('error', 'Địa chỉ cụ thể không được dài quá 100 ký tự');
+                    return;
+                }
+                if (!gioiTinh) {
+                    showToast('error', 'Vui lòng chọn giới tính');
+                    return;
+                }
+                if (!chucVu) {
+                    showToast('error', 'Vui lòng chọn chức vụ');
+                    return;
+                }
+                // Kiểm tra file ảnh nếu có
+                if (hinhAnhFile) {
+                    if (!hinhAnhFile.type.startsWith('image/')) {
+                        showToast('error', 'Vui lòng chọn file hình ảnh hợp lệ');
+                        return;
+                    }
+                    if (hinhAnhFile.size > 5 * 1024 * 1024) {
+                        showToast('error', 'Kích thước file không được vượt quá 5MB');
+                        return;
+                    }
                 }
 
-                // Khi chọn tỉnh
-                citis.onchange = function () {
-                    districts.length = 1;
-                    wards.length = 1;
+                // Vô hiệu hóa nút và hiển thị spinner
+                const $submitBtn = $('button[type="submit"]');
+                $submitBtn.prop('disabled', true);
+                $submitBtn.find('.bi-pencil-square').addClass('d-none');
+                $submitBtn.append('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>');
 
-                    const selectedCity = data.find(c => c.Id === this.value);
-                    if (selectedCity) {
-                        for (const district of selectedCity.Districts) {
-                            districts.options[districts.options.length] = new Option(district.Name, district.Id);
-                        }
+                // Hiển thị loading SweetAlert2
+                Swal.fire({
+                    title: 'Đang xử lý...',
+                    html: 'Vui lòng chờ trong giây lát',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
                     }
-                };
+                });
 
-                // Khi chọn huyện
-                districts.onchange = function () {
-                    wards.length = 1;
+                // Tạo FormData để gửi cả text và file
+                const formData = new FormData();
+                formData.append('id', id);
+                formData.append('ten', ten);
+                formData.append('soDienThoai', sdt);
+                formData.append('canCuocCongDan', cccd);
+                formData.append('ngaySinh', ngaySinh);
+                formData.append('gioiTinh', gioiTinh);
+                formData.append('tinhThanhPho', tinhThanhPho);
+                formData.append('quanHuyen', quanHuyen);
+                formData.append('xaPhuong', xaPhuong);
+                formData.append('soNhaNgoDuong', soNhaNgoDuong);
+                formData.append('chucVu', chucVu);
+                if (hinhAnhFile) {
+                    formData.append('hinhAnh', hinhAnhFile);
+                }
 
-                    const selectedCity = data.find(c => c.Id === citis.value);
-                    if (selectedCity) {
-                        const selectedDistrict = selectedCity.Districts.find(d => d.Id === this.value);
-                        if (selectedDistrict) {
-                            for (const ward of selectedDistrict.Wards) {
-                                wards.options[wards.options.length] = new Option(ward.Name, ward.Id);
-                            }
-                        }
+                // Gửi AJAX request
+                $.ajax({
+                    url: '/admin/nhan-vien/update',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        Swal.fire({
+                            toast: true,
+                            icon: 'success',
+                            title: response.message || 'Cập nhật thông tin nhân viên thành công',
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 1000,
+                            timerProgressBar: true
+                        }).then(() => {
+                            window.location.href = '/admin/nhan-vien/index';
+                        });
+                    },
+                    error: function (xhr) {
+                        Swal.close();
+                        showToast('error', xhr.responseText || 'Lỗi khi cập nhật thông tin nhân viên');
+                        $submitBtn.prop('disabled', false);
+                        $submitBtn.find('.spinner-border').remove();
+                        $submitBtn.find('.bi-pencil-square').removeClass('d-none');
                     }
-                };
-            }
-        });
-    </script>
-    <script>
-        flatpickr("#ngaySinh", {
-            dateFormat: "d/m/Y", // Ensure the correct format
-            maxDate: "today",
+                });
+            });
         });
     </script>
 
