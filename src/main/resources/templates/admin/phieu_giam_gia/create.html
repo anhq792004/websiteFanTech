@@ -337,6 +337,21 @@
                 return; // Dừng lại nếu có lỗi, không kiểm tra các trường khác
             }
 
+            if (ten.value.trim().length > 100) {
+                hasErrors = true;
+                await Swal.fire({
+                    text: 'Tên phiếu giảm giá không được vượt quá 100 ký tự',
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    toast: true
+                });
+                return;
+            }
+
+
             if (!ngayBatDau.value) {
                 hasErrors = true;
                 await Swal.fire({
