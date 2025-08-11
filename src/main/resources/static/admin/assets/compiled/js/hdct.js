@@ -448,7 +448,7 @@ $(document).ready(function () {
             data: JSON.stringify({
                 idSP: idsp,
                 idHD: idhd,
-                soLuong: soLuong,
+                soLuong: parseInt(soLuong),
                 gia: gia
             }),
             contentType: 'application/json; charset=utf-8',
@@ -466,17 +466,51 @@ $(document).ready(function () {
                 });
             },
             error: function (xhr) {
+                let errorMessage = "Có lỗi xảy ra";
+                
+                // Thử parse JSON response nếu có
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    errorMessage = response.message || response.error || xhr.responseText;
+                } catch (e) {
+                    // Nếu không parse được JSON, dùng responseText trực tiếp
+                    errorMessage = xhr.responseText || "Có lỗi xảy ra khi cập nhật số lượng";
+                }
+                
                 Swal.fire({
                     toast: true,
                     icon: 'error',
-                    title: xhr.responseText,
+                    title: errorMessage,
                     position: 'top-end',
                     showConfirmButton: false,
-                    timer: 3000,
+                    timer: 4000,
                     timerProgressBar: true
                 });
             }
         });
+    });
+    
+    // Thêm event listener cho input số lượng khi nhấn Enter
+    $(document).on('keypress', '.quantity-input', function(e) {
+        if (e.which === 13) { // Enter key
+            e.preventDefault();
+            $(this).closest('form').submit();
+        }
+    });
+    
+    // Thêm event listener cho input số lượng khi blur (mất focus)  
+    $(document).on('blur', '.quantity-input', function() {
+        const currentValue = parseInt($(this).val());
+        const form = $(this).closest('form');
+        
+        // Kiểm tra giá trị hợp lệ
+        if (isNaN(currentValue) || currentValue < 1) {
+            $(this).val(1);
+            return;
+        }
+        
+        // Tự động submit form khi người dùng thay đổi giá trị
+        form.submit();
     });
 });
 

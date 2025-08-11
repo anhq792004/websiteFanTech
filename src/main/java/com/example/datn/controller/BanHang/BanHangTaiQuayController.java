@@ -172,10 +172,13 @@ public class BanHangTaiQuayController {
     @PostMapping("/updateSoLuong")
     @ResponseBody
     public ResponseEntity<String> updateSoLuong(@RequestBody UpdateSoLuongRequest request) {
-        hoaDonService.updateSoluong(request);
-        banHangService.updateTongTienHoaDon(request.getIdHD());
-
-        return ResponseEntity.ok("Cập nhật thành công");
+        try {
+            hoaDonService.updateSoluong(request);
+            banHangService.updateTongTienHoaDon(request.getIdHD());
+            return ResponseEntity.ok("Cập nhật thành công");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/update-trang-thai")
