@@ -354,6 +354,24 @@
             document.getElementById('clearVoucherBtn').addEventListener('click', () => {
                 this.clearVoucher();
             });
+
+            // Thêm kiểm tra thời gian thực cho số điện thoại
+            const phoneInput = document.getElementById('soDienThoai');
+            phoneInput.addEventListener('input', () => {
+                const phoneValue = phoneInput.value.trim();
+                const phoneRegex = /^(0[0-9]{10,12})$/; // Bắt đầu bằng 0, tổng cộng 10 chữ số
+
+                if (phoneValue === '') {
+                    phoneInput.classList.remove('is-valid', 'is-invalid');
+                } else if (!phoneRegex.test(phoneValue)) {
+                    phoneInput.classList.remove('is-valid');
+                    phoneInput.classList.add('is-invalid');
+                    // Có thể thêm alert hoặc thông báo nếu cần
+                    // this.showAlert('Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số!', 'warning');
+                } else {
+                    phoneInput.classList.remove('is-invalid'); // Chỉ xóa lớp is-invalid, không thêm is-valid
+                }
+            });
         }
 
         async loadAddressData() {
@@ -797,6 +815,20 @@
 
             const payment = document.querySelector('input[name="phuongThucThanhToan"]:checked');
 
+            // Kiểm tra số điện thoại
+            const phoneInput = document.getElementById('soDienThoai');
+            const phoneValue = phoneInput.value.trim();
+            const phoneRegex = /^(0[0-9]{9})$/;
+
+            if (!phoneRegex.test(phoneValue)) {
+                phoneInput.classList.add('is-invalid');
+                this.showAlert('Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số!', 'warning');
+                return false;
+            } else {
+                phoneInput.classList.remove('is-invalid');
+                phoneInput.classList.add('is-valid');
+            }
+
             if (!isValid || !payment) {
                 this.showAlert('Vui lòng điền đầy đủ thông tin', 'warning');
                 return false;
@@ -819,12 +851,16 @@
                 });
 
                 const result = await response.json();
-                console.log('Process order response:', result);
+                console.log('Process order response:', result); // Log toàn bộ dữ liệu
 
                 if (result.success) {
-                    document.getElementById('discount').textContent = -result.discountAmount;
-                    document.getElementById('shippingFee').textContent = result.shippingFee;
-                    document.getElementById('totalAmount').textContent = result.finalAmount;
+                    const discountAmount = Math.round(Number(result.discountAmount) || 0);
+                    const shippingFee = Math.round(Number(result.shippingFee) || 0);
+                    const finalAmount = Math.round(Number(result.finalAmount) || 0);
+
+                    document.getElementById('discount').textContent = this.formatCurrency(-discountAmount);
+                    document.getElementById('shippingFee').textContent = this.formatCurrency(shippingFee);
+                    document.getElementById('totalAmount').textContent = this.formatCurrency(finalAmount);
 
                     if (result.paymentMethod === 'MOMO') {
                         this.handleMomoPayment(result);
@@ -838,6 +874,7 @@
                     this.showAlert(result.message || 'Có lỗi xảy ra', 'danger');
                 }
             } catch (error) {
+                console.error('Error in processOrder:', error); // Log lỗi chi tiết
                 this.showAlert('Lỗi kết nối', 'danger');
             }
         }

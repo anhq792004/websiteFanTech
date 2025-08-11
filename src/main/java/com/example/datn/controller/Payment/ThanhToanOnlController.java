@@ -188,10 +188,8 @@ public class ThanhToanOnlController {
             // Tính phí vận chuyển
             float totalWeight = (Float) cartInfo.get("totalWeight");
             if (totalAmount.compareTo(new BigDecimal("2000000")) < 0) {
-                // Dưới 2 triệu: tính phí ship theo kg
                 shippingFee = new BigDecimal(totalWeight / 1000).multiply(new BigDecimal("10000"));
             } else {
-                // Trên 2 triệu: free ship
                 shippingFee = BigDecimal.ZERO;
             }
 
@@ -211,12 +209,10 @@ public class ThanhToanOnlController {
                             response.put("message", "Phiếu giảm giá không hợp lệ hoặc không thuộc về bạn");
                             return ResponseEntity.ok(response);
                         }
-                        // Cập nhật trạng thái đã sử dụng cho phiếu giảm giá cá nhân
                         PhieuGiamGiaKhachHang pggkh = pggkhOpt.get();
                         pggkh.setDaSuDung(true);
                         phieuGiamGiaKhachHangRepo.save(pggkh);
                     }
-                    // Tăng số lượng đã sử dụng cho phiếu giảm giá
                     voucher.setSoLuongDaSuDung(voucher.getSoLuongDaSuDung() + 1);
                     phieuGiamGiaRepo.save(voucher);
                     usedVoucher = voucher;
@@ -253,13 +249,14 @@ public class ThanhToanOnlController {
             hoaDon.setPhuongThucThanhToan(phuongThucThanhToan);
             hoaDon.setGhiChu(ghiChu);
             hoaDon.setLoaiHoaDon(false);
-            hoaDon.setTrangThai(1);
+            // Set trạng thái hóa đơn dựa trên phương thức thanh toán
+            hoaDon.setTrangThai("MOMO".equals(phuongThucThanhToan) ? 2 : 1);
             hoaDon.setNgayTao(LocalDateTime.now());
             hoaDon.setNguoiTao(khachHang.getTen());
             hoaDon.setTongTien(totalAmount);
             hoaDon.setTongTienSauGiamGia(finalAmount);
-            hoaDon.setPhiVanChuyen(shippingFee); // Lưu phí vận chuyển vào hóa đơn
-            hoaDon.setPhieuGiamGia(usedVoucher); // Lưu phiếu giảm giá vào hóa đơn
+            hoaDon.setPhiVanChuyen(shippingFee);
+            hoaDon.setPhieuGiamGia(usedVoucher);
 
             HoaDon savedHoaDon = hoaDonRepo.save(hoaDon);
             System.out.println("DEBUG: Saved HoaDon - ID: " + savedHoaDon.getId() +
@@ -283,7 +280,6 @@ public class ThanhToanOnlController {
                 }
                 SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietOpt.get();
 
-                // Validate stock
                 int soLuong = item.getSoLuong();
                 if (sanPhamChiTiet.getSoLuong() < soLuong) {
                     throw new RuntimeException("Sản phẩm " + sanPhamChiTiet.getSanPham().getTen() + " không đủ số lượng tồn kho");
@@ -296,7 +292,6 @@ public class ThanhToanOnlController {
                 hoaDonChiTiet.setThanhTien(sanPhamChiTiet.getGia().multiply(new BigDecimal(soLuong)));
                 hoaDonChiTiet.setTrangThai(1);
 
-                // Update stock
                 sanPhamChiTiet.setSoLuong(sanPhamChiTiet.getSoLuong() - soLuong);
                 sanPhamChiTietRepo.save(sanPhamChiTiet);
 
@@ -305,7 +300,8 @@ public class ThanhToanOnlController {
 
             LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
             lichSuHoaDon.setHoaDon(savedHoaDon);
-            lichSuHoaDon.setTrangThai(1);
+            // Set trạng thái lịch sử hóa đơn dựa trên phương thức thanh toán
+            lichSuHoaDon.setTrangThai("MOMO".equals(phuongThucThanhToan) ? 2 : 1);
             lichSuHoaDon.setNgayTao(LocalDateTime.now());
             lichSuHoaDon.setMoTa("Đơn hàng được tạo bởi khách hàng: " + khachHang.getTen());
             lichSuHoaDon.setNguoiTao(khachHang.getTen());
@@ -313,17 +309,15 @@ public class ThanhToanOnlController {
 
             // Xử lý thanh toán theo phương thức
             if ("MOMO".equals(phuongThucThanhToan)) {
-                // Thanh toán MoMo
                 try {
                     MomoTransaction transaction = momoService.createTransaction(savedHoaDon, "user");
 
-                    if (transaction.getTrangThai() == 2) { // Lỗi
+                    if (transaction.getTrangThai() == 2) {
                         response.put("success", false);
                         response.put("message", "Lỗi khi tạo thanh toán MoMo: " + transaction.getMessage());
                         return ResponseEntity.ok(response);
                     }
 
-                    // Trả về thông tin thanh toán MoMo
                     response.put("success", true);
                     response.put("orderId", savedHoaDon.getId());
                     response.put("finalAmount", finalAmount);
@@ -340,8 +334,6 @@ public class ThanhToanOnlController {
                     return ResponseEntity.ok(response);
                 }
             } else {
-                // Thanh toán COD
-                // Clear cart for COD since no further payment confirmation is needed
                 gioHangService.clearCart(session);
                 response.put("success", true);
                 response.put("orderId", savedHoaDon.getId());
