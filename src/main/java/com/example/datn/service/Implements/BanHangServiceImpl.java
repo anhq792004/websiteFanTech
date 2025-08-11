@@ -5,14 +5,21 @@ import com.example.datn.entity.HoaDon.HoaDon;
 import com.example.datn.entity.HoaDon.HoaDonChiTiet;
 import com.example.datn.entity.HoaDon.LichSuHoaDon;
 import com.example.datn.entity.KhachHang;
+import com.example.datn.entity.NhanVien.NhanVien;
 import com.example.datn.entity.SanPham.SanPhamChiTiet;
+import com.example.datn.entity.TaiKhoan;
 import com.example.datn.repository.HoaDonRepo.HoaDonChiTietRepo;
 import com.example.datn.repository.HoaDonRepo.HoaDonRepo;
 import com.example.datn.repository.HoaDonRepo.LichSuHoaDonRepo;
+import com.example.datn.repository.NhanVienRepo;
 import com.example.datn.repository.SanPhamRepo.SanPhamChiTietRepo;
+import com.example.datn.repository.TaiKhoanRepo;
 import com.example.datn.service.BanHang.BanHangService;
 import com.example.datn.service.HoaDonService.HoaDonService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,11 +36,38 @@ public class BanHangServiceImpl implements BanHangService {
     private final LichSuHoaDonRepo lichSuHoaDonRepo;
     private final HoaDonChiTietRepo hoaDonChiTietRepo;
     private final SanPhamChiTietRepo sanPhamChiTietRepo;
+    private final TaiKhoanRepo taiKhoanRepo;
+    private final NhanVienRepo nhanVienRepo;
+
+    private NhanVien getCurrentNhanVien() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            String username = null;
+
+            if (principal instanceof UserDetails) {
+                username = ((UserDetails) principal).getUsername();
+            } else {
+                username = principal.toString();
+            }
+
+            TaiKhoan taiKhoan = taiKhoanRepo.findByEmail(username);
+            if (taiKhoan == null) {
+                throw new RuntimeException("Không tìm thấy tài khoản với email: " + username);
+            }
+
+            NhanVien nhanVien = nhanVienRepo.findByTaiKhoan(taiKhoan)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên cho tài khoản này"));
+            return nhanVien;
+        }
+        throw new RuntimeException("Không tìm thấy thông tin người dùng đang đăng nhập");
+    }
 
     @Transactional
     @Override
     public void taoHoaDonCho(HoaDon hoaDon) {
         List<HoaDon> listHoaDon = hoaDonService.findAll();
+        NhanVien currentNhanVien = getCurrentNhanVien();
         int count = (int) listHoaDon.stream()
                 .filter(sl -> sl.getTrangThai() == hoaDonService.getTrangThaiHoaDon().getHoaDonCho())
                 .count();
@@ -41,18 +75,22 @@ public class BanHangServiceImpl implements BanHangService {
             // Thông báo khi số lượng hóa đơn chờ vượt quá 10
             throw new IllegalStateException("Số lượng hóa đơn chờ tối qua là 10");
         }
+        hoaDon.setNhanVien(currentNhanVien);
         hoaDon.setMa(hoaDonService.generateOrderCode());
         hoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getHoaDonCho());
         hoaDon.setNgayTao(LocalDateTime.now());
         hoaDon.setLoaiHoaDon(true);
+        hoaDon.setNguoiTao(currentNhanVien.getTen());
 
         hoaDonRepo.saveAndFlush(hoaDon);
 
         //tao lich su hoa don
         LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
+        lichSuHoaDon.setNhanVien(currentNhanVien);
         lichSuHoaDon.setHoaDon(hoaDon);
         lichSuHoaDon.setNgayTao(hoaDon.getNgayTao());
         lichSuHoaDon.setTrangThai(hoaDon.getTrangThai());
+        lichSuHoaDon.setNguoiTao(currentNhanVien.getTen());
 
         lichSuHoaDonRepo.save(lichSuHoaDon);
     }
@@ -75,6 +113,7 @@ public class BanHangServiceImpl implements BanHangService {
         HoaDon hoaDon = hoaDonRepo.findById(idHD)
                 .orElseThrow(() -> new RuntimeException("Hóa đơn không tồn tại: " + idHD));
         List<HoaDonChiTiet> listHDCT = hoaDonChiTietRepo.findByHoaDon_Id(hoaDon.getId());
+        NhanVien currentNhanVien = getCurrentNhanVien();
 
         for (HoaDonChiTiet hdct : listHDCT) {
             SanPhamChiTiet sp = hdct.getSanPhamChiTiet();
@@ -84,17 +123,19 @@ public class BanHangServiceImpl implements BanHangService {
                 throw new RuntimeException("Số lượng sản phẩm không hợp lệ: " + sp.getSanPham().getTen());
             }
         }
-        
+        hoaDon.setNhanVien(currentNhanVien);
         hoaDon.setNgaySua(LocalDateTime.now());
         hoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getHoanThanh());
         hoaDon.setLoaiHoaDon(true);
-
+        hoaDon.setNguoiTao(currentNhanVien.getTen());
         LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
+        lichSuHoaDon.setNhanVien(currentNhanVien);
         lichSuHoaDon.setHoaDon(hoaDon);
         lichSuHoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getHoanThanh());
         lichSuHoaDon.setNgayTao(LocalDateTime.now());
         lichSuHoaDon.setNguoiTao("admin");
         lichSuHoaDon.setMoTa("Thanh toán thành công");
+        lichSuHoaDon.setNguoiTao(currentNhanVien.getTen());
         lichSuHoaDonRepo.save(lichSuHoaDon);
 
         hoaDonRepo.save(hoaDon);
@@ -117,6 +158,7 @@ public class BanHangServiceImpl implements BanHangService {
 
     @Override
     public void updateLoaiHoaDon(LoaiHoaDonRequest request) {
+        NhanVien currentNhanVien = getCurrentNhanVien();
         HoaDon hoaDon = hoaDonRepo.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
         hoaDon.setLoaiHoaDon(request.getLoaiHoaDon());
@@ -125,9 +167,11 @@ public class BanHangServiceImpl implements BanHangService {
 
         LichSuHoaDon lichSuHoaDon = lichSuHoaDonRepo.findByHoaDonId(hoaDon.getId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch sử hóa đơn"));
+        lichSuHoaDon.setNhanVien(currentNhanVien);
         lichSuHoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getChoXacNhan());
         lichSuHoaDon.setNgayTao(LocalDateTime.now());
         lichSuHoaDon.setMoTa("Admin đã xác nhận đơn hàng");
+        lichSuHoaDon.setNguoiTao(currentNhanVien.getTen());
         lichSuHoaDonRepo.save(lichSuHoaDon);
 
     }
