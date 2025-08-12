@@ -157,7 +157,12 @@
                             <tr th:each="item, iterStat : ${list}">
                                 <td th:text="${iterStat.count}"></td>
                                 <td th:text="${item.ma}"></td>
-                                <td th:text="${item.tenNguoiNhan}"></td>
+                                <td th:text="${item.tenNguoiNhan != null && item.tenNguoiNhan.length() > 15
+                                    ? item.tenNguoiNhan.substring(0, 15) + '...'
+                                    : item.tenNguoiNhan}">
+                                </td>
+                                </td>
+
                                 <td th:text="${item.sdtNguoiNhan}"></td>
                                 <td th:class="${item.loaiHoaDon != null and item.loaiHoaDon ? 'text-danger' : 'text-primary'}"
                                     th:text="${item.loaiHoaDon != null and item.loaiHoaDon ? 'Tại quầy' : 'Online'}">
@@ -179,8 +184,8 @@
                                            class="btn btn-outline-warning" style="width: 60px">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
-                                        <a th:href="@{/hoa-don/print/{id}(id=${item.id})}" 
-                                           target="_blank" 
+                                        <a th:href="@{/hoa-don/print/{id}(id=${item.id})}"
+                                           target="_blank"
                                            type="button"
                                            class="btn btn-outline-success" style="width: 60px">
                                             <i class="bi bi-printer"></i>

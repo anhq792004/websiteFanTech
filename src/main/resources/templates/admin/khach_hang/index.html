@@ -76,11 +76,17 @@
                                 <tr th:each="khachHang, iterStat : ${listKH}">
                                     <td th:text="${iterStat.count}"></td>
                                     <td th:text="${khachHang.ma}"></td>
-                                    <td th:text="${khachHang.ten}"></td>
+                                    <td th:text="${#strings.length(khachHang.ten) > 15
+                                       ? #strings.substring(khachHang.ten, 0, 15) + '...'
+                                       : khachHang.ten}">
                                     <td th:text="${khachHang.soDienThoai}"></td>
                                     <td th:text="${khachHang.gioiTinh}"></td>
                                     <td th:text="${#dates.format(khachHang.ngaySinh, 'dd/MM/yyyy')}"></td>
-                                    <td th:text="${khachHang.taiKhoan.email}"></td>
+                                    <td th:text="${#strings.length(khachHang.taiKhoan.email) > 25
+                                       ? #strings.substring(khachHang.taiKhoan.email, 0, 25) + '...'
+                                       : khachHang.taiKhoan.email}">
+                                    </td>
+
                                     <td th:text="${khachHang.trangThai ? 'Đang hoạt động' : 'Ngưng hoạt động'}"></td>
                                     <td>
                                         <a th:href="@{/khach-hang/detail(id=${khachHang.id})}"
