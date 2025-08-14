@@ -76,18 +76,24 @@
                                 <tr th:each="khachHang, iterStat : ${listKH}">
                                     <td th:text="${iterStat.count}"></td>
                                     <td th:text="${khachHang.ma}"></td>
-                                    <td th:text="${#strings.length(khachHang.ten) > 15
-                                       ? #strings.substring(khachHang.ten, 0, 15) + '...'
-                                       : khachHang.ten}">
+                                    <td th:text="${khachHang.ten != null
+                                        ? (#strings.length(khachHang.ten) > 15
+                                            ? #strings.substring(khachHang.ten, 0, 15) + '...'
+                                            : khachHang.ten)
+                                        : 'Chưa có tên'}">
+                                    </td>
                                     <td th:text="${khachHang.soDienThoai}"></td>
                                     <td th:text="${khachHang.gioiTinh}"></td>
                                     <td th:text="${#dates.format(khachHang.ngaySinh, 'dd/MM/yyyy')}"></td>
-                                    <td th:text="${#strings.length(khachHang.taiKhoan.email) > 25
-                                       ? #strings.substring(khachHang.taiKhoan.email, 0, 25) + '...'
-                                       : khachHang.taiKhoan.email}">
+                                    <td th:text="${khachHang.ten != null
+                                        ? (#strings.length(khachHang.taiKhoan.email) > 25
+                                            ? #strings.substring(khachHang.taiKhoan.email, 0, 25) + '...'
+                                            : khachHang.taiKhoan.email)
+                                        : 'Chưa có mail'}">
                                     </td>
-
-                                    <td th:text="${khachHang.trangThai ? 'Đang hoạt động' : 'Ngưng hoạt động'}"></td>
+                                    <td th:text="${khachHang.trangThai ? 'Đang hoạt động' : 'Ngưng hoạt động'}"
+                                        th:classappend="${khachHang.trangThai ? 'text-success' : 'text-danger'}">
+                                    </td>
                                     <td>
                                         <a th:href="@{/khach-hang/detail(id=${khachHang.id})}"
                                            class="btn btn-outline-warning">

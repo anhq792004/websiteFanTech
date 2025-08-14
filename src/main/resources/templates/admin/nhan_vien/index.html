@@ -79,17 +79,24 @@
                                 <tr th:each="nhanVien, iterStat : ${listNV}">
                                     <td th:text="${iterStat.count}"></td>
                                     <td th:text="${nhanVien.ma}"></td>
-                                    <td th:text="${#strings.length(nhanVien.ten) > 15
-                                       ? #strings.substring(nhanVien.ten, 0, 15) + '...'
-                                       : nhanVien.ten}">
+                                    <td th:text="${nhanVien.ten != null
+                                        ? (#strings.length(nhanVien.ten) > 15
+                                            ? #strings.substring(nhanVien.ten, 0, 15) + '...'
+                                            : nhanVien.ten)
+                                        : 'Chưa có tên'}">
+                                    </td>
                                     <td th:text="${nhanVien.gioiTinh}"></td>
                                     <td th:text="${#dates.format(nhanVien.ngaySinh, 'dd/MM/yyyy')}"></td>
-                                    <td th:text="${#strings.length(nhanVien.taiKhoan.email) > 20
-                                       ? #strings.substring(nhanVien.taiKhoan.email, 0, 20) + '...'
-                                       : nhanVien.taiKhoan.email}">
+                                    <td th:text="${nhanVien.ten != null
+                                        ? (#strings.length(nhanVien.taiKhoan.email) > 25
+                                            ? #strings.substring(nhanVien.taiKhoan.email, 0, 25) + '...'
+                                            : nhanVien.taiKhoan.email)
+                                        : 'Chưa có mail'}">
+                                    </td>
+                                    <td th:text="${nhanVien.trangThai ? 'Đang làm việc' : 'Đã nghỉ việc'}"
+                                        th:classappend="${nhanVien.trangThai ? 'text-success' : 'text-danger'}">
                                     </td>
 
-                                    <td th:text="${nhanVien.trangThai ? 'Đang làm việc' : 'Đã nghỉ việc'}"></td>
                                     <td>
                                         <a th:href="@{/admin/nhan-vien/detail(id=${nhanVien.id})}"
                                            class="btn btn-outline-warning">
