@@ -246,6 +246,43 @@
         
         const formData = new FormData(this);
         
+        // Validate riêng từng trường trước khi submit
+        const congSuatSelect = this.querySelector('select[name="congSuatId"]');
+        const hangSelect = this.querySelector('select[name="hangId"]');
+        const mauSacSelect = this.querySelector('select[name="mauSacId"]');
+        const nutBamSelect = this.querySelector('select[name="nutBamId"]');
+        
+        // Xóa trạng thái lỗi cũ
+        [congSuatSelect, hangSelect, mauSacSelect, nutBamSelect]
+            .forEach(el => el && el.classList.remove('is-invalid'));
+        
+        const congSuatId = formData.get('congSuatId');
+        const hangId = formData.get('hangId');
+        const mauSacId = formData.get('mauSacId');
+        const nutBamId = formData.get('nutBamId');
+        
+        // Ưu tiên báo thiếu theo từng trường cụ thể
+        if (!mauSacId) {
+            mauSacSelect.classList.add('is-invalid');
+            showToast('error', 'Vui lòng chọn màu sắc');
+            return;
+        }
+        if (!congSuatId) {
+            congSuatSelect.classList.add('is-invalid');
+            showToast('error', 'Vui lòng chọn công suất');
+            return;
+        }
+        if (!hangId) {
+            hangSelect.classList.add('is-invalid');
+            showToast('error', 'Vui lòng chọn hãng');
+            return;
+        }
+        if (!nutBamId) {
+            nutBamSelect.classList.add('is-invalid');
+            showToast('error', 'Vui lòng chọn nút bấm');
+            return;
+        }
+        
         // Hiển thị loading
         const submitBtn = document.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;

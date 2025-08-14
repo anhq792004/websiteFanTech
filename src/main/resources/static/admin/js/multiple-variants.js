@@ -507,11 +507,30 @@ class VariantsManager {
                 return;
             }
 
-            const hangId = document.getElementById('hangId').value;
-            const nutBamId = document.getElementById('nutBamId').value;
+            const hangSelect = document.getElementById('hangId');
+            const nutBamSelect = document.getElementById('nutBamId');
+            const hangId = hangSelect.value;
+            const nutBamId = nutBamSelect.value;
 
-            if (!hangId || !nutBamId) {
+            // Clear trạng thái lỗi cũ
+            hangSelect.classList.remove('is-invalid');
+            nutBamSelect.classList.remove('is-invalid');
+
+            // Validate riêng từng trường
+            if (!hangId && !nutBamId) {
+                hangSelect.classList.add('is-invalid');
+                nutBamSelect.classList.add('is-invalid');
                 this.showError('Vui lòng chọn hãng và nút bấm');
+                return;
+            }
+            if (!hangId) {
+                hangSelect.classList.add('is-invalid');
+                this.showError('Vui lòng chọn hãng');
+                return;
+            }
+            if (!nutBamId) {
+                nutBamSelect.classList.add('is-invalid');
+                this.showError('Vui lòng chọn nút bấm');
                 return;
             }
 
