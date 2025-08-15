@@ -60,8 +60,11 @@
                         </div>
 
                         <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
-                            <span>Phí vận chuyển:</span>
-                            <span class="text-success fw-bold">Miễn phí</span>
+                            <div>
+                                <span>Phí vận chuyển:</span>
+                                <small class="text-muted d-block">Miễn phí cho đơn ≥ 2 triệu<br>Dưới 2 triệu: 10k/kg</small>
+                            </div>
+                            <span id="shippingFee" class="fw-bold">0₫</span>
                         </div>
 
                         <div class="d-flex justify-content-between mb-4">
@@ -351,9 +354,33 @@
         }
 
         updateSummary(data) {
+            const subtotal = data.totalAmount || 0;
+            const totalWeight = data.totalWeight || 0;
+            
+            // Debug: console.log('Debug shipping:', { subtotal, totalWeight, data });
+            
+            // Tính phí vận chuyển theo logic backend - ĐỒNG BỘ với ThanhToanOnlController và thongtinGiaoHang
+            let shippingFee = 0;
+            if (subtotal < 2000000) { // Dưới 2 triệu VND
+                const weightKg = totalWeight ? (totalWeight / 1000) : 0;
+                shippingFee = Math.ceil(weightKg * 10000); // 10.000đ/kg, làm tròn lên - GIỐNG thongtinGiaoHang
+            } else {
+                shippingFee = 0; // Miễn phí từ 2 triệu trở lên
+            }
+            
+            const finalTotal = subtotal + shippingFee;
+            
             document.getElementById('totalItems').textContent = data.itemCount;
-            document.getElementById('subtotal').textContent = this.formatPrice(data.totalAmount);
-            document.getElementById('totalAmount').textContent = this.formatPrice(data.totalAmount);
+            document.getElementById('subtotal').textContent = this.formatPrice(subtotal);
+            const shippingElement = document.getElementById('shippingFee');
+            if (shippingFee > 0) {
+                shippingElement.textContent = this.formatPrice(shippingFee);
+                shippingElement.className = 'fw-bold text-warning';
+            } else {
+                shippingElement.textContent = 'Miễn phí';
+                shippingElement.className = 'fw-bold text-success';
+            }
+            document.getElementById('totalAmount').textContent = this.formatPrice(finalTotal);
             document.getElementById('cartSummary').style.display = 'block';
         }
 
