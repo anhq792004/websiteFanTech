@@ -1,0 +1,15 @@
+package com.example.datn.dto.request;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ChatAiMessage {
+    private String role;
+    private String text;
+}
+
+

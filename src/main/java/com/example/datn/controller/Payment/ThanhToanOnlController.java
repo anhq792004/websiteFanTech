@@ -292,7 +292,7 @@ public class ThanhToanOnlController {
                 hoaDonChiTiet.setThanhTien(sanPhamChiTiet.getGia().multiply(new BigDecimal(soLuong)));
                 hoaDonChiTiet.setTrangThai(1);
 
-                sanPhamChiTiet.setSoLuong(sanPhamChiTiet.getSoLuong() - soLuong);
+//                sanPhamChiTiet.setSoLuong(sanPhamChiTiet.getSoLuong() - soLuong);
                 sanPhamChiTietRepo.save(sanPhamChiTiet);
 
                 hoaDonChiTietRepo.save(hoaDonChiTiet);

@@ -52,7 +52,7 @@
                         <img id="productImage"
                              th:src="${chiTietDauTien?.hinhAnh?.hinhAnh ?: '/user/assets/images/default_product.jpg'}"
                              class="card-img-top"
-                             style="height: 400px; object-fit: cover;"
+                             style="height: 400px; object-fit: contain;"
                              th:alt="${sanPham.ten}">
                     </div>
                 </div>
@@ -578,6 +578,9 @@
         document.querySelector(this.getAttribute('href'))?.scrollIntoView({behavior: 'smooth', block: 'start'});
     }));
 </script>
+
+<!-- ChatAI (Gemini) floating widget for user pages only -->
+<script th:src="@{/admin/assets/compiled/js/chat-ai.js}"></script>
 
 </body>
 </html>

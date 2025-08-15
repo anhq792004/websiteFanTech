@@ -39,4 +39,9 @@ public class AppConfig implements WebMvcConfigurer {
     public String getUploadDirectory() {
         return Paths.get(uploadDir).toAbsolutePath().toString();
     }
+
+    @Bean
+    public String geminiApiBaseUrl() {
+        return "https://generativelanguage.googleapis.com/v1beta";
+    }
 } 

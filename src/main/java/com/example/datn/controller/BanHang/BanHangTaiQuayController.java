@@ -96,7 +96,7 @@ public class BanHangTaiQuayController {
             banHangService.taoHoaDonCho(hoaDon);
             return ResponseEntity.ok("Tạo hóa đơn thành công");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Số lượng hóa đơn chờ < 10");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
