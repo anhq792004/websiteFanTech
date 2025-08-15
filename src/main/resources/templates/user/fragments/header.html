@@ -60,7 +60,7 @@
                             </a>
 
                             <hr style="margin: 10px 0;">
-                            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                            <form th:action="@{/logout}" method="post" style="margin: 0;" onsubmit="if(window.clearChatAIHistory) window.clearChatAIHistory();">
                                 <button type="submit" class="user-dropdown-item"
                                         style="border: none; background: none; width: 100%; text-align: left; cursor: pointer;">
                                     <i class="fas fa-sign-out-alt me-2"></i>
