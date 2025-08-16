@@ -2,7 +2,7 @@
 class ProductSearch {
     constructor() {
         this.currentPage = 0;
-        this.pageSize = 12;
+        this.pageSize = 8;
         this.filters = {
             query: '',
             kieuQuatId: null,
@@ -259,6 +259,10 @@ class ProductSearch {
         const productType = product.kieuQuat ? product.kieuQuat.ten : 'Null';
         const shortType = productType.length > 10 ? productType.substring(0, 10) + '...' : productType;
 
+        // Format product name - limit to 30 characters
+        const productName = product.ten || 'Không có tên';
+        const shortProductName = productName.length > 30 ? productName.substring(0, 30) + '...' : productName;
+
         // Dữ liệu cho nút thêm vào giỏ hàng
         const detailId = cheapestVariant ? cheapestVariant.id : '';
         const quantity = cheapestVariant ? cheapestVariant.soLuong : 0;
@@ -281,7 +285,7 @@ class ProductSearch {
             <!-- Thông tin sản phẩm -->
             <div class="p-3 d-flex flex-column flex-grow-1">
                 <!-- Tên sản phẩm -->
-                <h5 class="card-title line-clamp-1">${product.ten}</h5>
+                <h5 class="card-title line-clamp-1" title="${product.ten}">${shortProductName}</h5>
 
                 <!-- Mô tả ngắn -->
                 <div>

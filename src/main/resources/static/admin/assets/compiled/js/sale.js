@@ -117,6 +117,9 @@ $(".btn-add-khachHang").click(function () {
                 showConfirmButton: false,
                 timer: 1000,
                 timerProgressBar: true
+            }).then(() => {
+                // Reload trang để đưa về trạng thái ban đầu
+                location.reload();
             });
         }
     });
@@ -322,6 +325,9 @@ $(document).ready(function () {
                     showConfirmButton: false,
                     timer: 4000,
                     timerProgressBar: true
+                }).then(() => {
+                    // Reload trang để đưa số lượng về trạng thái ban đầu
+                    location.reload();
                 });
             }
         });
@@ -481,6 +487,9 @@ $(document).ready(function () {
                     showConfirmButton: false,
                     timer: 3000,
                     timerProgressBar: true
+                }).then(() => {
+                    // Reload trang để đưa về trạng thái ban đầu
+                    location.reload();
                 });
             }
         });
@@ -772,6 +781,9 @@ function retryMomoPayment(hoaDonId) {
                 showConfirmButton: false,
                 timer: 3000,
                 timerProgressBar: true
+            }).then(() => {
+                // Reload trang để đưa về trạng thái ban đầu
+                location.reload();
             });
         }
     });
@@ -932,6 +944,9 @@ $(document).ready(function () {
                     showConfirmButton: false,
                     timer: 1000,
                     timerProgressBar: true
+                }).then(() => {
+                    // Reload trang để đưa về trạng thái ban đầu
+                    location.reload();
                 });
             }
         });
@@ -939,8 +954,41 @@ $(document).ready(function () {
 
     // Chạy format currency khi trang tải xong
     formatCurrency();
+    
+    // Kiểm tra và disable nút thanh toán khi load trang
+    checkAndTogglePaymentButton();
 });
 
+
+// Hàm kiểm tra và toggle nút thanh toán
+function checkAndTogglePaymentButton() {
+    const productList = document.getElementById('product-list');
+    const paymentButton = document.getElementById('btnThanhToan');
+    
+    if (!paymentButton) {
+        return; // Không có nút thanh toán (chưa tạo hóa đơn)
+    }
+    
+    // Kiểm tra xem có sản phẩm nào trong giỏ hàng không
+    let hasProducts = false;
+    
+    if (productList) {
+        // Đếm số dòng sản phẩm (div có class product-details)
+        const productItems = productList.querySelectorAll('.product-details');
+        hasProducts = productItems.length > 0;
+    }
+    
+    // Enable/disable nút thanh toán
+    if (hasProducts) {
+        paymentButton.disabled = false;
+        paymentButton.classList.remove('disabled');
+        paymentButton.title = '';
+    } else {
+        paymentButton.disabled = true;
+        paymentButton.classList.add('disabled');
+        paymentButton.title = 'Vui lòng thêm sản phẩm trước khi thanh toán';
+    }
+}
 
 // Khởi tạo biến cho phiếu giảm giá
 let selectedPhieuGiamGia = null;

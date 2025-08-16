@@ -26,6 +26,10 @@ public interface SanPhamRepo extends JpaRepository<SanPham,Long> {
     @Query("SELECT s FROM SanPham s WHERE s.trangThai = true")
     List<SanPham> findByTrangThaiTrue();
     
+    // Phân trang cho sản phẩm active
+    @Query("SELECT s FROM SanPham s WHERE s.trangThai = true")
+    Page<SanPham> findByTrangThaiTrue(Pageable pageable);
+    
     @Query("SELECT s.ma FROM SanPham s WHERE s.ma LIKE 'SP%' ORDER BY s.ma DESC")
     List<String> findLatestProductCode();
     

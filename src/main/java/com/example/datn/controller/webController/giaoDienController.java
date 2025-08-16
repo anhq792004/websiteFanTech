@@ -4,6 +4,7 @@ import com.example.datn.entity.SanPham.SanPhamChiTiet;
 import com.example.datn.repository.SanPhamRepo.SanPhamRepo;
 import com.example.datn.service.SanPhamSerivce.SanPhamService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,12 +23,18 @@ public class giaoDienController {
     private SanPhamRepo sanPhamRepo;
 
     @GetMapping("/index")
-    public String index(Model model) {
-        // Lấy danh sách sản phẩm có trạng thái true (đang hoạt động)
-        List<SanPham> sanPhamList = sanPhamService.findAllActiveProducts();
+    public String index(@RequestParam(name = "page", defaultValue = "0") int page, Model model) {
+        // Phân trang với 8 sản phẩm mỗi trang
+        int size = 8;
+        Page<SanPham> sanPhamPage = sanPhamService.findAllActiveProductsPaginated(page, size);
 
-        // Thêm danh sách sản phẩm vào model để sử dụng trong template
-        model.addAttribute("sanPhamList", sanPhamList);
+        // Thêm dữ liệu phân trang vào model
+        model.addAttribute("sanPhamList", sanPhamPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", sanPhamPage.getTotalPages());
+        model.addAttribute("totalElements", sanPhamPage.getTotalElements());
+        model.addAttribute("hasNext", sanPhamPage.hasNext());
+        model.addAttribute("hasPrevious", sanPhamPage.hasPrevious());
 
         return "user/index";
     }

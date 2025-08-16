@@ -66,6 +66,12 @@ public class SanPhamServiceImpl implements SanPhamService {
     }
 
     @Override
+    public Page<SanPham> findAllActiveProductsPaginated(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return sanPhamRepo.findByTrangThaiTrue(pageable);
+    }
+
+    @Override
     public void saveSanPham(SanPham sanPham) {
         if (sanPham.getMa() == null || sanPham.getMa().trim().isEmpty()) {
             sanPham.setMa(generateNextProductCode());
