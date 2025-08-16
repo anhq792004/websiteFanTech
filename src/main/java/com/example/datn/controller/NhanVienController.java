@@ -193,4 +193,10 @@ public class NhanVienController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/changePassword")
+    public String changePassword(){
+
+        return "admin/nhan_vien/change-password";
+    }
+
 }
