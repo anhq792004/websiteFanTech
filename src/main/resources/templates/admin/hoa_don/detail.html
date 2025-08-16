@@ -56,14 +56,23 @@
                                             <tr th:each="item, iter : ${lichSuHoaDonList}">
                                                 <td th:text="${iter.count}"></td>
                                                 <td th:switch="${item.trangThai}">
-                                                    <span th:case="0" th:text="'Hóa đơn chờ'"></span>
-                                                    <span th:case="1" th:text="'Đang chờ xác nhận'"></span>
-                                                    <span th:case="2" th:text="'Đã xác nhận'"></span>
-                                                    <span th:case="3" th:text="'Đang giao hàng'"></span>
-                                                    <span th:case="4" th:text="'Hoàn thành'"></span>
-                                                    <span th:case="5" th:text="'Hủy'"></span>
+                                                    <span th:case="0" class="text-success-emphasis"
+                                                          th:text="'Hóa đơn chờ'"></span>
+                                                    <span th:case="1" class="text-secondary-emphasis"
+                                                          th:text="'Đang chờ xác nhận'"></span>
+                                                    <span th:case="2" class="text-success"
+                                                          th:text="'Đã xác nhận'"></span>
+                                                    <span th:case="3" class="text-warning"
+                                                          th:text="'Đang giao hàng'"></span>
+                                                    <span th:case="4" class="text-primary"
+                                                          th:text="'Hoàn thành'"></span>
+                                                    <span th:case="5" class="text-danger"
+                                                          th:text="'Hủy'"></span>
+                                                    <span th:case="6" class="text-dark"
+                                                          th:text="'Hoàn hàng'"></span>
                                                 </td>
-                                                <td th:text="${item.ngayTao}"></td>
+                                                <td th:text="${item.ngayTao != null ? #temporals.format(item.ngayTao, 'dd/MM/yyyy HH:mm')
+                                                    : #temporals.format(item.ngaySua, 'dd/MM/yyyy HH:mm')}"></td>
                                                 <td th:text="${item.nguoiTao}"></td>
                                             </tr>
                                             </tbody>
@@ -114,7 +123,7 @@
                                         <div class="Day">
                                             <span class="text-success">Đã xác nhận</span>
                                             <div class="MonthYear text-success"
-                                                 th:text="${#temporals.format(history.ngayTao, 'dd-MM-yyyy')}">
+                                                 th:text="${#temporals.format(history.ngaySua, 'dd-MM-yyyy')}">
                                             </div>
                                         </div>
                                     </div>
@@ -126,7 +135,7 @@
                                         <div class="Day">
                                             <span class="text-primary-emphasis">Giao hàng</span>
                                             <div class="MonthYear text-primary-emphasis"
-                                                 th:text="${#temporals.format(history.ngayTao, 'dd-MM-yyyy')}">
+                                                 th:text="${#temporals.format(history.ngaySua, 'dd-MM-yyyy')}">
                                             </div>
                                         </div>
                                     </div>
@@ -138,7 +147,7 @@
                                         <div class="Day">
                                             <span class="text-danger-emphasis">Hoàn thành</span>
                                             <div class="MonthYear text-danger-emphasis"
-                                                 th:text="${#temporals.format(history.ngayTao, 'dd-MM-yyyy')}">
+                                                 th:text="${#temporals.format(history.ngaySua, 'dd-MM-yyyy')}">
 
                                             </div>
                                         </div>
@@ -150,7 +159,18 @@
                                         <div class="Day text-danger">
                                             <span>Hủy</span>
                                             <div class="MonthYear text-danger"
-                                                 th:text="${#temporals.format(history.ngayTao, 'dd-MM-yyyy')}">
+                                                 th:text="${#temporals.format(history.ngaySua, 'dd-MM-yyyy')}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div th:case="6" class="eventTime">
+                                        <div class="DayDigit text-dark">
+                                            <i class="bi bi-arrow-left-right"></i>
+                                        </div>
+                                        <div class="Day text-dark">
+                                            <span>Hoàn hàng</span>
+                                            <div class="MonthYear text-dark"
+                                                 th:text="${#temporals.format(history.ngaySua, 'dd-MM-yyyy')}">
                                             </div>
                                         </div>
                                     </div>
@@ -165,11 +185,13 @@
                                 <line x1="0" y1="0" x2="200" y2="0" style="stroke:#004165;stroke-width:5"/>
                             </svg>
                             <div class="time" th:text="${#temporals.format(history.ngayTao, 'HH:mm')}"></div>
+                            <div class="time" th:text="${#temporals.format(history.ngaySua, 'HH:mm')}"></div>
                         </div>
                     </div>
 
                     <div class="card mb-4">
-                        <div class="d-flex" th:if="${hoaDon.trangThai != 4 && hoaDon.trangThai != 5 }">
+                        <div class="d-flex"
+                             th:if="${hoaDon.trangThai != 4 && hoaDon.trangThai != 5 && hoaDon.trangThai != 6}">
                             <form th:if="${hoaDon.trangThai != 3 && hoaDon.trangThai != 2 && hoaDon.trangThai != 0}"
                                   class="me-2" th:data-id="${hoaDon.id}">
                                 <button type="button" class="btn btn-outline-success btn-xac-nhan">Xác nhận</button>
@@ -184,15 +206,15 @@
                                   class="me-2" th:data-id="${hoaDon.id}">
                                 <button type="button" class="btn btn-outline-primary btn-hoan-thanh">Hoàn Thành</button>
                             </form>
+                            <form th:if="${hoaDon.trangThai == 3}"
+                                  class="me-2" th:data-id="${hoaDon.id}">
+                                <button type="button" class="btn btn-outline-secondary btn-hoan-hang">Hoàn hàng</button>
+                            </form>
 
                             <form th:if="${hoaDon.trangThai != 3 }"
                                   class="me-2" th:data-id="${hoaDon.id}">
                                 <button type="button" class="btn btn-outline-danger btn-huy">Hủy</button>
                             </form>
-                            <!--                            <form th:if="${hoaDon.trangThai != 3 && hoaDon.trangThai != 2 && hoaDon.trangThai != 0}"-->
-                            <!--                                  class="me-2" th:data-id="${hoaDon.id}">-->
-                            <!--                                <button type="button" class="btn btn-outline-danger btn-huy">Hủy onl</button>-->
-                            <!--                            </form>-->
                         </div>
                     </div>
                 </div>
@@ -212,7 +234,7 @@
                                 <th>Thời gian</th>
                                 <th>Phương thức thanh toán</th>
                                 <th>Loại hóa đơn</th>
-                                <th>Người tạo</th>
+                                <th>Người xác nhận</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -226,6 +248,7 @@
                                     <span th:case="3" class="text-warning">Đang giao hàng</span>
                                     <span th:case="4" class="text-primary">Hoàn thành</span>
                                     <span th:case="5" class="text-danger">Hủy</span>
+                                    <span th:case="6" class="text-dark">Hoàn hàng</span>
                                 </td>
                                 <td th:text="${#temporals.format(hoaDon.ngaySua, 'dd-MM-yyyy HH:mm')}"></td>
                                 <td th:text="${item.hinhThucThanhToan}"></td>
@@ -256,29 +279,28 @@
                                 <input type="text" class="form-control" placeholder="Tên" name="tenNguoiNhan"
                                        id="tenNguoiNhan"
                                        th:value="${hoaDon.tenNguoiNhan}"
-                                       th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3}"
-                                >
+                                       th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bolder">Số điện thoại</label>
                                 <input type="text" class="form-control" placeholder="Số điện thoại" name="sdtNguoiNhan"
                                        id="sdtNguoiNhan"
                                        th:value="${hoaDon.sdtNguoiNhan}"
-                                       th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3}">
+                                       th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bolder" for="city">Thành phố</label>
                                 <select class="form-control" id="city" name="tinh"
-                                        th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3}">
+                                        th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
                                     <option value="" selected>Chọn tỉnh thành</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bolder" for="district">Quận huyện</label>
                                 <select class="form-control" id="district" name="huyen"
-                                        th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3}">
+                                        th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
                                     <option value="" selected>Chọn quận huyện</option>
                                 </select>
                             </div>
@@ -287,7 +309,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bolder" for="district">Phường xã</label>
                                 <select class="form-control" id="ward" name="xa"
-                                        th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3}">
+                                        th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
                                     <option value="" selected>Chọn phường xã</option>
                                 </select>
                             </div>
@@ -296,7 +318,7 @@
                                 <input type="text" class="form-control" th:value="${hoaDon.soNhaNgoDuong}"
                                        id="soNhaNgoDuong"
                                        placeholder="1300 Rockdick Rd., Unit A Markham, ON L3R8C3"
-                                       th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3}">
+                                       th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
                             </div>
                         </div>
                         <input type="hidden" id="tinh" th:value="${hoaDon.tinh}"/>
@@ -355,7 +377,7 @@
                                                 −
                                             </button>
                                             <input type="text" class="quantity-input"
-                                                   th:disabled="${hoaDon.trangThai == 3 || hoaDon.trangThai == 4 ||hoaDon.trangThai == 5}"
+                                                   th:disabled="${hoaDon.trangThai == 3 || hoaDon.trangThai == 4 ||hoaDon.trangThai == 5 || hoaDon.trangThai == 6}"
                                                    th:value="${item.soLuong}" id="soLuong" name="soLuong">
                                             <button class="quantity-btn" type="button"
                                                     th:if="${hoaDon.trangThai == 0 || hoaDon.trangThai == 1 ||hoaDon.trangThai == 2}">
