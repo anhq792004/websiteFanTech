@@ -35,7 +35,7 @@ public class ProductApiController {
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size) {
+            @RequestParam(defaultValue = "8") int size) {
 
         try {
             // Lấy danh sách sản phẩm đã filter

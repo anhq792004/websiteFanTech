@@ -26,6 +26,9 @@ public interface SanPhamService {
 
     // Thêm method để lấy tất cả sản phẩm đang hoạt động
     List<SanPham> findAllActiveProducts();
+    
+    // Thêm method phân trang cho sản phẩm active
+    Page<SanPham> findAllActiveProductsPaginated(int page, int size);
 
     // Method để search và filter sản phẩm
     List<SanPham> searchAndFilterProducts(String query, Long kieuQuatId, Long congSuatId, 

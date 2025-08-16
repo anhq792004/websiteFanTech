@@ -494,6 +494,25 @@
     });
 </script>
 
+<style>
+/* CSS cho nút thanh toán disabled */
+#btnThanhToan:disabled,
+#btnThanhToan.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f8f9fa;
+    border-color: #d1d3d4;
+    color: #6c757d;
+}
+
+#btnThanhToan:disabled:hover,
+#btnThanhToan.disabled:hover {
+    background-color: #f8f9fa;
+    border-color: #d1d3d4;
+    color: #6c757d;
+    transform: none;
+}
+</style>
 
 </body>
 </html>

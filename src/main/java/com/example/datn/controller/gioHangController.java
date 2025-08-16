@@ -48,10 +48,12 @@ public class gioHangController {
         boolean success = gioHangService.addToCart(session, sanPhamChiTietId, soLuong);
 
         if (success) {
+            Map<String, Object> cartInfo = gioHangService.getCartInfo(session);
             response.put("success", true);
             response.put("message", "Đã thêm sản phẩm vào giỏ hàng!");
-            response.put("cartCount", gioHangService.getCartItemCount(session));
-            response.put("totalAmount", gioHangService.getTotalAmount(session));
+            response.put("cartCount", cartInfo.get("itemCount"));
+            response.put("totalAmount", cartInfo.get("totalAmount"));
+            response.put("totalWeight", cartInfo.get("totalWeight"));
         } else {
             response.put("success", false);
             response.put("message", "Không thể thêm sản phẩm vào giỏ hàng!");
@@ -73,10 +75,12 @@ public class gioHangController {
         boolean success = gioHangService.updateQuantity(session, sanPhamChiTietId, soLuong);
 
         if (success) {
+            Map<String, Object> cartInfo = gioHangService.getCartInfo(session);
             response.put("success", true);
             response.put("message", "Đã cập nhật số lượng!");
-            response.put("cartCount", gioHangService.getCartItemCount(session));
-            response.put("totalAmount", gioHangService.getTotalAmount(session));
+            response.put("cartCount", cartInfo.get("itemCount"));
+            response.put("totalAmount", cartInfo.get("totalAmount"));
+            response.put("totalWeight", cartInfo.get("totalWeight"));
         } else {
             response.put("success", false);
             response.put("message", "Không thể cập nhật số lượng!");
@@ -97,11 +101,13 @@ public class gioHangController {
         boolean success = gioHangService.removeFromCart(session, sanPhamChiTietId);
 
         if (success) {
+            Map<String, Object> cartInfo = gioHangService.getCartInfo(session);
             response.put("success", true);
             response.put("message", "Đã xóa sản phẩm khỏi giỏ hàng!");
-            response.put("cartCount", gioHangService.getCartItemCount(session));
-            response.put("totalAmount", gioHangService.getTotalAmount(session));
-            response.put("isEmpty", gioHangService.isEmpty(session));
+            response.put("cartCount", cartInfo.get("itemCount"));
+            response.put("totalAmount", cartInfo.get("totalAmount"));
+            response.put("totalWeight", cartInfo.get("totalWeight"));
+            response.put("isEmpty", cartInfo.get("isEmpty"));
         } else {
             response.put("success", false);
             response.put("message", "Không thể xóa sản phẩm!");
@@ -135,15 +141,8 @@ public class gioHangController {
     @GetMapping("/info")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getCartInfo(HttpSession session) {
-        Map<String, Object> response = new HashMap<>();
-
-        List<gioHangDTO> cartItems = gioHangService.getCart(session);
-
-        response.put("items", cartItems);
-        response.put("totalAmount", gioHangService.getTotalAmount(session));
-        response.put("itemCount", gioHangService.getCartItemCount(session));
-        response.put("isEmpty", gioHangService.isEmpty(session));
-
-        return ResponseEntity.ok(response);
+        // Sử dụng method getCartInfo() có sẵn để đảm bảo đồng bộ với checkout
+        Map<String, Object> cartInfo = gioHangService.getCartInfo(session);
+        return ResponseEntity.ok(cartInfo);
     }
 }
