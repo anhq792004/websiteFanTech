@@ -235,14 +235,6 @@ public class ThanhToanOnlController {
                     ", discountAmount: " + discountAmount +
                     ", finalAmount: " + finalAmount);
 
-            DiaChi diaChi = new DiaChi();
-            diaChi.setKhachHang(khachHang);
-            diaChi.setTinh(tinhThanh);
-            diaChi.setHuyen(quanHuyen);
-            diaChi.setXa(phuongXa);
-            diaChi.setSoNhaNgoDuong(diaChiChiTiet);
-            DiaChi savedDiaChi = diaChiRepo.save(diaChi);
-
             HoaDon hoaDon = new HoaDon();
             hoaDon.setMa(generateOrderCode());
             hoaDon.setKhachHang(khachHang);

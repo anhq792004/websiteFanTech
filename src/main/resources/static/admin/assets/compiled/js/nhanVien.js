@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    // Hàm kiểm tra định dạng số điện thoại (10 chữ số)
+    // Hàm kiểm tra định dạng số điện thoại (10-12 chữ số)
     function isValidPhoneNumber(phone) {
         const phoneRegex = /^[0-9]{10,12}$/;
         return phoneRegex.test(phone);
@@ -41,6 +41,96 @@ $(document).ready(function () {
         });
     }
 
+    // Hàm tải danh sách tỉnh/thành phố
+    function loadCities() {
+        const tinh = $('#tinh').val();
+        $.ajax({
+            url: 'https://provinces.open-api.vn/api/p/', // API tỉnh/thành phố
+            method: 'GET',
+            success: function (data) {
+                $('#city').empty().append('<option value="">Chọn tỉnh thành</option>');
+                data.forEach(city => {
+                    $('#city').append(`<option value="${city.code}">${city.name}</option>`);
+                });
+                if (tinh) {
+                    $('#city').val(tinh); // Điền giá trị mặc định
+                    loadDistricts(tinh); // Tải quận/huyện
+                }
+            },
+            error: function () {
+                showToast('error', 'Không thể tải danh sách tỉnh/thành phố');
+            }
+        });
+    }
+
+    // Hàm tải danh sách quận/huyện
+    function loadDistricts(cityCode) {
+        const huyen = $('#huyen').val();
+        $.ajax({
+            url: `https://provinces.open-api.vn/api/p/${cityCode}?depth=2`, // API quận/huyện
+            method: 'GET',
+            success: function (data) {
+                $('#district').empty().append('<option value="">Chọn quận huyện</option>');
+                data.districts.forEach(district => {
+                    $('#district').append(`<option value="${district.code}">${district.name}</option>`);
+                });
+                if (huyen) {
+                    $('#district').val(huyen); // Điền giá trị mặc định
+                    loadWards(huyen); // Tải xã/phường
+                }
+            },
+            error: function () {
+                showToast('error', 'Không thể tải danh sách quận/huyện');
+            }
+        });
+    }
+
+    // Hàm tải danh sách xã/phường
+    function loadWards(districtCode) {
+        const xa = $('#xa').val();
+        $.ajax({
+            url: `https://provinces.open-api.vn/api/d/${districtCode}?depth=2`, // API xã/phường
+            method: 'GET',
+            success: function (data) {
+                $('#ward').empty().append('<option value="">Chọn phường xã</option>');
+                data.wards.forEach(ward => {
+                    $('#ward').append(`<option value="${ward.code}">${ward.name}</option>`);
+                });
+                if (xa) {
+                    $('#ward').val(xa); // Điền giá trị mặc định
+                }
+            },
+            error: function () {
+                showToast('error', 'Không thể tải danh sách xã/phường');
+            }
+        });
+    }
+
+    // Gọi hàm tải tỉnh/thành phố khi trang được tải
+    loadCities();
+
+    // Xử lý sự kiện thay đổi tỉnh/thành phố
+    $('#city').change(function () {
+        const cityCode = $(this).val();
+        if (cityCode) {
+            loadDistricts(cityCode);
+        } else {
+            $('#district').empty().append('<option value="">Chọn quận huyện</option>');
+            $('#ward').empty().append('<option value="">Chọn phường xã</option>');
+        }
+    });
+
+    // Xử lý sự kiện thay đổi quận/huyện
+    $('#district').change(function () {
+        const districtCode = $(this).val();
+        if (districtCode) {
+            loadWards(districtCode);
+        } else {
+            $('#ward').empty().append('<option value="">Chọn phường xã</option>');
+        }
+    });
+
+    // Xử lý submit form thêm nhân viên
     $('#addNhanVienForm').on('submit', function (event) {
         event.preventDefault();
 
@@ -66,8 +156,8 @@ $(document).ready(function () {
             $('#btnIcon').removeClass('d-none');
             return;
         }
-        if (!ten.length > 100) {
-            showToast('error', 'Tên không được dài quá 100 ký tư');
+        if (ten.length > 100) {
+            showToast('error', 'Tên không được dài quá 100 ký tự');
             $('#btnNV').prop('disabled', false);
             $('#btnSpinner').addClass('d-none');
             $('#btnIcon').removeClass('d-none');
@@ -99,7 +189,7 @@ $(document).ready(function () {
             return;
         }
         if (!isValidPhoneNumber(sdt)) {
-            showToast('error', 'Số điện thoại phải có 10 chữ số');
+            showToast('error', 'Số điện thoại phải có từ 10 đến 12 chữ số');
             $('#btnNV').prop('disabled', false);
             $('#btnSpinner').addClass('d-none');
             $('#btnIcon').removeClass('d-none');
@@ -133,27 +223,6 @@ $(document).ready(function () {
             $('#btnIcon').removeClass('d-none');
             return;
         }
-        if (!tinhThanhPho) {
-            showToast('error', 'Vui lòng chọn Tỉnh/Thành phố');
-            $('#btnNV').prop('disabled', false);
-            $('#btnSpinner').addClass('d-none');
-            $('#btnIcon').removeClass('d-none');
-            return;
-        }
-        if (!quanHuyen) {
-            showToast('error', 'Vui lòng chọn Quận/Huyện');
-            $('#btnNV').prop('disabled', false);
-            $('#btnSpinner').addClass('d-none');
-            $('#btnIcon').removeClass('d-none');
-            return;
-        }
-        if (!xaPhuong) {
-            showToast('error', 'Vui lòng chọn Xã/Phường');
-            $('#btnNV').prop('disabled', false);
-            $('#btnSpinner').addClass('d-none');
-            $('#btnIcon').removeClass('d-none');
-            return;
-        }
         if (!soNhaNgoDuong) {
             showToast('error', 'Vui lòng nhập địa chỉ cụ thể');
             $('#btnNV').prop('disabled', false);
@@ -161,7 +230,7 @@ $(document).ready(function () {
             $('#btnIcon').removeClass('d-none');
             return;
         }
-        if (!soNhaNgoDuong.length > 100) {
+        if (soNhaNgoDuong.length > 100) {
             showToast('error', 'Địa chỉ cụ thể không được dài quá 100 ký tự');
             $('#btnNV').prop('disabled', false);
             $('#btnSpinner').addClass('d-none');
@@ -170,14 +239,14 @@ $(document).ready(function () {
         }
         if (!gioiTinh) {
             showToast('error', 'Vui lòng chọn giới tính');
-            $('#submitBtn').prop('disabled', false);
+            $('#btnNV').prop('disabled', false);
             $('#btnSpinner').addClass('d-none');
             $('#btnIcon').removeClass('d-none');
             return;
         }
         if (!chucVu) {
             showToast('error', 'Vui lòng chọn chức vụ');
-            $('#submitBtn').prop('disabled', false);
+            $('#btnNV').prop('disabled', false);
             $('#btnSpinner').addClass('d-none');
             $('#btnIcon').removeClass('d-none');
             return;
@@ -222,9 +291,6 @@ $(document).ready(function () {
             formData.append('xaPhuong', xaPhuong);
             formData.append('soNhaNgoDuong', soNhaNgoDuong);
             formData.append('chucVu', chucVu);
-
-            // Thêm file ảnh nếu có
-            const hinhAnhFile = $('#hinhAnh')[0].files[0];
             if (hinhAnhFile) {
                 formData.append('hinhAnh', hinhAnhFile);
             }
@@ -258,281 +324,311 @@ $(document).ready(function () {
             });
         });
     });
-});
 
-$('.changeStatusNhanVien').on('click', function () {
-    const id = $(this).data('id');
+    // Xử lý submit form cập nhật nhân viên - FIXED VERSION
+    $('#formUpdateNV').on('submit', function (event) {
+        event.preventDefault();
 
-    $.ajax({
-        url: '/admin/nhan-vien/change-status',
-        type: 'POST',
-        data: {id: id},
-        success: function (response) {
-            if (response === "Cập nhật trạng thái thành công.") {
-                Swal.fire({
-                    toast: true,
-                    icon: 'success',
-                    title: response,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 500,
-                    timerProgressBar: true
-                }).then(() => {
-                    location.reload();
-                });
-            } else {
-                Swal.fire({
-                    toast: true,
-                    icon: 'error',
-                    title: response,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 1000,
-                    timerProgressBar: true
-                });
-            }
-        },
-        error: function (xhr) {
-            Swal.fire({
-                toast: true,
-                icon: 'error',
-                title: "Có lỗi xảy ra khi cập nhật trạng thái nhân viên",
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true
-            });
-        }
-    });
-});
-
-$(document).ready(function () {
-    $('#formUpdateNV').submit(function (e) {
-        e.preventDefault();
-
-        // Tạo FormData để gửi cả text và file
-        const formData = new FormData();
-        formData.append('id', $('#id').val());
-        formData.append('ten', $('#name').val());
-        formData.append('soDienThoai', $('#soDienThoai').val());
-        formData.append('canCuocCongDan', $('#canCuocCongDan').val());
-        formData.append('ngaySinh', $('#ngaySinh').val());
-        formData.append('gioiTinh', $('#gioiTinh').val());
-        formData.append('tinhThanhPho', $('#city').val());
-        formData.append('quanHuyen', $('#district').val());
-        formData.append('xaPhuong', $('#ward').val());
-        formData.append('soNhaNgoDuong', $('#soNhaNgoDuong').val());
-        formData.append('chucVu', $('#chucVu').val());
-
-        // Thêm file ảnh nếu có
+        // Lấy giá trị các trường
+        const id = $('#id').val().trim();
+        const ten = $('#name').val().trim();
+        const sdt = $('#soDienThoai').val().trim();
+        const cccd = $('#canCuocCongDan').val().trim();
+        const ngaySinh = $('#ngaySinh').val().trim();
+        const tinhThanhPho = $('#city').val().trim();
+        const quanHuyen = $('#district').val().trim();
+        const xaPhuong = $('#ward').val().trim();
+        const soNhaNgoDuong = $('#soNhaNgoDuong').val().trim();
+        const gioiTinh = $('#gioiTinh').val().trim();
+        const chucVu = $('#chucVu').val().trim();
         const hinhAnhFile = $('#hinhAnh')[0].files[0];
+
+        // Debug log để kiểm tra giá trị chức vụ
+        console.log('Giá trị chức vụ:', chucVu);
+        console.log('Element chức vụ:', $('#chucVu'));
+
+        // Kiểm tra các trường bắt buộc
+        if (!ten) {
+            showToast('error', 'Vui lòng nhập tên nhân viên');
+            return;
+        }
+        if (ten.length > 100) {
+            showToast('error', 'Tên không được dài quá 100 ký tự');
+            return;
+        }
+        if (!sdt) {
+            showToast('error', 'Vui lòng nhập số điện thoại');
+            return;
+        }
+        if (!isValidPhoneNumber(sdt)) {
+            showToast('error', 'Số điện thoại phải có từ 10 đến 12 chữ số');
+            return;
+        }
+        if (!cccd) {
+            showToast('error', 'Vui lòng nhập số CCCD');
+            return;
+        }
+        if (!isValidCCCD(cccd)) {
+            showToast('error', 'Số CCCD phải có 12 chữ số');
+            return;
+        }
+        if (!ngaySinh) {
+            showToast('error', 'Vui lòng nhập ngày sinh');
+            return;
+        }
+        if (!isValidDate(ngaySinh)) {
+            showToast('error', 'Ngày sinh không hợp lệ hoặc trong tương lai');
+            return;
+        }
+        if (!soNhaNgoDuong) {
+            showToast('error', 'Vui lòng nhập địa chỉ cụ thể');
+            return;
+        }
+        if (soNhaNgoDuong.length > 100) {
+            showToast('error', 'Địa chỉ cụ thể không được dài quá 100 ký tự');
+            return;
+        }
+        if (!gioiTinh) {
+            showToast('error', 'Vui lòng chọn giới tính');
+            return;
+        }
+        if (!chucVu || chucVu === "") {
+            showToast('error', 'Vui lòng chọn chức vụ');
+            console.log('Chức vụ rỗng hoặc không hợp lệ:', chucVu);
+            return;
+        }
+        if (hinhAnhFile) {
+            if (!hinhAnhFile.type.startsWith('image/')) {
+                showToast('error', 'Vui lòng chọn file hình ảnh hợp lệ');
+                return;
+            }
+            if (hinhAnhFile.size > 5 * 1024 * 1024) {
+                showToast('error', 'Kích thước file không được vượt quá 5MB');
+                return;
+            }
+        }
+
+        // Vô hiệu hóa nút và hiển thị spinner
+        const $submitBtn = $('button[type="submit"]');
+        $submitBtn.prop('disabled', true);
+        $submitBtn.find('.bi-pencil-square').addClass('d-none');
+        $submitBtn.append('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>');
+
+        // Hiển thị loading
+        Swal.fire({
+            title: 'Đang cập nhật...',
+            html: 'Vui lòng chờ trong giây lát',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Tạo FormData
+        const formData = new FormData();
+        formData.append('id', id);
+        formData.append('ten', ten);
+        formData.append('soDienThoai', sdt);
+        formData.append('canCuocCongDan', cccd);
+        formData.append('ngaySinh', ngaySinh);
+        formData.append('gioiTinh', gioiTinh);
+        formData.append('tinhThanhPho', tinhThanhPho);
+        formData.append('quanHuyen', quanHuyen);
+        formData.append('xaPhuong', xaPhuong);
+        formData.append('soNhaNgoDuong', soNhaNgoDuong);
+        formData.append('chucVu', chucVu); // Đảm bảo field này được gửi
+
         if (hinhAnhFile) {
             formData.append('hinhAnh', hinhAnhFile);
         }
 
+        // Debug log để kiểm tra FormData
+        console.log('FormData contents:');
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+
+        // Gửi AJAX request
         $.ajax({
             url: '/admin/nhan-vien/update',
             type: 'POST',
             data: formData,
             processData: false,
             contentType: false,
+            beforeSend: function(xhr, settings) {
+                console.log('Sending data to:', settings.url);
+                console.log('Request data:', formData);
+            },
             success: function (response) {
+                console.log('Update response:', response);
+                Swal.close();
                 Swal.fire({
                     toast: true,
                     icon: 'success',
-                    title: response.message || 'Thông tin nhân viên đã được thay đổi',
+                    title: response || 'Cập nhật thông tin nhân viên thành công',
                     position: 'top-end',
                     showConfirmButton: false,
-                    timer: 1000,
+                    timer: 1500,
                     timerProgressBar: true
                 }).then(() => {
                     window.location.href = '/admin/nhan-vien/index';
                 });
             },
+            error: function (xhr, status, error) {
+                console.error('Update error:', xhr.responseText);
+                console.error('Status:', status);
+                console.error('Error:', error);
+
+                Swal.close();
+                showToast('error', xhr.responseText || 'Lỗi khi cập nhật thông tin nhân viên');
+
+                // Khôi phục lại nút submit
+                $submitBtn.prop('disabled', false);
+                $submitBtn.find('.spinner-border').remove();
+                $submitBtn.find('.bi-pencil-square').removeClass('d-none');
+            }
+        });
+    });
+
+    // Preview ảnh khi chọn file trong form update
+    $('#hinhAnh').on('change', function () {
+        const file = this.files[0];
+        if (file) {
+            // Kiểm tra loại file
+            if (!file.type.startsWith('image/')) {
+                showToast('error', 'Vui lòng chọn file hình ảnh hợp lệ');
+                this.value = '';
+                return;
+            }
+
+            // Kiểm tra kích thước file (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('error', 'Kích thước file không được vượt quá 5MB');
+                this.value = '';
+                return;
+            }
+
+            // Hiển thị preview
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                $('#employeeAvatar').attr('src', e.target.result);
+                showToast('success', 'Đã chọn ảnh thành công!');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Click vào ảnh avatar nhân viên để chọn ảnh
+    $('#employeeAvatar').on('click', function () {
+        const currentSrc = $(this).attr('src');
+        const isDefaultAvatar = currentSrc.includes('avatar.jpg');
+
+        Swal.fire({
+            title: isDefaultAvatar ? 'Thêm ảnh nhân viên' : 'Thay đổi ảnh nhân viên',
+            text: isDefaultAvatar
+                ? 'Hãy chọn một ảnh để tạo ảnh đại diện cho nhân viên!'
+                : 'Bạn muốn thay đổi ảnh đại diện hiện tại?',
+            icon: isDefaultAvatar ? 'info' : 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Chọn ảnh',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                openFileSelector();
+            }
+        });
+    });
+
+    // Hàm mở file selector
+    function openFileSelector() {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+
+        fileInput.onchange = function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (!file.type.startsWith('image/')) {
+                    showToast('error', 'Vui lòng chọn file hình ảnh hợp lệ');
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('error', 'Kích thước file không được vượt quá 5MB');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#employeeAvatar').attr('src', e.target.result);
+                    showToast('success', 'Đã chọn ảnh thành công! Vui lòng nhấn "Lưu" để cập nhật.');
+                };
+                reader.readAsDataURL(file);
+
+                $('#hinhAnh')[0].files = e.target.files;
+            }
+            document.body.removeChild(fileInput);
+        };
+
+        document.body.appendChild(fileInput);
+        fileInput.click();
+    }
+
+    // Xử lý thay đổi trạng thái nhân viên
+    $('.changeStatusNhanVien').on('click', function () {
+        const id = $(this).data('id');
+
+        $.ajax({
+            url: '/admin/nhan-vien/change-status',
+            type: 'POST',
+            data: { id: id },
+            success: function (response) {
+                if (response === "Cập nhật trạng thái thành công.") {
+                    Swal.fire({
+                        toast: true,
+                        icon: 'success',
+                        title: response,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 500,
+                        timerProgressBar: true
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        toast: true,
+                        icon: 'error',
+                        title: response,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1000,
+                        timerProgressBar: true
+                    });
+                }
+            },
             error: function (xhr) {
                 Swal.fire({
                     toast: true,
                     icon: 'error',
-                    title: xhr.responseText || 'Lỗi khi thay đổi thông tin nhân viên',
+                    title: "Có lỗi xảy ra khi cập nhật trạng thái nhân viên",
                     position: 'top-end',
                     showConfirmButton: false,
-                    timer: 1000,
+                    timer: 3000,
                     timerProgressBar: true
                 });
             }
         });
     });
 
-    // Preview ảnh khi chọn file trong form update
-    $('#hinhAnh').on('change', function() {
-        const file = this.files[0];
-        if (file) {
-            // Kiểm tra loại file
-            if (!file.type.startsWith('image/')) {
-                Swal.fire({
-                    toast: true,
-                    icon: 'error',
-                    title: 'Vui lòng chọn file hình ảnh hợp lệ',
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                });
-                this.value = '';
-                $('#imagePreview').hide();
-                return;
-            }
-
-            // Kiểm tra kích thước file (max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                Swal.fire({
-                    toast: true,
-                    icon: 'error',
-                    title: 'Kích thước file không được vượt quá 5MB',
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                });
-                this.value = '';
-                $('#imagePreview').hide();
-                return;
-            }
-
-            // Hiển thị preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                // Thay thế ảnh trong ô chính
-                $('#employeeAvatar').attr('src', e.target.result);
-                $('#imagePreview').hide(); // Ẩn preview riêng
-
-                // Hiển thị thông báo
-                Swal.fire({
-                    toast: true,
-                    icon: 'success',
-                    title: 'Đã chọn ảnh thành công!',
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 2000,
-                    timerProgressBar: true
-                });
-            };
-            reader.readAsDataURL(file);
-        } else {
-            $('#imagePreview').hide();
-        }
+    // Thêm event listener cho dropdown chức vụ để debug
+    $('#chucVu').on('change', function() {
+        console.log('Chức vụ đã thay đổi:', $(this).val());
     });
-
-    // Click vào ảnh avatar nhân viên để chọn ảnh
-    $('#employeeAvatar').on('click', function() {
-        // Kiểm tra xem có phải ảnh mặc định không
-        const currentSrc = $(this).attr('src');
-        const isDefaultAvatar = currentSrc.includes('avatar.jpg');
-
-        if (isDefaultAvatar) {
-            // Hiển thị thông báo đặc biệt cho lần đầu thêm ảnh
-            Swal.fire({
-                title: 'Thêm ảnh nhân viên',
-                text: 'Hãy chọn một ảnh để tạo ảnh đại diện cho nhân viên!',
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'Chọn ảnh',
-                cancelButtonText: 'Hủy'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    openFileSelector();
-                }
-            });
-        } else {
-            // Thông báo thay đổi ảnh
-            Swal.fire({
-                title: 'Thay đổi ảnh nhân viên',
-                text: 'Bạn muốn thay đổi ảnh đại diện hiện tại?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Thay đổi',
-                cancelButtonText: 'Hủy'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    openFileSelector();
-                }
-            });
-        }
-    });
-
-    // Hàm mở file selector
-    function openFileSelector() {
-        // Tạo input file ẩn
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.style.display = 'none';
-
-        fileInput.onchange = function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                // Kiểm tra loại file
-                if (!file.type.startsWith('image/')) {
-                    Swal.fire({
-                        toast: true,
-                        icon: 'error',
-                        title: 'Vui lòng chọn file hình ảnh hợp lệ',
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true
-                    });
-                    return;
-                }
-
-                // Kiểm tra kích thước file (max 5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    Swal.fire({
-                        toast: true,
-                        icon: 'error',
-                        title: 'Kích thước file không được vượt quá 5MB',
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true
-                    });
-                    return;
-                }
-
-                // Hiển thị preview
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    // Thay thế ảnh trong ô chính
-                    $('#employeeAvatar').attr('src', e.target.result);
-                    $('#imagePreview').hide(); // Ẩn preview riêng
-
-                    // Hiển thị thông báo
-                    Swal.fire({
-                        toast: true,
-                        icon: 'success',
-                        title: 'Đã chọn ảnh thành công! Vui lòng nhấn "Lưu" để cập nhật.',
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 2000,
-                        timerProgressBar: true
-                    });
-                };
-                reader.readAsDataURL(file);
-
-                // Gán file vào input file trong form
-                $('#hinhAnh')[0].files = e.target.files;
-            }
-
-            // Xóa input file ẩn
-            document.body.removeChild(fileInput);
-        };
-
-        // Thêm input file vào body và trigger click
-        document.body.appendChild(fileInput);
-        fileInput.click();
-    }
 });
 
+// Hàm kiểm tra email tồn tại
 function checkEmailExists(email, callback) {
     if (email && email.length > 0) {
         $.ajax({
@@ -543,15 +639,7 @@ function checkEmailExists(email, callback) {
                 if (response.exists) {
                     $('#email').addClass('is-invalid');
                     $('#email-error').text('Email này đã được sử dụng').show();
-                    Swal.fire({
-                        toast: true,
-                        icon: 'error',
-                        title: 'Email này đã được sử dụng',
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true
-                    });
+                    showToast('error', 'Email này đã được sử dụng');
                     callback(false);
                 } else {
                     $('#email').removeClass('is-invalid');
@@ -560,15 +648,7 @@ function checkEmailExists(email, callback) {
                 }
             },
             error: function (xhr) {
-                Swal.fire({
-                    toast: true,
-                    icon: 'error',
-                    title: 'Lỗi khi kiểm tra email',
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                });
+                showToast('error', 'Lỗi khi kiểm tra email');
                 callback(false);
             }
         });
@@ -578,6 +658,6 @@ function checkEmailExists(email, callback) {
 }
 
 // Gọi kiểm tra email khi người dùng nhập xong
-$('#email').on('blur', function() {
+$('#email').on('blur', function () {
     checkEmailExists($(this).val());
 });

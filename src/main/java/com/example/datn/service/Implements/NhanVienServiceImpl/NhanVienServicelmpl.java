@@ -60,20 +60,28 @@ public class NhanVienServicelmpl implements NhanVienService {
     public void updateNhanVien(UpdateNhanVienRequest request) {
         updateNhanVien(request, null);
     }
-    
+
     @Override
     public void updateNhanVien(UpdateNhanVienRequest request, MultipartFile hinhAnh) {
         Optional<NhanVien> nhanVienOptional = nhanVienRepo.findById(request.getId());
 
-        if (nhanVienOptional.isPresent() ){
+        if (nhanVienOptional.isPresent()) {
             NhanVien nhanVien = nhanVienOptional.get();
 
+            // Cập nhật thông tin nhân viên
             nhanVien.setTen(request.getTen());
             nhanVien.setSoDienThoai(request.getSoDienThoai());
             nhanVien.setNgaySinh(request.getNgaySinh());
             nhanVien.setGioiTinh(request.getGioiTinh());
             nhanVien.setCanCuocCongDan(request.getCanCuocCongDan());
-            
+
+            // Cập nhật chức vụ của nhân viên
+            if (request.getChucVu() != null && !request.getChucVu().isEmpty()) {
+                ChucVu chucVu = chucVuRepo.findByViTri(request.getChucVu())
+                        .orElseThrow(() -> new RuntimeException("Chức vụ không tồn tại: " + request.getChucVu()));
+                nhanVien.setChucVu(chucVu);
+            }
+
             // Xử lý upload ảnh mới nếu có
             if (hinhAnh != null && !hinhAnh.isEmpty()) {
                 try {
@@ -81,7 +89,7 @@ public class NhanVienServicelmpl implements NhanVienService {
                     if (nhanVien.getAnh() != null && !nhanVien.getAnh().isEmpty()) {
                         fileUploadService.deleteFile(nhanVien.getAnh());
                     }
-                    
+
                     // Lưu ảnh mới
                     String imagePath = fileUploadService.saveFile(hinhAnh);
                     nhanVien.setAnh(imagePath);
@@ -89,7 +97,8 @@ public class NhanVienServicelmpl implements NhanVienService {
                     throw new RuntimeException("Lỗi khi lưu ảnh: " + e.getMessage());
                 }
             }
-            
+
+            // Cập nhật địa chỉ
             DiaChi dc = nhanVien.getDiaChi();
             if (dc == null) {
                 dc = new DiaChi();
@@ -103,7 +112,18 @@ public class NhanVienServicelmpl implements NhanVienService {
             diaChiRepo.save(dc);
             nhanVien.setDiaChi(dc);
 
-            nhanVienRepo.save(nhanVien);
+            // Cập nhật tài khoản liên kết với chức vụ mới
+            if (nhanVien.getTaiKhoan() != null && request.getChucVu() != null && !request.getChucVu().isEmpty()) {
+                TaiKhoan taiKhoan = nhanVien.getTaiKhoan();
+                ChucVu chucVu = chucVuRepo.findByViTri(request.getChucVu())
+                        .orElseThrow(() -> new RuntimeException("Chức vụ không tồn tại: " + request.getChucVu()));
+                taiKhoan.setChucVu(chucVu);
+                taiKhoanRepo.save(taiKhoan); // Lưu thay đổi vào tài khoản
+            }
+
+            nhanVienRepo.save(nhanVien); // Lưu thay đổi vào nhân viên
+        } else {
+            throw new RuntimeException("Nhân viên không tồn tại với ID: " + request.getId());
         }
     }
 
