@@ -380,7 +380,7 @@ class ProductSearch {
         // Previous button
         items += `
             <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
-                <a class="page-link" href="#" data-page="${currentPage - 1}">Trước</a>
+                <a class="page-link" href="#" data-page="${currentPage - 1}"> << </a>
             </li>
         `;
 
@@ -396,7 +396,7 @@ class ProductSearch {
         // Next button
         items += `
             <li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
-                <a class="page-link" href="#" data-page="${currentPage + 1}">Sau</a>
+                <a class="page-link" href="#" data-page="${currentPage + 1}"> >> </a>
             </li>
         `;
 

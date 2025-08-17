@@ -115,7 +115,7 @@ public class HoaDonController {
             hoaDonService.truSoLuongSanPham(id);
             return ResponseEntity.ok("Đơn hàng đã được xác nhận !");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Số lượng sản phẩm không đủ");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
@@ -147,6 +147,14 @@ public class HoaDonController {
         hoaDonService.huy(id, ghiChu);
 //        hoaDonService.hoanSoLuongSanPham(id);
         return ResponseEntity.ok("Hóa đơn đã được hủy !");
+    }
+
+    @PostMapping("/hoan-hang")
+    @ResponseBody
+    public ResponseEntity<String> hoanHang(@RequestParam("id") Long id,
+                                           @RequestParam("ghiChu") String ghiChu) {
+        hoaDonService.hoanHang(id,ghiChu);
+        return ResponseEntity.ok("Đơn hàng đã được hoàn về shop!");
     }
 
     @PostMapping("/huy-hd-onl")

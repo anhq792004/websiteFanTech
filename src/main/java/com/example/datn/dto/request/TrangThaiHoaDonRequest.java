@@ -15,4 +15,5 @@ public class TrangThaiHoaDonRequest {
     Integer dangGiaoHang;
     Integer hoanThanh;
     Integer huy;
+    Integer hoanHang;
 }

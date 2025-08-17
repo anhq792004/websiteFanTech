@@ -187,6 +187,64 @@ $(document).ready(function () {
     });
 });
 
+$(document).ready(function () {
+    $(".btn-hoan-hang").click(function () {
+        hoaDonId = $(this).closest("form").data("id"); // Lấy ID hóa đơn
+
+        Swal.fire({
+            title: "Hoàn đơn hàng?",
+            input: "textarea",
+            inputPlaceholder: "Vui lòng nhập lí do hoàn đơn hàng ",
+            inputAttributes: {
+                "aria-label": "Vui lòng nhập lí do hoàn đơn hàng"
+            },
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Xác nhận",
+            didOpen: () => {
+                const confirmBtn = Swal.getConfirmButton();
+                const input = Swal.getInput();
+
+                confirmBtn.disabled = true; // ban đầu disable
+
+                input.addEventListener('input', () => {
+                    confirmBtn.disabled = !input.value.trim(); // có nhập thì enable
+                });
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const ghiChu = result.value;
+
+                $.ajax({
+                    url: "/hoa-don/hoan-hang",
+                    type: "POST",
+                    data: {
+                        id: hoaDonId,
+                        ghiChu: ghiChu
+                    }, // Gửi ID của hóa đơn
+                    success: function (response) {
+                        Swal.fire({
+                            toast: true,
+                            icon: 'success',
+                            title: response, // Thông báo thành công từ server
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 1000,
+                            timerProgressBar: true
+                        }).then(() => {
+                            location.reload(); // Reload lại trang sau khi nhấn OK
+                        });
+                    },
+                    error: function () {
+                        Swal.fire("Lỗi!", "Lỗi khi xác nhận hóa đơn", "error");
+                    }
+                });
+            }
+        });
+    });
+});
 $(".btn-add-sanPham").click(function () {
     const hoaDonId = $(this).data("id-hd");
     const sanPhamId = $(this).data("id-sp");

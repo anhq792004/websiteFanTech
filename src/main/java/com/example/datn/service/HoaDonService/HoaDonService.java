@@ -52,6 +52,8 @@ public interface HoaDonService {
 
     void huy(Long id, String ghiChu);
 
+    void hoanHang(Long id, String ghiChu);
+
     void huyOnl(Long id, String ghiChu);
 
     void addSPToHDCT(AddSPToHDCTRequest addSPToHDCTRequest);

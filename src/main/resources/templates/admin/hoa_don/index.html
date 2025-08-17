@@ -69,49 +69,56 @@
                             </form>
                             <div class="dataTable-container mt-2 mb-2 border-bottom border-top">
                                 <ul class="nav nav-tabs">
-                                    <li class="nav-item2 text-center" style="width: 14%">
+                                    <li class="nav-item2 text-center" style="width: 12%">
                                         <a class="nav-link"
                                            th:href="@{/hoa-don/index}">
                                             Tất cả
                                         </a>
                                     </li>
-                                    <li class="nav-item2 text-center" style="width: 14%">
+                                    <li class="nav-item2 text-center" style="width: 12%">
                                         <a class="nav-link" th:classappend="${trangThai == 0} ? 'active'"
                                            th:href="@{/hoa-don/index(query=${query}, startDate=${startDate}, endDate=${endDate}, loaiHoaDon=${loaiHoaDon}, trangThai=${trangThaiHoaDon.hoaDonCho})}">
                                             Đang treo
                                         </a>
                                     </li>
-                                    <li class="nav-item2 text-center" style="width: 14%">
+                                    <li class="nav-item2 text-center" style="width: 12%">
                                         <a class="nav-link"
                                            th:classappend="${trangThai == 1} ? 'active'"
                                            th:href="@{/hoa-don/index(query=${query}, startDate=${startDate}, endDate=${endDate}, loaiHoaDon=${loaiHoaDon},trangThai=${trangThaiHoaDon.choXacNhan})}">
                                             Chờ xác nhận
                                         </a>
                                     </li>
-                                    <li class="nav-item2 text-center" style="width: 14%">
+                                    <li class="nav-item2 text-center" style="width: 12%">
                                         <a class="nav-link"
                                            th:classappend="${trangThai == 2} ? 'active'"
                                            th:href="@{/hoa-don/index(query=${query}, startDate=${startDate}, endDate=${endDate}, loaiHoaDon=${loaiHoaDon},trangThai=${trangThaiHoaDon.daXacNhan})}">
                                             Đã xác nhận
                                         </a>
                                     </li>
-                                    <li class="nav-item2 text-center" style="width: 14%">
+                                    <li class="nav-item2 text-center" style="width: 12%">
                                         <a class="nav-link"
                                            th:classappend="${trangThai == 3} ? 'active'"
                                            th:href="@{/hoa-don/index(query=${query}, startDate=${startDate}, endDate=${endDate}, loaiHoaDon=${loaiHoaDon},trangThai=${trangThaiHoaDon.dangGiaoHang})}">
                                             Đang giao</a>
                                     </li>
-                                    <li class="nav-item2 text-center" style="width: 15%">
+                                    <li class="nav-item2 text-center" style="width: 12%">
                                         <a class="nav-link"
                                            th:classappend="${trangThai == 4} ? 'active'"
                                            th:href="@{/hoa-don/index(query=${query}, startDate=${startDate}, endDate=${endDate}, loaiHoaDon=${loaiHoaDon},trangThai=${trangThaiHoaDon.hoanThanh})}">
                                             Hoàn thành</a>
                                     </li>
-                                    <li class="nav-item2 text-center" style="width: 15%">
+                                    <li class="nav-item2 text-center" style="width: 12%">
                                         <a class="nav-link"
                                            th:classappend="${trangThai == 5} ? 'active'"
                                            th:href="@{/hoa-don/index(query=${query}, startDate=${startDate}, endDate=${endDate}, loaiHoaDon=${loaiHoaDon},trangThai=${trangThaiHoaDon.huy})}">
                                             Hủy
+                                        </a>
+                                    </li>
+                                    <li class="nav-item2 text-center" style="width: 12%">
+                                        <a class="nav-link"
+                                           th:classappend="${trangThai == 6} ? 'active'"
+                                           th:href="@{/hoa-don/index(query=${query}, startDate=${startDate}, endDate=${endDate}, loaiHoaDon=${loaiHoaDon},trangThai=${trangThaiHoaDon.hoanHang})}">
+                                            Hoàn hàng
                                         </a>
                                     </li>
                                 </ul>
@@ -177,6 +184,7 @@
                                     <span th:case="3" class="text-warning">Đang giao hàng</span>
                                     <span th:case="4" class="text-primary">Hoàn thành</span>
                                     <span th:case="5" class="text-danger">Hủy</span>
+                                    <span th:case="6" class="text-dark">Hoàn hàng</span>
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">
