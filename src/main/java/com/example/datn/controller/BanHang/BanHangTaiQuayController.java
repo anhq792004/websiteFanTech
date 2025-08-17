@@ -569,5 +569,15 @@ public class BanHangTaiQuayController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    @PostMapping("/remove-discount")
+    public ResponseEntity<String> removeDiscount(@RequestParam Long idHD) {
+        try {
+            hoaDonService.removeDiscount(idHD);
+            return ResponseEntity.ok("Đã xóa phiếu giảm giá thành công");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }
 

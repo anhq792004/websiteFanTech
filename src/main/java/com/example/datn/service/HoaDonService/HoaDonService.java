@@ -18,6 +18,8 @@ public interface HoaDonService {
     //hoaDon
     List<HoaDon> findAll();
 
+    void removeDiscount(Long idHD);
+
     Page<HoaDon> findAllHoaDonAndSortDay(int page, int size);
 
     Page<HoaDon> searchHoaDon(String query, Boolean loaiHoaDon, LocalDateTime tuNgay, LocalDateTime denNgay, Integer trangThai, Pageable pageable);

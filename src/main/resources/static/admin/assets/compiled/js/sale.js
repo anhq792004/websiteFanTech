@@ -79,50 +79,106 @@ $(document).ready(function () {
 });
 
 // Thêm khách hàng
-$(".btn-add-khachHang").click(function () {
-    const hoaDonId = $(this).data("id-hd");
-    const sanPhamId = $(this).data("id-sp");
-    const ten = $(this).data("ten");
-    const sdt = $(this).data("sdt");
+$(document).ready(function () {
+    // Thêm khách hàng
+    $(".btn-add-khachHang").click(function () {
+        const hoaDonId = $(this).data("id-hd");
+        const sanPhamId = $(this).data("id-sp");
+        const ten = $(this).data("ten");
+        const sdt = $(this).data("sdt");
 
-    $.ajax({
-        url: '/sale/addKH',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            idHD: hoaDonId,
-            idSP: sanPhamId,
-            ten: ten,
-            sdt: sdt
-        }),
-        success: function (response) {
-            Swal.fire({
-                toast: true,
-                icon: 'success',
-                title: response,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 500,
-                timerProgressBar: true
-            }).then(() => {
-                location.reload();
-            });
-        },
-        error: function (xhr) {
-            Swal.fire({
-                toast: true,
-                icon: 'error',
-                title: xhr.responseText,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 1000,
-                timerProgressBar: true
-            }).then(() => {
-                // Reload trang để đưa về trạng thái ban đầu
-                location.reload();
-            });
-        }
+        // Clear selected discount voucher
+        selectedPhieuGiamGia = null; // Reset global variable
+        clearDiscountOnUI(); // Reset UI elements
+        removeDiscountFromOrder(hoaDonId); // Call backend to remove voucher
+
+        // Proceed with adding customer
+        $.ajax({
+            url: '/sale/addKH',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                idHD: hoaDonId,
+                idSP: sanPhamId,
+                ten: ten,
+                sdt: sdt
+            }),
+            success: function (response) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: response,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 500,
+                    timerProgressBar: true
+                }).then(() => {
+                    // Update current customer ID and reload voucher list
+                    currentCustomerId = sanPhamId; // Assuming id-sp is the customer ID
+                    loadPhieuGiamGia(); // Reload voucher list for the new customer
+                    location.reload(); // Reload page to reflect changes
+                });
+            },
+            error: function (xhr) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    title: xhr.responseText,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1000,
+                    timerProgressBar: true
+                }).then(() => {
+                    location.reload();
+                });
+            }
+        });
     });
+
+    // Function to clear discount-related UI elements
+    function clearDiscountOnUI() {
+        $('#tenPhieuGiamGia').text('Chưa chọn'); // Reset voucher name
+        $('#giaTriGiamGia').text('0 đ'); // Reset discount value
+        $('#giaTriGiamGia').attr('data-value', '0');
+        const tongTien = parseFloat($('#tienThanhToan').attr('data-value')) || 0;
+        $('#tongTienSauGiam').text(formatNumberToVND(tongTien)); // Reset total after discount
+        $('#tongTienSauGiam').attr('data-value', tongTien);
+
+        // Recalculate change (tienThua) if customer has entered payment amount
+        const tienKhachTra = parseFloat($('#tienKhachTra').val()) || 0;
+        const tienThua = tienKhachTra - tongTien;
+        $('#tienThua').text(formatNumberToVND(tienThua));
+        if (tienThua < 0) {
+            $('#tienThua').addClass("text-danger");
+            $('#btnThanhToan').removeClass('btn-success').addClass('btn-outline-warning');
+        } else {
+            $('#tienThua').removeClass("text-danger");
+            $('#btnThanhToan').removeClass('btn-outline-warning').addClass('btn-success');
+        }
+    }
+
+    // Function to remove discount from order (call backend)
+    function removeDiscountFromOrder(hoaDonId) {
+        $.ajax({
+            url: '/sale/remove-discount',
+            type: 'POST',
+            data: { idHD: hoaDonId },
+            success: function (response) {
+                console.log('Discount removed successfully:', response);
+            },
+            error: function (xhr) {
+                console.error('Error removing discount:', xhr.responseText);
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    title: xhr.responseText || 'Không thể xóa phiếu giảm giá',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        });
+    }
 });
 //xoa san pham khoi gio hang
 $(".btn-xoa-sanPham").click(function () {

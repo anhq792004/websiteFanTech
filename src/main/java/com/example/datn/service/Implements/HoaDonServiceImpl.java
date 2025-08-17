@@ -576,11 +576,24 @@ public class HoaDonServiceImpl implements HoaDonService {
     }
 
     @Override
+    public void removeDiscount(Long idHD) {
+        Optional<HoaDon> hoaDonOptional = hoaDonRepo.findById(idHD);
+        if (hoaDonOptional.isPresent()) {
+            HoaDon hoaDon = hoaDonOptional.get();
+            // Remove the associated voucher
+            hoaDon.setPhieuGiamGia(null);
+            // Recalculate total amount
+            updateTongTienHoaDon(idHD);
+            hoaDonRepo.save(hoaDon);
+        } else {
+            throw new RuntimeException("Không tìm thấy hóa đơn với ID: " + idHD);
+        }
+    }
+
+    @Override
     public void updateSoluong(UpdateSoLuongRequest request) {
         Optional<SanPhamChiTiet> spOpt = sanPhamChiTietRepo.findById(request.getIdSP());
         Optional<HoaDon> hdOpt = hoaDonRepo.findById(request.getIdHD());
-        System.out.println("id san pham là" + request.getIdSP());
-        System.out.println("id hd là" + request.getIdHD());
 
         if (spOpt.isEmpty()) {
             throw new RuntimeException("Không tìm thấy sản phẩm với ID: " + request.getIdSP());
@@ -593,21 +606,15 @@ public class HoaDonServiceImpl implements HoaDonService {
         HoaDon hoaDon = hdOpt.get();
         SanPhamChiTiet sanPhamChiTiet = spOpt.get();
 
-        // 🔍 Tìm xem sản phẩm này đã có trong hóa đơn chưa
+        // Tìm xem sản phẩm này đã có trong hóa đơn chưa
         Optional<HoaDonChiTiet> hdctOpt = hoaDonChiTietRepo.findByHoaDonAndSanPhamChiTiet(hoaDon, sanPhamChiTiet);
 
-        // ✅ Kiểm tra số lượng yêu cầu có hợp lệ không
+        // Kiểm tra số lượng hợp lệ
         if (request.getSoLuong() <= 0) {
             throw new RuntimeException("Số lượng phải lớn hơn 0!");
         }
 
-        // ✅ Kiểm tra và tính toán số lượng hợp lệ
-        int soLuongHienTai = 0;
-        if (hdctOpt.isPresent()) {
-            soLuongHienTai = hdctOpt.get().getSoLuong();
-        }
-
-        // Số lượng khả dụng = tồn kho + số lượng hiện tại trong hóa đơn (để hoàn lại)
+        int soLuongHienTai = hdctOpt.map(HoaDonChiTiet::getSoLuong).orElse(0);
         int soLuongKhaDung = sanPhamChiTiet.getSoLuong() + soLuongHienTai;
 
         if (request.getSoLuong() > soLuongKhaDung) {
@@ -619,15 +626,8 @@ public class HoaDonServiceImpl implements HoaDonService {
         HoaDonChiTiet hoaDonChiTiet;
         if (hdctOpt.isPresent()) {
             hoaDonChiTiet = hdctOpt.get();
-
-            // Tính chênh lệch để cập nhật kho
             int chenhLech = request.getSoLuong() - soLuongHienTai;
-
-            // Cập nhật số lượng trong hóa đơn chi tiết
             hoaDonChiTiet.setSoLuong(request.getSoLuong());
-
-            // ✅ TRỪ KHO theo chênh lệch
-            // Giảm số lượng sản phẩm trong kho
             if (hoaDon.getTrangThai() != getTrangThaiHoaDon().getChoXacNhan()) {
                 sanPhamChiTiet.setSoLuong(sanPhamChiTiet.getSoLuong() - chenhLech);
                 sanPhamChiTietRepo.save(sanPhamChiTiet);
@@ -637,20 +637,19 @@ public class HoaDonServiceImpl implements HoaDonService {
             hoaDonChiTiet.setHoaDon(hoaDon);
             hoaDonChiTiet.setSanPhamChiTiet(sanPhamChiTiet);
             hoaDonChiTiet.setSoLuong(request.getSoLuong());
-            hoaDonChiTiet.setGia(request.getGia());
-
-            // ✅ TRỪ KHO cho sản phẩm mới
-            // Giảm số lượng sản phẩm trong kho
+            hoaDonChiTiet.setGia(sanPhamChiTiet.getGia()); // Sử dụng giá từ sản phẩm
             if (hoaDon.getTrangThai() != getTrangThaiHoaDon().getChoXacNhan()) {
                 sanPhamChiTiet.setSoLuong(sanPhamChiTiet.getSoLuong() - request.getSoLuong());
                 sanPhamChiTietRepo.save(sanPhamChiTiet);
             }
         }
 
-        BigDecimal thanhTien = request.getGia().multiply(BigDecimal.valueOf(request.getSoLuong()));
+        BigDecimal gia = sanPhamChiTiet.getGia();
+        BigDecimal thanhTien = gia.multiply(BigDecimal.valueOf(request.getSoLuong()));
         hoaDonChiTiet.setThanhTien(thanhTien);
 
         hoaDonChiTietRepo.save(hoaDonChiTiet);
+        updateTongTienHoaDon(request.getIdHD());
     }
 
 
