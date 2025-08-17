@@ -32,9 +32,6 @@ public class TaiKhoan {
     @Column(name = "mat_khau")
     String matKhau;
 
-    @Column(name = "reset_token")
-    String resetToken;
-
     @Column(name = "ngay_tao")
     Date ngayTao;
 

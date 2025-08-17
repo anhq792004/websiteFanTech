@@ -42,7 +42,11 @@ public class SecurityConfig {
                                 "/verify-account").permitAll()
 
                         // API thống kê - Admin và Employee có thể truy cập
-                        .requestMatchers("/api/thong-ke/**").hasAnyRole("ADMIN", "EMPLOYE")
+                        .requestMatchers("/api/thong-ke/**",
+                                "/admin/nhan-vien/changePassword",
+                                "/admin/nhan-vien/change-password/request",
+                                "/admin/nhan-vien/change-password/verify",
+                                "/admin/nhan-vien/change-password/update").hasAnyRole("ADMIN", "EMPLOYE")
 
                         // PHÂN QUYỀN HÓA ĐƠN - CHỈ ADMIN MỚI TRUY CẬP ĐƯỢC
                         .requestMatchers("/admin/**").hasRole("ADMIN")

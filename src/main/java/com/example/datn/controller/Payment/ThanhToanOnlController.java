@@ -201,18 +201,25 @@ public class ThanhToanOnlController {
                     System.out.println("DEBUG: Voucher - ID: " + voucher.getId() +
                             ", loaiGiamGia: " + voucher.getLoaiGiamGia() +
                             ", giaTriGiam: " + voucher.getGiaTriGiam());
+
                     if (!voucher.getLoaiPhieu()) {
                         Optional<PhieuGiamGiaKhachHang> pggkhOpt = phieuGiamGiaKhachHangRepo
                                 .findByPhieuGiamGiaAndKhachHang(voucher, khachHang);
-                        if (!pggkhOpt.isPresent()) {
+                        if (!pggkhOpt.isPresent() || voucher.getSoLuongDaSuDung() >= voucher.getSoLuong()) {
                             response.put("success", false);
-                            response.put("message", "Phiếu giảm giá không hợp lệ hoặc không thuộc về bạn");
+                            response.put("message", "Phiếu giảm giá không hợp lệ hoặc đã được sử dụng");
                             return ResponseEntity.ok(response);
                         }
-                        PhieuGiamGiaKhachHang pggkh = pggkhOpt.get();
-                        pggkh.setDaSuDung(true);
-                        phieuGiamGiaKhachHangRepo.save(pggkh);
+                        // Xóa quan hệ sau khi sử dụng
+                        phieuGiamGiaKhachHangRepo.delete(pggkhOpt.get());
                     }
+
+                    if (voucher.getSoLuongDaSuDung() >= voucher.getSoLuong()) {
+                        response.put("success", false);
+                        response.put("message", "Phiếu giảm giá đã hết lượt sử dụng");
+                        return ResponseEntity.ok(response);
+                    }
+
                     voucher.setSoLuongDaSuDung(voucher.getSoLuongDaSuDung() + 1);
                     phieuGiamGiaRepo.save(voucher);
                     usedVoucher = voucher;
@@ -222,7 +229,6 @@ public class ThanhToanOnlController {
                 }
             }
 
-            // Tính tổng tiền cuối cùng
             finalAmount = totalAmount.add(shippingFee).subtract(discountAmount);
             System.out.println("DEBUG: Calculated - totalAmount: " + totalAmount +
                     ", shippingFee: " + shippingFee +
@@ -249,7 +255,6 @@ public class ThanhToanOnlController {
             hoaDon.setPhuongThucThanhToan(phuongThucThanhToan);
             hoaDon.setGhiChu(ghiChu);
             hoaDon.setLoaiHoaDon(false);
-            // Set trạng thái hóa đơn dựa trên phương thức thanh toán
             hoaDon.setTrangThai("MOMO".equals(phuongThucThanhToan) ? 2 : 1);
             hoaDon.setNgayTao(LocalDateTime.now());
             hoaDon.setNguoiTao(khachHang.getTen());
@@ -291,8 +296,6 @@ public class ThanhToanOnlController {
                 hoaDonChiTiet.setGiaSauGiam(sanPhamChiTiet.getGia());
                 hoaDonChiTiet.setThanhTien(sanPhamChiTiet.getGia().multiply(new BigDecimal(soLuong)));
                 hoaDonChiTiet.setTrangThai(1);
-
-//                sanPhamChiTiet.setSoLuong(sanPhamChiTiet.getSoLuong() - soLuong);
                 sanPhamChiTietRepo.save(sanPhamChiTiet);
 
                 hoaDonChiTietRepo.save(hoaDonChiTiet);
@@ -300,14 +303,12 @@ public class ThanhToanOnlController {
 
             LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
             lichSuHoaDon.setHoaDon(savedHoaDon);
-            // Set trạng thái lịch sử hóa đơn dựa trên phương thức thanh toán
             lichSuHoaDon.setTrangThai("MOMO".equals(phuongThucThanhToan) ? 2 : 1);
             lichSuHoaDon.setNgayTao(LocalDateTime.now());
             lichSuHoaDon.setMoTa("Đơn hàng được tạo bởi khách hàng: " + khachHang.getTen());
             lichSuHoaDon.setNguoiTao(khachHang.getTen());
             lichSuHoaDonRepo.save(lichSuHoaDon);
 
-            // Xử lý thanh toán theo phương thức
             if ("MOMO".equals(phuongThucThanhToan)) {
                 try {
                     MomoTransaction transaction = momoService.createTransaction(savedHoaDon, "user");
@@ -431,19 +432,11 @@ public class ThanhToanOnlController {
             for (PhieuGiamGiaKhachHang relation : allRelations) {
                 System.out.println("   - Relation ID: " + relation.getId() +
                         ", PGG: " + relation.getPhieuGiamGia().getMa() +
-                        ", TrangThai: " + relation.getTrangThai() +
-                        ", DaSuDung: " + relation.getDaSuDung());
+                        ", TrangThai: " + relation.getTrangThai());
             }
 
-            // Lấy phiếu giảm giá cá nhân CHƯA SỬ DỤNG
-            List<PhieuGiamGiaKhachHang> privateVoucherRelations = phieuGiamGiaKhachHangRepo
-                    .findByKhachHangAndTrangThaiAndDaSuDung(khachHang, true, false);
-
-            System.out.println(" DEBUG: Active unused private voucher relations: " + privateVoucherRelations.size());
-
             // Lấy danh sách voucher từ service
-            List<Map<String, Object>> vouchers = phieuGiamGiaService
-                    .getAvailableVouchers(khachHang, orderAmount);
+            List<Map<String, Object>> vouchers = phieuGiamGiaService.getAvailableVouchers(khachHang, orderAmount);
 
             System.out.println(" DEBUG: Total vouchers returned: " + vouchers.size());
 
@@ -463,13 +456,13 @@ public class ThanhToanOnlController {
     @ResponseBody
     public ResponseEntity<String> momoNotify(@RequestBody Map<String, Object> payload) {
         logger.info("Received MoMo IPN notification: {}", payload);
-        
+
         try {
             // Xử lý thông báo từ MoMo
             if (payload.containsKey("orderId") && payload.containsKey("resultCode")) {
                 String orderId = payload.get("orderId").toString();
                 int resultCode = Integer.parseInt(payload.get("resultCode").toString());
-                
+
                 // Kiểm tra kết quả giao dịch
                 if (resultCode == 0) {
                     // Giao dịch thành công
@@ -481,14 +474,14 @@ public class ThanhToanOnlController {
                     }
                 }
             }
-            
+
             return ResponseEntity.ok("Transaction processing failed");
         } catch (Exception e) {
             logger.error("Error processing MoMo IPN: {}", e.getMessage());
             return ResponseEntity.ok("Error processing transaction");
         }
     }
-    
+
     /**
      * Endpoint khi người dùng được redirect từ MoMo về
      */
@@ -531,7 +524,7 @@ public class ThanhToanOnlController {
             return "redirect:/checkout";
         }
     }
-    
+
     /**
      * Kiểm tra trạng thái thanh toán MoMo
      */
@@ -539,24 +532,24 @@ public class ThanhToanOnlController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> checkMomoStatus(@RequestParam("orderId") Long orderId) {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             MomoTransaction transaction = momoService.getTransactionByHoaDonId(orderId);
-            
+
             if (transaction == null) {
                 response.put("success", false);
                 response.put("message", "Không tìm thấy giao dịch MoMo");
                 return ResponseEntity.ok(response);
             }
-            
+
             // Kiểm tra trạng thái giao dịch
             // 0: Chờ thanh toán, 1: Đã thanh toán, 2: Lỗi, 3: Đã hủy
             response.put("success", transaction.getTrangThai() == 1);
             response.put("status", transaction.getTrangThai());
             response.put("message", transaction.getMessage());
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             logger.error("Error checking MoMo status: {}", e.getMessage());
             response.put("success", false);
