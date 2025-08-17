@@ -15,6 +15,7 @@ import com.example.datn.repository.DiaChiRepo;
 import com.example.datn.service.DiaChiService;
 import com.example.datn.service.HoaDonService.HoaDonService;
 import com.example.datn.service.KhachHangService.KhachHangService;
+import com.example.datn.service.PhieuGiamGiaSercvice;
 import com.example.datn.service.taiKhoanService.TaiKhoanService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -49,6 +51,8 @@ public class ProfileController {
     private final DiaChiRepo diaChiRepo;
 
     private final DiaChiService diaChiService;
+
+    private final PhieuGiamGiaSercvice phieuGiamGiaService;
 
     /**
      * Hiển thị trang thông tin cá nhân
@@ -248,11 +252,17 @@ public class ProfileController {
 
     //phieu giam gia
     @GetMapping("/coupon")
-    public String coupon(Model model,
-                         HttpSession session) {
+    public String coupon(Model model, HttpSession session) {
         TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
         KhachHang khachHang = khachHangService.findByTaiKhoan(currentUser);
+        List<Map<String, Object>> availableVouchers = phieuGiamGiaService.getAllVouchers(khachHang);
         model.addAttribute("khachHang", khachHang);
+        model.addAttribute("availableVouchers", availableVouchers);
+
         return "user/infor/coupon";
     }
 

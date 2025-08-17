@@ -98,7 +98,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="soDienThoai" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
                                     <input type="tel" class="form-control" id="soDienThoai" name="soDienThoai" required>
-                                    <div class="invalid-feedback">Vui lòng nhập số điện thoại</div>
+                                    <div class="invalid-feedback">Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số</div>
                                 </div>
                             </div>
                         </div>
@@ -155,7 +155,7 @@
                                     <div class="border rounded p-3 payment-method" data-method="cod">
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="phuongThucThanhToan"
-                                                   value="TIEN_MAT" id="TIEN_MAT">
+                                                   value="TIEN_MAT" id="TIEN_MAT" required>
                                             <label class="form-check-label w-100" for="TIEN_MAT">
                                                 <div class="fw-bold">
                                                     <i class="fas fa-money-bill-wave me-2 text-success"></i>
@@ -170,7 +170,7 @@
                                     <div class="border rounded p-3 payment-method" data-method="momo">
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="phuongThucThanhToan"
-                                                   value="MOMO" id="momo">
+                                                   value="MOMO" id="momo" required>
                                             <label class="form-check-label w-100" for="momo">
                                                 <div class="fw-bold">
                                                     <i class="fas fa-wallet me-2 text-primary"></i>
@@ -182,6 +182,7 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="invalid-feedback">Vui lòng chọn phương thức thanh toán</div>
                         </div>
 
                         <!-- Note -->
@@ -355,22 +356,10 @@
                 this.clearVoucher();
             });
 
-            // Thêm kiểm tra thời gian thực cho số điện thoại
+            // Real-time validation for phone number
             const phoneInput = document.getElementById('soDienThoai');
             phoneInput.addEventListener('input', () => {
-                const phoneValue = phoneInput.value.trim();
-                const phoneRegex = /^(0[0-9]{10,12})$/; // Bắt đầu bằng 0, tổng cộng 10 chữ số
-
-                if (phoneValue === '') {
-                    phoneInput.classList.remove('is-valid', 'is-invalid');
-                } else if (!phoneRegex.test(phoneValue)) {
-                    phoneInput.classList.remove('is-valid');
-                    phoneInput.classList.add('is-invalid');
-                    // Có thể thêm alert hoặc thông báo nếu cần
-                    // this.showAlert('Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số!', 'warning');
-                } else {
-                    phoneInput.classList.remove('is-invalid'); // Chỉ xóa lớp is-invalid, không thêm is-valid
-                }
+                this.validatePhoneNumber(phoneInput);
             });
         }
 
@@ -806,20 +795,37 @@
             return discountAmount;
         }
 
+        validatePhoneNumber(input) {
+            const phoneValue = input.value.trim();
+            const phoneRegex = /^(0[0-9]{9})$/;
+
+            if (phoneValue === '') {
+                input.classList.remove('is-valid', 'is-invalid');
+            } else if (!phoneRegex.test(phoneValue)) {
+                input.classList.remove('is-valid');
+                input.classList.add('is-invalid');
+            } else {
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+            }
+        }
+
         validateForm() {
             const form = document.getElementById('checkoutForm');
             form.classList.add('was-validated');
 
-            const required = ['hoTen', 'soDienThoai', 'tinhThanh', 'quanHuyen', 'phuongXa', 'diaChiChiTiet'];
-            const isValid = required.every(field => document.getElementById(field).value.trim());
+            const requiredFields = ['hoTen', 'soDienThoai', 'tinhThanh', 'quanHuyen', 'phuongXa', 'diaChiChiTiet'];
+            const isAllFilled = requiredFields.every(field => {
+                const el = document.getElementById(field);
+                const isValid = el.value.trim() !== '';
+                if (!isValid) el.classList.add('is-invalid');
+                else el.classList.remove('is-invalid');
+                return isValid;
+            });
 
-            const payment = document.querySelector('input[name="phuongThucThanhToan"]:checked');
-
-            // Kiểm tra số điện thoại
             const phoneInput = document.getElementById('soDienThoai');
             const phoneValue = phoneInput.value.trim();
             const phoneRegex = /^(0[0-9]{9})$/;
-
             if (!phoneRegex.test(phoneValue)) {
                 phoneInput.classList.add('is-invalid');
                 this.showAlert('Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số!', 'warning');
@@ -829,12 +835,13 @@
                 phoneInput.classList.add('is-valid');
             }
 
-            if (!isValid || !payment) {
-                this.showAlert('Vui lòng điền đầy đủ thông tin', 'warning');
+            const paymentSelected = document.querySelector('input[name="phuongThucThanhToan"]:checked');
+            if (!paymentSelected) {
+                this.showAlert('Vui lòng chọn phương thức thanh toán', 'warning');
                 return false;
             }
 
-            return true;
+            return isAllFilled && phoneRegex.test(phoneValue) && paymentSelected;
         }
 
         async processOrder() {
@@ -851,7 +858,7 @@
                 });
 
                 const result = await response.json();
-                console.log('Process order response:', result); // Log toàn bộ dữ liệu
+                console.log('Process order response:', result);
 
                 if (result.success) {
                     const discountAmount = Math.round(Number(result.discountAmount) || 0);
@@ -874,7 +881,7 @@
                     this.showAlert(result.message || 'Có lỗi xảy ra', 'danger');
                 }
             } catch (error) {
-                console.error('Error in processOrder:', error); // Log lỗi chi tiết
+                console.error('Error in processOrder:', error);
                 this.showAlert('Lỗi kết nối', 'danger');
             }
         }

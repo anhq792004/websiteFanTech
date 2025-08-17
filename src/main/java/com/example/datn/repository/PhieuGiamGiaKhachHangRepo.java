@@ -20,15 +20,11 @@ public interface PhieuGiamGiaKhachHangRepo extends JpaRepository<PhieuGiamGiaKha
     // Kiểm tra khách hàng đã có phiếu giảm giá này chưa
     boolean existsByPhieuGiamGiaIdAndKhachHangId(Long phieuGiamGiaId, Long khachHangId);
 
-    // Đếm số lượng đã sử dụng
-    @Query("SELECT COUNT(p) FROM PhieuGiamGiaKhachHang p WHERE p.phieuGiamGia.id = :phieuGiamGiaId AND p.daSuDung = true")
-    Long countUsedByPhieuGiamGiaId(@Param("phieuGiamGiaId") Long phieuGiamGiaId);
-
     /**
      * Tìm phiếu giảm giá của khách hàng theo trạng thái và tình trạng sử dụng
      */
-    List<PhieuGiamGiaKhachHang> findByKhachHangAndTrangThaiAndDaSuDung(
-            KhachHang khachHang, Boolean trangThai, Boolean daSuDung);
+    List<PhieuGiamGiaKhachHang> findByKhachHangAndTrangThai(
+            KhachHang khachHang, Boolean trangThai);
 
     // Tìm một phiếu giảm giá cụ thể cho khách hàng
     Optional<PhieuGiamGiaKhachHang> findByPhieuGiamGiaAndKhachHang(PhieuGiamGia phieuGiamGia, KhachHang khachHang);

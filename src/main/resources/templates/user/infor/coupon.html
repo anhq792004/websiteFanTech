@@ -21,6 +21,9 @@
     .list-group-item span {
         font-size: 1rem;
     }
+    .table th, .table td {
+        vertical-align: middle;
+    }
 </style>
 <body>
 
@@ -29,7 +32,6 @@
     <!-- /header -->
 
     <main>
-        <!-- Phần hiển thị sản phẩm - Thêm vào sau phần "New Arrival" trong file HTML -->
         <div class="container">
             <nav aria-label="breadcrumb" class="mt-3">
                 <ol class="breadcrumb">
@@ -50,7 +52,42 @@
                         </div>
                         <div class="card-body">
                             <form>
-
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped">
+                                        <thead class="table-dark">
+                                        <tr>
+                                            <th scope="col">Mã</th>
+                                            <th scope="col">Tên</th>
+                                            <th scope="col">Loại phiếu</th>
+                                            <th scope="col">Giá trị giảm</th>
+                                            <th scope="col">Đơn hàng tối thiểu</th>
+                                            <th scope="col">Giảm tối đa</th>
+                                            <th scope="col">Số lượng</th>
+                                            <th scope="col">Số lượng còn lại</th>
+                                            <th scope="col">Loại phiếu (DB)</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="voucher : ${availableVouchers}">
+                                            <td th:text="${voucher.ma}"></td>
+                                            <td th:text="${voucher.ten}"></td>
+                                            <td th:text="${voucher.type == 'public' ? 'Công khai' : 'Cá nhân'}"></td>
+                                            <td>
+                                                <span th:if="${voucher.loaiGiam == 'PERCENT'}" th:text="${voucher.giaTriGiam} + '%'"></span>
+                                                <span th:if="${voucher.loaiGiam == 'AMOUNT'}" th:text="${#numbers.formatInteger(voucher.giaTriGiam, 3) + ' đ'}"></span>
+                                            </td>
+                                            <td th:text="${#numbers.formatInteger(voucher.giaTriDonHangToiThieu, 3) + ' đ'}"></td>
+                                            <td th:text="${voucher.giaTriGiamToiDa != null ? #numbers.formatInteger(voucher.giaTriGiamToiDa, 3) + ' đ' : 'Không giới hạn'}"></td>
+                                            <td th:text="${voucher.soLuong}"></td>
+                                            <td th:text="${voucher.soLuongConLai}"></td>
+                                            <td th:text="${voucher.loaiPhieu ? 'Công khai' : 'Cá nhân'}"></td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(availableVouchers)}">
+                                            <td colspan="12" class="text-center">Không có phiếu giảm giá nào khả dụng</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </form>
                         </div>
                     </div>
