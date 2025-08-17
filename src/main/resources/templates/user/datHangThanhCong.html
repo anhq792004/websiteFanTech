@@ -187,8 +187,12 @@
                                 <td class="text-center">
                                     <span class="badge bg-primary" th:text="${chiTiet?.soLuong}">1</span>
                                 </td>
-                                <td class="text-end" th:text="${#numbers.formatCurrency(chiTiet?.gia)}">500,000₫</td>
-                                <td class="text-end fw-bold text-danger" th:text="${#numbers.formatCurrency(chiTiet?.thanhTien)}">500,000₫</td>
+                                <td class="text-end">
+                                    <span th:text="${#numbers.formatDecimal(chiTiet?.gia, 0, 'COMMA', 0, 'POINT')} + '₫'" class="currency-format">500.000₫</span>
+                                </td>
+                                <td class="text-end fw-bold text-danger">
+                                    <span th:text="${#numbers.formatDecimal(chiTiet?.thanhTien, 0, 'COMMA', 0, 'POINT')} + '₫'" class="currency-format">500.000₫</span>
+                                </td>
                             </tr>
                             </tbody>
                         </table>
@@ -211,20 +215,30 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-3">
                             <span>Tạm tính:</span>
-                            <span class="fw-bold" th:text="${#numbers.formatCurrency(hoaDon?.tongTien)}">1,500,000₫</span>
+                            <span class="fw-bold">
+                                <span th:text="${#numbers.formatDecimal(hoaDon?.tongTien, 0, 'COMMA', 0, 'POINT')} + '₫'" class="currency-format">1.500.000₫</span>
+                            </span>
                         </div>
                         <div class="d-flex justify-content-between mb-3">
                             <span>Phí vận chuyển:</span>
-                            <span class="text-success fw-bold" th:text="${#numbers.formatCurrency(hoaDon?.phiVanChuyen)}">Miễn phí</span>
+                            <span class="text-success fw-bold">
+                                <span th:if="${hoaDon?.phiVanChuyen == 0}">Miễn phí</span>
+                                <span th:if="${hoaDon?.phiVanChuyen != 0}" th:text="${#numbers.formatDecimal(hoaDon?.phiVanChuyen, 0, 'COMMA', 0, 'POINT')} + '₫'" class="currency-format"></span>
+                            </span>
                         </div>
                         <div class="d-flex justify-content-between mb-3">
                             <span>Giảm giá:</span>
-                            <span class="text-success fw-bold">-0₫</span>
+                            <span class="text-success fw-bold">
+                                <span th:if="${hoaDon?.tienGiam == null || hoaDon?.tienGiam == 0}">-0₫</span>
+                                <span th:if="${hoaDon?.tienGiam != null && hoaDon?.tienGiam > 0}" th:text="'-' + ${#numbers.formatDecimal(hoaDon?.tienGiam, 0, 'COMMA', 0, 'POINT')} + '₫'" class="currency-format"></span>
+                            </span>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between mb-4">
                             <strong class="fs-5">Tổng cộng:</strong>
-                            <strong class="fs-5 text-danger" th:text="${#numbers.formatCurrency(hoaDon?.tongTienSauGiamGia)}">1,500,000₫</strong>
+                            <strong class="fs-5 text-danger">
+                                <span th:text="${#numbers.formatDecimal(hoaDon?.tongTienSauGiamGia, 0, 'COMMA', 0, 'POINT')} + '₫'" class="currency-format">1.500.000₫</span>
+                            </strong>
                         </div>
                     </div>
                 </div>
@@ -297,5 +311,57 @@
 <div class="py-5"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Function to format currency for Vietnamese locale
+    function formatCurrency(amount) {
+        if (amount === null || amount === undefined) return '0₫';
+        return new Intl.NumberFormat('vi-VN').format(amount) + '₫';
+    }
+
+    // Function to format all currency elements on page load
+    function formatAllCurrencyElements() {
+        // Find all elements with currency-format class that don't have Thymeleaf attributes
+        const currencyElements = document.querySelectorAll('.currency-format');
+
+        currencyElements.forEach(element => {
+            // Only format if the element doesn't already contain formatted text
+            const text = element.textContent.trim();
+            const numericValue = text.replace(/[^\d]/g, '');
+
+            if (numericValue && !text.includes('₫')) {
+                element.textContent = formatCurrency(parseInt(numericValue));
+            }
+        });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', formatAllCurrencyElements);
+
+
+    function formatCurrencyInResponse(data) {
+
+        if (data.tongTien) data.tongTienFormatted = formatCurrency(data.tongTien);
+        if (data.phiVanChuyen) data.phiVanChuyenFormatted = formatCurrency(data.phiVanChuyen);
+        if (data.tienGiam) data.tienGiamFormatted = formatCurrency(data.tienGiam);
+        if (data.tongTienSauGiamGia) data.tongTienSauGiamGiaFormatted = formatCurrency(data.tongTienSauGiamGia);
+
+        return data;
+    }
+</script>
+
+<style>
+    .currency-format {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Ensure consistent currency display */
+    .table td.text-end,
+    .d-flex span.fw-bold {
+        white-space: nowrap;
+    }
+</style>
+
 </body>
 </html>
