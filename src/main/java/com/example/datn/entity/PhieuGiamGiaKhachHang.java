@@ -25,13 +25,6 @@ public class PhieuGiamGiaKhachHang {
     @JoinColumn(name = "id_khach_hang", referencedColumnName = "id")
     private KhachHang khachHang;
 
-    @Column(name = "da_su_dung")
-    private Boolean daSuDung = false;
-
-    @Column(name = "ngay_su_dung")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date ngaySuDung;
-
     @Column(name = "ngay_tao")
     @Temporal(TemporalType.TIMESTAMP)
     private Date ngayTao;

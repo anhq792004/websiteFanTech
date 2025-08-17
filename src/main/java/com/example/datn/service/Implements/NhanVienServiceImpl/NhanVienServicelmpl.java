@@ -110,15 +110,26 @@ public class NhanVienServicelmpl implements NhanVienService {
 
     @Override
     public boolean thayDoiTrangThaiNhanVien(Long id) {
-        Optional<NhanVien> nhanVienOptional=nhanVienRepo.findById(id);
-        if (nhanVienOptional.isPresent()){
-            NhanVien nhanVien= nhanVienOptional.get();
-            nhanVien.setTrangThai(nhanVien.getTrangThai()==Boolean.FALSE?Boolean.TRUE:Boolean.FALSE);
+        Optional<NhanVien> nhanVienOptional = nhanVienRepo.findById(id);
+        if (nhanVienOptional.isPresent()) {
+            NhanVien nhanVien = nhanVienOptional.get();
+
+            // Thay đổi trạng thái nhân viên
+            boolean newStatus = !nhanVien.getTrangThai();
+            nhanVien.setTrangThai(newStatus);
+
+            // Đồng bộ trạng thái tài khoản
+            if (nhanVien.getTaiKhoan() != null) {
+                nhanVien.getTaiKhoan().setTrangThai(newStatus);
+                taiKhoanRepo.save(nhanVien.getTaiKhoan());
+            }
+
             nhanVienRepo.save(nhanVien);
             return true;
         }
         return false;
     }
+
     // Phương thức tạo mật khẩu ngẫu nhiên
     private String generateRandomPassword(int length) {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%";
@@ -209,13 +220,22 @@ public class NhanVienServicelmpl implements NhanVienService {
         return String.format("NV%03d", count + 1); // VD: HD001, HD002
     }
 
-    @Override
     public ResponseEntity<?> changeStatus(Long id) {
         NhanVien nhanVien = nhanVienRepo.findById(id).orElse(null);
         if (nhanVien == null) {
             return ResponseEntity.badRequest().body("Không tìm nhân viên.");
         }
-        nhanVien.setTrangThai(!nhanVien.getTrangThai());
+
+        // Thay đổi trạng thái nhân viên
+        boolean newStatus = !nhanVien.getTrangThai();
+        nhanVien.setTrangThai(newStatus);
+
+        // Đồng bộ trạng thái tài khoản
+        if (nhanVien.getTaiKhoan() != null) {
+            nhanVien.getTaiKhoan().setTrangThai(newStatus);
+            taiKhoanRepo.save(nhanVien.getTaiKhoan());
+        }
+
         nhanVienRepo.save(nhanVien);
         return ResponseEntity.ok("Cập nhật trạng thái thành công.");
     }

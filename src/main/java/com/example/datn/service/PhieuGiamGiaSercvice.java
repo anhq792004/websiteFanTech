@@ -23,14 +23,13 @@ public class PhieuGiamGiaSercvice {
 
     public List<Map<String, Object>> getAvailableVouchers(KhachHang khachHang, BigDecimal orderAmount) {
         List<Map<String, Object>> availableVouchers = new ArrayList<>();
-        Date now = new Date(); //  Sử dụng Date thống nhất
+        Date now = new Date();
 
         try {
             // 1. Lấy phiếu giảm giá CÔNG KHAI (loaiPhieu = true)
             List<PhieuGiamGia> publicVouchers = phieuGiamGiaRepo.findAll();
 
             for (PhieuGiamGia voucher : publicVouchers) {
-                // Lọc phiếu công khai
                 if (voucher.getLoaiPhieu() == true && // công khai
                         voucher.isTrangThai() && // active
                         voucher.getNgayBatDau().before(now) && // đã bắt đầu
@@ -44,7 +43,7 @@ public class PhieuGiamGiaSercvice {
 
             // 2. Lấy phiếu giảm giá CÁ NHÂN (loaiPhieu = false)
             List<PhieuGiamGiaKhachHang> privateVoucherRelations = phieuGiamGiaKhachHangRepo
-                    .findByKhachHangAndTrangThaiAndDaSuDung(khachHang, true, false);
+                    .findByKhachHangAndTrangThai(khachHang, true);
 
             System.out.println(" DEBUG: Found " + privateVoucherRelations.size() + " private voucher relations");
 
@@ -61,7 +60,8 @@ public class PhieuGiamGiaSercvice {
                 if (voucher.isTrangThai() && // voucher active
                         voucher.getNgayBatDau().before(now) && // đã bắt đầu
                         voucher.getNgayKetThuc().after(now) && // chưa kết thúc
-                        isVoucherValid(voucher, orderAmount)) { // đủ điều kiện đơn hàng
+                        isVoucherValid(voucher, orderAmount) && // đủ điều kiện đơn hàng
+                        voucher.getSoLuongDaSuDung() < voucher.getSoLuong()) { // chưa sử dụng hết
 
                     availableVouchers.add(createVoucherMap(voucher, "private"));
                     System.out.println(" Added private voucher: " + voucher.getMa());
@@ -149,5 +149,41 @@ public class PhieuGiamGiaSercvice {
         }
 
         return discountAmount;
+    }
+
+    // Thêm phương thức mới để lấy tất cả PGG mà không áp dụng điều kiện
+    public List<Map<String, Object>> getAllVouchers(KhachHang khachHang) {
+        List<Map<String, Object>> allVouchers = new ArrayList<>();
+        Date now = new Date();
+
+        // Lấy tất cả phiếu giảm giá công khai
+        List<PhieuGiamGia> publicVouchers = phieuGiamGiaRepo.findAll();
+        for (PhieuGiamGia voucher : publicVouchers) {
+            if (voucher.getLoaiPhieu() == true) { // Chỉ lấy công khai, bỏ qua điều kiện thời gian và số lượng
+                allVouchers.add(createVoucherMap(voucher, "public"));
+                System.out.println(" Added public voucher (all): " + voucher.getMa());
+            }
+        }
+
+        // Lấy tất cả phiếu giảm giá cá nhân liên kết với khách hàng
+        List<PhieuGiamGiaKhachHang> privateVoucherRelations = phieuGiamGiaKhachHangRepo.findByKhachHangAndTrangThai(khachHang, true);
+        System.out.println(" DEBUG: Found " + privateVoucherRelations.size() + " private voucher relations (all)");
+        for (PhieuGiamGiaKhachHang relation : privateVoucherRelations) {
+            PhieuGiamGia voucher = relation.getPhieuGiamGia();
+            if (!voucher.getLoaiPhieu()) { // Chỉ lấy cá nhân
+                allVouchers.add(createVoucherMap(voucher, "private"));
+                System.out.println(" Added private voucher (all): " + voucher.getMa());
+            }
+        }
+
+        // Sắp xếp theo giá trị giảm giá
+        allVouchers.sort((v1, v2) -> {
+            BigDecimal value1 = (BigDecimal) v1.get("giaTriGiam");
+            BigDecimal value2 = (BigDecimal) v2.get("giaTriGiam");
+            return value2.compareTo(value1);
+        });
+
+        System.out.println(" FINAL RESULT: Total all vouchers: " + allVouchers.size());
+        return allVouchers;
     }
 }

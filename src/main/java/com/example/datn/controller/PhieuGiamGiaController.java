@@ -100,31 +100,26 @@ public class PhieuGiamGiaController {
                           @RequestParam(value = "selectedKhachHang", required = false) List<Long> selectedKhachHang,
                           RedirectAttributes redirectAttributes) {
         try {
-            // Kiểm tra và tạo mã nếu cần
             if (phieuGiamGia.getMa() == null || phieuGiamGia.getMa().trim().isEmpty()) {
                 phieuGiamGia.setMa(generateNextCode());
             }
 
             phieuGiamGia.setNgayTao(new Date());
 
-            // Validate dữ liệu
             if (!validatePhieuGiamGia(phieuGiamGia, redirectAttributes)) {
                 return "redirect:/admin/phieu-giam-gia/create";
             }
 
-            // Lưu phiếu giảm giá
             PhieuGiamGia savedPhieuGiamGia = phieuGiamGiaRepo.save(phieuGiamGia);
 
-            // Nếu là phiếu cá nhân, lưu vào bảng trung gian
             if (!phieuGiamGia.getLoaiPhieu() && selectedKhachHang != null && !selectedKhachHang.isEmpty()) {
                 for (Long khachHangId : selectedKhachHang) {
                     PhieuGiamGiaKhachHang pggKh = new PhieuGiamGiaKhachHang();
                     pggKh.setPhieuGiamGia(savedPhieuGiamGia);
                     pggKh.setKhachHang(khachHangRepo.findById(khachHangId).orElse(null));
-                    pggKh.setDaSuDung(false);
                     pggKh.setNgayTao(new Date());
                     pggKh.setTrangThai(true);
-                    pggKh.setNguoiTao("Admin"); // Có thể lấy từ session
+                    pggKh.setNguoiTao("Admin");
 
                     phieuGiamGiaKhachHangRepo.save(pggKh);
                 }
@@ -174,41 +169,27 @@ public class PhieuGiamGiaController {
                     phieuGiamGia.setMa(pggCu.get().getMa());
                 }
 
-                // Validate dữ liệu
                 if (!validatePhieuGiamGia(phieuGiamGia, redirectAttributes)) {
                     return "redirect:/admin/phieu-giam-gia/edit/" + phieuGiamGia.getId();
                 }
 
-                // Lưu phiếu giảm giá
                 PhieuGiamGia savedPhieuGiamGia = phieuGiamGiaRepo.save(phieuGiamGia);
 
-                // Xử lý phiếu cá nhân
                 if (!phieuGiamGia.getLoaiPhieu()) {
-                    // Xóa các quan hệ cũ (chỉ những chưa sử dụng)
                     List<PhieuGiamGiaKhachHang> oldRelations =
                             phieuGiamGiaKhachHangRepo.findByPhieuGiamGiaId(phieuGiamGia.getId());
+                    phieuGiamGiaKhachHangRepo.deleteAll(oldRelations);
 
-                    for (PhieuGiamGiaKhachHang relation : oldRelations) {
-                        if (!relation.getDaSuDung()) {
-                            phieuGiamGiaKhachHangRepo.delete(relation);
-                        }
-                    }
-
-                    // Thêm các quan hệ mới
                     if (selectedKhachHang != null && !selectedKhachHang.isEmpty()) {
                         for (Long khachHangId : selectedKhachHang) {
-                            // Kiểm tra xem khách hàng đã có phiếu này chưa
                             if (!phieuGiamGiaKhachHangRepo.existsByPhieuGiamGiaIdAndKhachHangId(
                                     phieuGiamGia.getId(), khachHangId)) {
-
                                 PhieuGiamGiaKhachHang pggKh = new PhieuGiamGiaKhachHang();
                                 pggKh.setPhieuGiamGia(savedPhieuGiamGia);
                                 pggKh.setKhachHang(khachHangRepo.findById(khachHangId).orElse(null));
-                                pggKh.setDaSuDung(false);
                                 pggKh.setNgayTao(new Date());
                                 pggKh.setTrangThai(true);
                                 pggKh.setNguoiTao("Admin");
-
                                 phieuGiamGiaKhachHangRepo.save(pggKh);
                             }
                         }
@@ -221,33 +202,6 @@ public class PhieuGiamGiaController {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
         }
 
-        return "redirect:/admin/phieu-giam-gia/index";
-    }
-
-    @GetMapping("/delete/{id}")
-    public String xoa(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        try {
-            if (phieuGiamGiaRepo.existsById(id)) {
-                // Kiểm tra xem phiếu đã được sử dụng chưa
-                Long usedCount = phieuGiamGiaKhachHangRepo.countUsedByPhieuGiamGiaId(id);
-                if (usedCount > 0) {
-                    redirectAttributes.addFlashAttribute("error",
-                            "Không thể xóa phiếu giảm giá đã được sử dụng!");
-                    return "redirect:/admin/phieu-giam-gia/index";
-                }
-
-                // Xóa các quan hệ trong bảng trung gian trước
-                List<PhieuGiamGiaKhachHang> relations =
-                        phieuGiamGiaKhachHangRepo.findByPhieuGiamGiaId(id);
-                phieuGiamGiaKhachHangRepo.deleteAll(relations);
-
-                // Xóa phiếu giảm giá
-                phieuGiamGiaRepo.deleteById(id);
-                redirectAttributes.addFlashAttribute("success", "Xóa phiếu giảm giá thành công!");
-            }
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
-        }
         return "redirect:/admin/phieu-giam-gia/index";
     }
 
