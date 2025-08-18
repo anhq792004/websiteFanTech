@@ -391,6 +391,19 @@
                 });
                 return;
             }
+            if (loaiGiamGia.value === 'true' && giaTriGiam.value > 100) {
+                hasErrors = true;
+                await Swal.fire({
+                    text: 'Giá trị giảm không được lớn hơn 100%',
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    toast: true
+                });
+                return;
+            }
 
             if (!giaTriDonHangToiThieu.value || giaTriDonHangToiThieu.value < 0) {
                 hasErrors = true;
