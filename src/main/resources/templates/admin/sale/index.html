@@ -121,7 +121,7 @@
                                             </div>
                                         </form>
                                     </div>
-                                    <div class="product-total"
+                                    <div class="product-total "
                                          th:text="${#numbers.formatDecimal(item.thanhTien, 0, 'COMMA', 0, 'POINT')} + ' đ'"
                                          th:attr="data-value=${item.thanhTien}"></div>
 
@@ -157,14 +157,13 @@
                             </div>
                             <div class="gap-3 d-flex justify-content-between">
                                 <div class="col floating-group">
-                                    <input type="text" class="form-control" placeholder="" aria-label="name"
-                                           id="name" th:value="${khachHang?.ten ?: ''}">
-                                    <label for="name">Tên</label>
+                                    <input type="text" class="form-control" placeholder="Tên khách hàng"
+                                           aria-label="name"
+                                           id="name" th:value="${khachHang?.ten ?: ''}" readonly>
                                 </div>
                                 <div class="col floating-group">
-                                    <input type="text" class="form-control" placeholder="" aria-label="sdt"
-                                           id="sdt" th:value="${khachHang?.soDienThoai ?: ''}">
-                                    <label for="sdt">Số điện thoại</label>
+                                    <input type="text" class="form-control" placeholder="Số điện thoại" aria-label="sdt"
+                                           id="sdt" th:value="${khachHang?.soDienThoai ?: ''}" readonly>
                                 </div>
                             </div>
                         </div>
@@ -332,7 +331,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
             </div>
-            <div class="modal-body"  style="max-height: 60vh; overflow-y: auto;">
+            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
                 <div class="input-group mb-3 gap-3">
                     <input type="text" class="form-control" id="searchKH"
                            placeholder="Tìm kiếm theo tên, số điện thoại khách hàng">
@@ -493,25 +492,41 @@
         searchInput.addEventListener("keyup", filterTable);
     });
 </script>
+<script>
+    document.getElementById("searchKH").addEventListener("keyup", function () {
+        let keyword = this.value.toLowerCase().trim();
+        let rows = document.querySelectorAll("#modalTaiKhoan tbody tr");
+
+        rows.forEach(row => {
+            let ma = row.cells[1].textContent.toLowerCase();
+            let ten = row.cells[2].textContent.toLowerCase();
+            let sdt = row.cells[3].textContent.toLowerCase();
+
+            row.style.display = (ma.includes(keyword) || ten.includes(keyword) || sdt.includes(keyword))
+                ? ""
+                : "none";
+        });
+    });
+</script>
 
 <style>
-/* CSS cho nút thanh toán disabled */
-#btnThanhToan:disabled,
-#btnThanhToan.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background-color: #f8f9fa;
-    border-color: #d1d3d4;
-    color: #6c757d;
-}
+    /* CSS cho nút thanh toán disabled */
+    #btnThanhToan:disabled,
+    #btnThanhToan.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background-color: #f8f9fa;
+        border-color: #d1d3d4;
+        color: #6c757d;
+    }
 
-#btnThanhToan:disabled:hover,
-#btnThanhToan.disabled:hover {
-    background-color: #f8f9fa;
-    border-color: #d1d3d4;
-    color: #6c757d;
-    transform: none;
-}
+    #btnThanhToan:disabled:hover,
+    #btnThanhToan.disabled:hover {
+        background-color: #f8f9fa;
+        border-color: #d1d3d4;
+        color: #6c757d;
+        transform: none;
+    }
 </style>
 
 </body>

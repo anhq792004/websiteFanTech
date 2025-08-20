@@ -122,47 +122,67 @@ public class HoaDonController {
     @PostMapping("/return-trangThai")
     @ResponseBody
     public ResponseEntity<String> returnTrangThai(@RequestParam("id") Long id) {
-        hoaDonService.returnTrangThai(id);
-        return ResponseEntity.ok("Đơn hàng đã được chuyển về trạng thái chờ !");
+        try {
+            hoaDonService.returnTrangThai(id);
+            return ResponseEntity.ok("Đơn hàng đã được chuyển về trạng thái chờ !");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @PostMapping("/giao-hang")
     @ResponseBody
     public ResponseEntity<String> giaoHang(@RequestParam("id") Long id) {
-        hoaDonService.giaoHang(id);
-        return ResponseEntity.ok("Đơn hàng đã được bàn giao thành công !");
+        try {
+            hoaDonService.giaoHang(id);
+            return ResponseEntity.ok("Đơn hàng đã được bàn giao thành công !");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @PostMapping("/hoan-thanh")
     @ResponseBody
     public ResponseEntity<String> hoanThanh(@RequestParam("id") Long id) {
-        hoaDonService.hoanThanh(id);
-        return ResponseEntity.ok("Đơn hàng đã hoàn thành !");
+        try {
+            hoaDonService.hoanThanh(id);
+            return ResponseEntity.ok("Đơn hàng đã hoàn thành !");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @PostMapping("/huy")
     @ResponseBody
     public ResponseEntity<String> huy(@RequestParam("id") Long id,
                                       @RequestParam("ghiChu") String ghiChu) {
-        hoaDonService.huy(id, ghiChu);
+        try {
+            hoaDonService.huy(id, ghiChu);
 //        hoaDonService.hoanSoLuongSanPham(id);
-        return ResponseEntity.ok("Hóa đơn đã được hủy !");
+            return ResponseEntity.ok("Hóa đơn đã được hủy !");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @PostMapping("/hoan-hang")
     @ResponseBody
     public ResponseEntity<String> hoanHang(@RequestParam("id") Long id,
                                            @RequestParam("ghiChu") String ghiChu) {
-        hoaDonService.hoanHang(id,ghiChu);
+        hoaDonService.hoanHang(id, ghiChu);
         return ResponseEntity.ok("Đơn hàng đã được hoàn về shop!");
     }
 
     @PostMapping("/huy-hd-onl")
     @ResponseBody
     public ResponseEntity<String> huyHDOnl(@RequestParam("id") Long id,
-                                      @RequestParam("ghiChu") String ghiChu) {
-        hoaDonService.huy(id, ghiChu);
-        return ResponseEntity.ok("Hóa đơn đã được hủy !");
+                                           @RequestParam("ghiChu") String ghiChu) {
+        try {
+            hoaDonService.huy(id, ghiChu);
+            return ResponseEntity.ok("Hóa đơn đã được hủy !");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @PostMapping("/addSP")
@@ -185,7 +205,7 @@ public class HoaDonController {
             banHangService.updateTongTienHoaDon(idHD);
             return ResponseEntity.ok("Xóa thành công");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi xóa sản phẩm");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
@@ -229,7 +249,7 @@ public class HoaDonController {
 
     @PostMapping("/updateInfor")
     @ResponseBody
-    public ResponseEntity<?> updateInfor( @RequestBody UpdateInforRequest request) {
+    public ResponseEntity<?> updateInfor(@RequestBody UpdateInforRequest request) {
         hoaDonService.updateInfor(request);
         return ResponseEntity.ok("Cập nhật thông tin thành công");
     }

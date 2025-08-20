@@ -114,7 +114,9 @@ public class BanHangServiceImpl implements BanHangService {
                 .orElseThrow(() -> new RuntimeException("Hóa đơn không tồn tại: " + idHD));
         List<HoaDonChiTiet> listHDCT = hoaDonChiTietRepo.findByHoaDon_Id(hoaDon.getId());
         NhanVien currentNhanVien = getCurrentNhanVien();
-
+        if (!hoaDon.getTrangThai().equals(hoaDonService.getTrangThaiHoaDon().getHoaDonCho())) {
+            throw new RuntimeException("Hóa đơn đã được xử lý bởi người khác!");
+        }
         for (HoaDonChiTiet hdct : listHDCT) {
             SanPhamChiTiet sp = hdct.getSanPhamChiTiet();
             // Chỉ kiểm tra số lượng, không cần cập nhật số lượng trong kho nữa
@@ -133,7 +135,6 @@ public class BanHangServiceImpl implements BanHangService {
         lichSuHoaDon.setHoaDon(hoaDon);
         lichSuHoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getHoanThanh());
         lichSuHoaDon.setNgayTao(LocalDateTime.now());
-        lichSuHoaDon.setNguoiTao("admin");
         lichSuHoaDon.setMoTa("Thanh toán thành công");
         lichSuHoaDon.setNguoiTao(currentNhanVien.getTen());
         lichSuHoaDonRepo.save(lichSuHoaDon);
