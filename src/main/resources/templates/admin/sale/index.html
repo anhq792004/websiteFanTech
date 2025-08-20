@@ -121,7 +121,7 @@
                                             </div>
                                         </form>
                                     </div>
-                                    <div class="product-total"
+                                    <div class="product-total "
                                          th:text="${#numbers.formatDecimal(item.thanhTien, 0, 'COMMA', 0, 'POINT')} + ' đ'"
                                          th:attr="data-value=${item.thanhTien}"></div>
 
@@ -490,6 +490,22 @@
         }
 
         searchInput.addEventListener("keyup", filterTable);
+    });
+</script>
+<script>
+    document.getElementById("searchKH").addEventListener("keyup", function () {
+        let keyword = this.value.toLowerCase().trim();
+        let rows = document.querySelectorAll("#modalTaiKhoan tbody tr");
+
+        rows.forEach(row => {
+            let ma = row.cells[1].textContent.toLowerCase();
+            let ten = row.cells[2].textContent.toLowerCase();
+            let sdt = row.cells[3].textContent.toLowerCase();
+
+            row.style.display = (ma.includes(keyword) || ten.includes(keyword) || sdt.includes(keyword))
+                ? ""
+                : "none";
+        });
     });
 </script>
 

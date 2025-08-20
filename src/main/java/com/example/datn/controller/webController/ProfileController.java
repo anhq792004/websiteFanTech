@@ -86,18 +86,18 @@ public class ProfileController {
     @PostMapping("/update")
     @ResponseBody
     public ResponseEntity<String> update(@RequestParam("idKH") Long idKH,
-                                          @RequestParam("ten") String ten,
-                                          @RequestParam("soDienThoai") String soDienThoai,
-                                          @RequestParam("ngaySinh") String ngaySinh,
-                                          @RequestParam("gioiTinh") String gioiTinh,
-                                          @RequestParam(value = "hinhAnh", required = false) MultipartFile hinhAnh) {
+                                         @RequestParam("ten") String ten,
+                                         @RequestParam("soDienThoai") String soDienThoai,
+                                         @RequestParam("ngaySinh") String ngaySinh,
+                                         @RequestParam("gioiTinh") String gioiTinh,
+                                         @RequestParam(value = "hinhAnh", required = false) MultipartFile hinhAnh) {
         try {
             // Tạo UpdateInforKhachHangRequest từ các tham số
             UpdateInforKhachHangRequest request = new UpdateInforKhachHangRequest();
             request.setIdKH(idKH);
             request.setTen(ten);
             request.setSoDienThoai(soDienThoai);
-            
+
             // Parse ngày sinh từ String sang Date
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
@@ -106,9 +106,9 @@ public class ProfileController {
             } catch (ParseException e) {
                 return ResponseEntity.badRequest().body("Định dạng ngày sinh không hợp lệ (dd/MM/yyyy)");
             }
-            
+
             request.setGioiTinh(gioiTinh);
-            
+
             khachHangService.updateInforKhachHang(request, hinhAnh);
             return ResponseEntity.ok("Cập nhật thành công");
         } catch (Exception e) {
@@ -167,7 +167,7 @@ public class ProfileController {
 
     @PostMapping("/updateInfor")
     @ResponseBody
-    public ResponseEntity<?> updateInfor( @RequestBody UpdateInforRequest request) {
+    public ResponseEntity<?> updateInfor(@RequestBody UpdateInforRequest request) {
         hoaDonService.updateInfor(request);
         return ResponseEntity.ok("Cập nhật thông tin thành công");
     }
@@ -176,9 +176,13 @@ public class ProfileController {
     @ResponseBody
     public ResponseEntity<String> huy(@RequestParam("id") Long id,
                                       @RequestParam("ghiChu") String ghiChu) {
-        hoaDonService.huyOnl(id, ghiChu);
+        try {
+            hoaDonService.huyOnl(id, ghiChu);
 //        hoaDonService.hoanSoLuongSanPham(id);
-        return ResponseEntity.ok("Hóa đơn đã được hủy !");
+            return ResponseEntity.ok("Hóa đơn đã được hủy !");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     // dia chi

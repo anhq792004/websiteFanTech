@@ -69,8 +69,8 @@ $(document).ready(function () {
                             window.location.href = "/sale/index";
                         });
                     },
-                    error: function () {
-                        Swal.fire("Lỗi!", "Lỗi khi xác nhận hủy hóa đơn", "error");
+                    error: function (xhr) {
+                        Swal.fire("Lỗi!", xhr.responseText, "error");
                     }
                 });
             }
@@ -162,7 +162,7 @@ $(document).ready(function () {
         $.ajax({
             url: '/sale/remove-discount',
             type: 'POST',
-            data: { idHD: hoaDonId },
+            data: {idHD: hoaDonId},
             success: function (response) {
                 console.log('Discount removed successfully:', response);
             },
@@ -363,7 +363,7 @@ $(document).ready(function () {
             },
             error: function (xhr) {
                 let errorMessage = "Có lỗi xảy ra";
-                
+
                 // Thử parse JSON response nếu có
                 try {
                     const response = JSON.parse(xhr.responseText);
@@ -372,7 +372,7 @@ $(document).ready(function () {
                     // Nếu không parse được JSON, dùng responseText trực tiếp
                     errorMessage = xhr.responseText || "Có lỗi xảy ra khi cập nhật số lượng";
                 }
-                
+
                 Swal.fire({
                     toast: true,
                     icon: 'error',
@@ -388,26 +388,26 @@ $(document).ready(function () {
             }
         });
     });
-    
+
     // Thêm event listener cho input số lượng khi nhấn Enter
-    $(document).on('keypress', '.quantity-input', function(e) {
+    $(document).on('keypress', '.quantity-input', function (e) {
         if (e.which === 13) { // Enter key
             e.preventDefault();
             $(this).closest('form').submit();
         }
     });
-    
+
     // Thêm event listener cho input số lượng khi blur (mất focus)
-    $(document).on('blur', '.quantity-input', function() {
+    $(document).on('blur', '.quantity-input', function () {
         const currentValue = parseInt($(this).val());
         const form = $(this).closest('form');
-        
+
         // Kiểm tra giá trị hợp lệ
         if (isNaN(currentValue) || currentValue < 1) {
             $(this).val(1);
             return;
         }
-        
+
         // Tự động submit form khi người dùng thay đổi giá trị
         form.submit();
     });
@@ -509,14 +509,14 @@ $(document).ready(function () {
                     // Xử lý thành công bình thường
                     let message = response;
                     let shouldPrintInvoice = false;
-                    
+
                     // Kiểm tra xem có yêu cầu in hóa đơn không
                     if (response.includes('PRINT_INVOICE:')) {
                         const parts = response.split('PRINT_INVOICE:');
                         message = parts[0].trim();
                         shouldPrintInvoice = true;
                     }
-                    
+
                     Swal.fire({
                         toast: true,
                         icon: 'success',
@@ -535,18 +535,35 @@ $(document).ready(function () {
                 }
             },
             error: function (xhr) {
-                Swal.fire({
-                    toast: true,
-                    icon: 'error',
-                    title: xhr.responseText,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                }).then(() => {
-                    // Reload trang để đưa về trạng thái ban đầu
-                    location.reload();
-                });
+                if (xhr.responseText === "Hóa đơn đã được xử lý bởi người khác!") {
+                    // Chuyển hướng về trang '/sale/index'
+                    Swal.fire({
+                        toast: true,
+                        icon: 'error',
+                        title: xhr.responseText,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1000,
+                        timerProgressBar: true
+                    }).then(() => {
+                        // Reload trang để đưa về trạng thái ban đầu
+                        window.location.href = '/sale/index';
+                    });
+                } else {
+                    // Hiển thị thông báo lỗi và reload trang
+                    Swal.fire({
+                        toast: true,
+                        icon: 'error',
+                        title: xhr.responseText,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1000,
+                        timerProgressBar: true
+                    }).then(() => {
+                        // Reload trang để đưa về trạng thái ban đầu
+                        location.reload();
+                    });
+                }
             }
         });
     }
@@ -977,11 +994,11 @@ $(document).ready(function () {
 
                 Swal.fire({
                     toast: true,
-                    icon:  'success',
-                    title:  response,
+                    icon: 'success',
+                    title: response,
                     position: 'top-end',
                     showConfirmButton: false,
-                    timer:  1000,
+                    timer: 1000,
                     timerProgressBar: true
                 }).then(() => {
                     location.reload();
@@ -1010,7 +1027,7 @@ $(document).ready(function () {
 
     // Chạy format currency khi trang tải xong
     formatCurrency();
-    
+
     // Kiểm tra và disable nút thanh toán khi load trang
     checkAndTogglePaymentButton();
 });
@@ -1020,20 +1037,20 @@ $(document).ready(function () {
 function checkAndTogglePaymentButton() {
     const productList = document.getElementById('product-list');
     const paymentButton = document.getElementById('btnThanhToan');
-    
+
     if (!paymentButton) {
         return; // Không có nút thanh toán (chưa tạo hóa đơn)
     }
-    
+
     // Kiểm tra xem có sản phẩm nào trong giỏ hàng không
     let hasProducts = false;
-    
+
     if (productList) {
         // Đếm số dòng sản phẩm (div có class product-details)
         const productItems = productList.querySelectorAll('.product-details');
         hasProducts = productItems.length > 0;
     }
-    
+
     // Enable/disable nút thanh toán
     if (hasProducts) {
         paymentButton.disabled = false;
@@ -1097,7 +1114,10 @@ function getCurrentCustomerInfo() {
 function loadPhieuGiamGia() {
     // Lấy tổng tiền hóa đơn từ UI
     const tongTienDonHang = parseFloat($('#tongTienSauGiam').attr('data-value') || $('#tienThanhToan').attr('data-value')) || 0;
-    const requestData = currentCustomerId ? { idKH: currentCustomerId, tongTienDonHang: tongTienDonHang } : { tongTienDonHang: tongTienDonHang };
+    const requestData = currentCustomerId ? {
+        idKH: currentCustomerId,
+        tongTienDonHang: tongTienDonHang
+    } : {tongTienDonHang: tongTienDonHang};
     console.log('Requesting PGG with data:', requestData);
 
     $.ajax({
@@ -1258,7 +1278,7 @@ function applyDiscount(idHD, idPGG, isPersonal = false, pggkhId = null) {
             $.ajax({
                 url: '/sale/api/get-hoa-don',
                 type: 'GET',
-                data: { idHD: idHD },
+                data: {idHD: idHD},
                 success: function (hoaDonData) {
                     if (hoaDonData) {
                         const tongTienSauGiamGia = hoaDonData.tongTienSauGiamGia || hoaDonData.tongTien || 0;
@@ -1398,10 +1418,10 @@ $(document).on('click', '#phieuGiamGiaList button', function () {
 });
 
 // Hàm tìm kiếm phiếu giảm giá
-$(document).on('input', '#searchPGG', function() {
+$(document).on('input', '#searchPGG', function () {
     const searchTerm = $(this).val().toLowerCase();
 
-    $('#phieuGiamGiaList tr').each(function() {
+    $('#phieuGiamGiaList tr').each(function () {
         const row = $(this);
         const ma = row.find('td:eq(1)').text().toLowerCase();
         const ten = row.find('td:eq(2)').text().toLowerCase();
@@ -1415,7 +1435,7 @@ $(document).on('input', '#searchPGG', function() {
 });
 
 // Sự kiện cho nút tìm kiếm phiếu giảm giá
-$(document).on('click', '#searchButtonPGG', function() {
+$(document).on('click', '#searchButtonPGG', function () {
     const searchTerm = $('#searchPGG').val();
     if (searchTerm.trim()) {
         // Thực hiện tìm kiếm
@@ -1506,7 +1526,7 @@ $(document).ready(function () {
     // Lưu danh sách khách hàng vào window object để sử dụng sau
     const khachHangElements = $('.btn-add-khachHang');
     window.khachHangList = [];
-    khachHangElements.each(function() {
+    khachHangElements.each(function () {
         const kh = {
             id: $(this).data('id-sp'),
             ten: $(this).data('ten'),

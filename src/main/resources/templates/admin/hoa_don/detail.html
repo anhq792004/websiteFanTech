@@ -279,28 +279,28 @@
                                 <input type="text" class="form-control" placeholder="Tên" name="tenNguoiNhan"
                                        id="tenNguoiNhan"
                                        th:value="${hoaDon.tenNguoiNhan}"
-                                       th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
+                                       th:readonly="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bolder">Số điện thoại</label>
                                 <input type="text" class="form-control" placeholder="Số điện thoại" name="sdtNguoiNhan"
                                        id="sdtNguoiNhan"
                                        th:value="${hoaDon.sdtNguoiNhan}"
-                                       th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
+                                       th:readonly="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bolder" for="city">Thành phố</label>
                                 <select class="form-control" id="city" name="tinh"
-                                        th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
+                                        th:readonly="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
                                     <option value="" selected>Chọn tỉnh thành</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bolder" for="district">Quận huyện</label>
                                 <select class="form-control" id="district" name="huyen"
-                                        th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
+                                        th:readonly="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
                                     <option value="" selected>Chọn quận huyện</option>
                                 </select>
                             </div>
@@ -309,7 +309,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bolder" for="district">Phường xã</label>
                                 <select class="form-control" id="ward" name="xa"
-                                        th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
+                                        th:readonly="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
                                     <option value="" selected>Chọn phường xã</option>
                                 </select>
                             </div>
@@ -318,7 +318,7 @@
                                 <input type="text" class="form-control" th:value="${hoaDon.soNhaNgoDuong}"
                                        id="soNhaNgoDuong"
                                        placeholder="1300 Rockdick Rd., Unit A Markham, ON L3R8C3"
-                                       th:disabled="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
+                                       th:readonly="${hoaDon.trangThai == 4 || hoaDon.trangThai == 5 || hoaDon.trangThai == 3 || hoaDon.trangThai == 6}">
                             </div>
                         </div>
                         <input type="hidden" id="tinh" th:value="${hoaDon.tinh}"/>
