@@ -192,6 +192,13 @@
                                                     th:disabled="${idHD == null}">
                                                 <i class="bi bi-ticket-perforated"></i>
                                             </button>
+                                            <!-- Add Remove Discount Button -->
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-2"
+                                                    id="btnXoaPhieuGiamGia"
+                                                    th:disabled="${idHD == null || phieuGiamGia == null}"
+                                                    th:data-id="${idHD}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </div>
                                     </div>
                                     <div class="d-flex justify-content-between">
