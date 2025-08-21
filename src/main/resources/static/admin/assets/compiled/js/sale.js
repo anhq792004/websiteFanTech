@@ -425,8 +425,11 @@ $(document).ready(function () {
 
         // Nếu là thanh toán tiền mặt, kiểm tra số tiền khách trả
         if (phuongThucThanhToan === 'TIEN_MAT') {
-            // Lấy số tiền khách trả
-            const tienKhachTra = parseFloat($('#tienKhachTra').val() || 0);
+            // Lấy số tiền khách trả (đã format có thể chứa dấu chấm)
+            const tienKhachTra = (function(){
+                const raw = $('#tienKhachTra').val() || '0';
+                return Number((raw+'').replace(/[^0-9-]/g, '')) || 0;
+            })();
 
             // Kiểm tra xem khách đã trả đủ tiền chưa
             if (tienKhachTra < tongTienSauGiam) {
@@ -872,6 +875,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // Định dạng tiền tệ cho tất cả các giá trị tiền hàng khi trang tải
     formatCurrency();
 
+    // Nếu input đã có giá trị số, format sẵn khi load
+    if (inputTienKhachTra && inputTienKhachTra.value) {
+        inputTienKhachTra.value = (Number((inputTienKhachTra.value+'').replace(/[^0-9]/g, '')) || 0).toLocaleString('vi-VN');
+    }
+
     if (!pTienThanhToan) {
         console.error("Không tìm thấy phần tử 'tienThanhToan'");
         return;
@@ -883,8 +891,34 @@ document.addEventListener("DOMContentLoaded", function () {
         btnThanhToan.classList.add('btn-outline-warning');
     }
 
+    // Tiện ích: chuẩn hóa chuỗi số VND -> number (loại bỏ . , và ký tự khác)
+    function parseVNDToNumber(str) {
+        if (typeof str !== 'string') return Number(str) || 0;
+        // Loại bỏ ký tự không phải số
+        const digits = str.replace(/[^0-9-]/g, '');
+        return Number(digits) || 0;
+    }
+
+    // Định dạng input theo VND realtime khi gõ
+    function formatInputAsVND(el) {
+        const caretPos = el.selectionStart;
+        const raw = el.value;
+        const numeric = raw.replace(/[^0-9]/g, '');
+        if (numeric.length === 0) {
+            el.value = '';
+            return;
+        }
+        const number = Number(numeric);
+        el.value = number.toLocaleString('vi-VN');
+        // Cố gắng giữ vị trí con trỏ gần cuối
+        try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) {}
+    }
+
     inputTienKhachTra.addEventListener('input', function () {
-        const tienKhachTra = parseFloat(inputTienKhachTra.value) || 0;
+        // Format realtime
+        formatInputAsVND(inputTienKhachTra);
+
+        const tienKhachTra = parseVNDToNumber(inputTienKhachTra.value);
         const tongTienSauGiam = parseFloat($('#tongTienSauGiam').attr('data-value') || $('#tienThanhToan').attr('data-value')) || 0;
         const tienThua = tienKhachTra - tongTienSauGiam;
 
