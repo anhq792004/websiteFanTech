@@ -84,7 +84,7 @@ public class ThongKeRepoImpl implements ThongKeRepo {
     @Override
     public ThongKeTongQuanResponse thongKeTongQuanTrongKhoang(LocalDate from, LocalDate to) {
         String sql = """
-            SELECT COUNT(DISTINCT hd.id), COALESCE(SUM(hd.tongTienSauGiamGia),0), COALESCE(SUM(hdct.soLuong),0), COUNT(DISTINCT hd.khachHang.id)
+            SELECT COUNT(DISTINCT hd.id), SUM(COALESCE(hd.tongTienSauGiamGia, hd.tongTien)), COALESCE(SUM(hdct.soLuong),0), COUNT(DISTINCT hd.khachHang.id)
             FROM HoaDonChiTiet hdct
             JOIN hdct.hoaDon hd
             WHERE hd.trangThai = 4 AND CAST(hd.ngayTao AS DATE) >= :from AND CAST(hd.ngayTao AS DATE) <= :to
@@ -104,7 +104,7 @@ public class ThongKeRepoImpl implements ThongKeRepo {
     @Override
     public List<DoanhThuNgayResponse> doanhThuTungNgayTrongThang(int year, int month) {
         String sql = """
-            SELECT DAY(hd.ngayTao), COALESCE(SUM(hd.tongTienSauGiamGia),0)
+            SELECT DAY(hd.ngayTao), SUM(COALESCE(hd.tongTienSauGiamGia, hd.tongTien))
             FROM HoaDon hd
             WHERE hd.trangThai = 4 AND YEAR(hd.ngayTao) = :year AND MONTH(hd.ngayTao) = :month
             GROUP BY DAY(hd.ngayTao)
@@ -120,7 +120,7 @@ public class ThongKeRepoImpl implements ThongKeRepo {
     @Override
     public List<DoanhThuThangResponse> doanhThuTungThangTrongNam(int year) {
         String sql = """
-            SELECT MONTH(hd.ngayTao), COALESCE(SUM(hd.tongTienSauGiamGia),0)
+            SELECT MONTH(hd.ngayTao), SUM(COALESCE(hd.tongTienSauGiamGia, hd.tongTien))
             FROM HoaDon hd
             WHERE hd.trangThai = 4 AND YEAR(hd.ngayTao) = :year
             GROUP BY MONTH(hd.ngayTao)
@@ -135,7 +135,7 @@ public class ThongKeRepoImpl implements ThongKeRepo {
     @Override
     public List<DoanhThuNgayResponse> doanhThuTheoKhoangNgay(LocalDate from, LocalDate to) {
         String sql = """
-            SELECT DAY(hd.ngayTao), COALESCE(SUM(hd.tongTienSauGiamGia),0)
+            SELECT DAY(hd.ngayTao), SUM(COALESCE(hd.tongTienSauGiamGia, hd.tongTien))
             FROM HoaDon hd
             WHERE hd.trangThai = 4 AND CAST(hd.ngayTao AS DATE) >= :from AND CAST(hd.ngayTao AS DATE) <= :to
             GROUP BY DAY(hd.ngayTao)
@@ -150,28 +150,28 @@ public class ThongKeRepoImpl implements ThongKeRepo {
 
     @Override
     public long tongDoanhThuToanHeThong() {
-        String sql = "SELECT COALESCE(SUM(hd.tongTienSauGiamGia),0) FROM HoaDon hd WHERE hd.trangThai = 4";
+        String sql = "SELECT COALESCE(SUM(COALESCE(hd.tongTienSauGiamGia, hd.tongTien)),0) FROM HoaDon hd WHERE hd.trangThai = 4";
         Query query = entityManager.createQuery(sql);
         return ((Number) query.getSingleResult()).longValue();
     }
 
     @Override
     public long doanhThuHomNay() {
-        String sql = "SELECT COALESCE(SUM(hd.tongTienSauGiamGia),0) FROM HoaDon hd WHERE hd.trangThai = 4 AND CAST(hd.ngayTao AS DATE) = CURRENT_DATE";
+        String sql = "SELECT COALESCE(SUM(COALESCE(hd.tongTienSauGiamGia, hd.tongTien)),0) FROM HoaDon hd WHERE hd.trangThai = 4 AND CAST(hd.ngayTao AS DATE) = CURRENT_DATE";
         Query query = entityManager.createQuery(sql);
         return ((Number) query.getSingleResult()).longValue();
     }
 
     @Override
     public long doanhThuTuanNay() {
-        String sql = "SELECT COALESCE(SUM(hd.tongTienSauGiamGia),0) FROM HoaDon hd WHERE hd.trangThai = 4 AND YEAR(hd.ngayTao) = YEAR(CURRENT_DATE) AND DATEPART(week, hd.ngayTao) = DATEPART(week, CURRENT_DATE)";
+        String sql = "SELECT COALESCE(SUM(COALESCE(hd.tongTienSauGiamGia, hd.tongTien)),0) FROM HoaDon hd WHERE hd.trangThai = 4 AND YEAR(hd.ngayTao) = YEAR(CURRENT_DATE) AND DATEPART(week, hd.ngayTao) = DATEPART(week, CURRENT_DATE)";
         Query query = entityManager.createQuery(sql);
         return ((Number) query.getSingleResult()).longValue();
     }
 
     @Override
     public long doanhThuThangNay() {
-        String sql = "SELECT COALESCE(SUM(hd.tongTienSauGiamGia),0) FROM HoaDon hd WHERE hd.trangThai = 4 AND YEAR(hd.ngayTao) = YEAR(CURRENT_DATE) AND MONTH(hd.ngayTao) = MONTH(CURRENT_DATE)";
+        String sql = "SELECT COALESCE(SUM(COALESCE(hd.tongTienSauGiamGia, hd.tongTien)),0) FROM HoaDon hd WHERE hd.trangThai = 4 AND YEAR(hd.ngayTao) = YEAR(CURRENT_DATE) AND MONTH(hd.ngayTao) = MONTH(CURRENT_DATE)";
         Query query = entityManager.createQuery(sql);
         return ((Number) query.getSingleResult()).longValue();
     }
