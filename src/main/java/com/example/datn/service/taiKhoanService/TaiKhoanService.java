@@ -65,7 +65,9 @@ public class TaiKhoanService {
 
         return verificationCode;
     }
-
+    private String generateSequentialCode(long count) {
+        return String.format("%03d", count); // Định dạng số với 3 chữ số, ví dụ: 001, 002,...
+    }
     public boolean confirmRegistration(String email, String code, HttpSession session) {
         String storedCode = (String) session.getAttribute("verificationCode");
         DangKyDto dangKyDto = (DangKyDto) session.getAttribute("dangKyDto");
@@ -75,7 +77,7 @@ public class TaiKhoanService {
         }
 
         TaiKhoan taiKhoan = new TaiKhoan();
-        taiKhoan.setMa("TK" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        taiKhoan.setMa("TK" + generateSequentialCode(taiKhoanRepository.count() + 1));
         taiKhoan.setEmail(dangKyDto.getEmail());
         taiKhoan.setMatKhau(passwordEncoder.encode(dangKyDto.getMatKhau()));
         taiKhoan.setNgayTao(new Date());
@@ -89,7 +91,7 @@ public class TaiKhoanService {
         TaiKhoan savedTaiKhoan = taiKhoanRepository.save(taiKhoan);
 
         KhachHang khachHang = new KhachHang();
-        khachHang.setMa("KH" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        khachHang.setMa("KH" + generateSequentialCode(khachHangRepository.count() + 1));
         khachHang.setNgayTao(new Date());
         khachHang.setTrangThai(true);
         khachHang.setTaiKhoan(savedTaiKhoan);

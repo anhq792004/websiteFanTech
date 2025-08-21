@@ -356,9 +356,9 @@
         updateSummary(data) {
             const subtotal = data.totalAmount || 0;
             const totalWeight = data.totalWeight || 0;
-            
+
             // Debug: console.log('Debug shipping:', { subtotal, totalWeight, data });
-            
+
             // Tính phí vận chuyển theo logic backend - ĐỒNG BỘ với ThanhToanOnlController và thongtinGiaoHang
             let shippingFee = 0;
             if (subtotal < 2000000) { // Dưới 2 triệu VND
@@ -367,9 +367,9 @@
             } else {
                 shippingFee = 0; // Miễn phí từ 2 triệu trở lên
             }
-            
+
             const finalTotal = subtotal + shippingFee;
-            
+
             document.getElementById('totalItems').textContent = data.itemCount;
             document.getElementById('subtotal').textContent = this.formatPrice(subtotal);
             const shippingElement = document.getElementById('shippingFee');
