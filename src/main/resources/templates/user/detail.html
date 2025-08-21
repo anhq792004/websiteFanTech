@@ -44,7 +44,7 @@
                 </ol>
             </nav>
 
-            <div class="row edit" style="background-color: #FFFFFF;">
+            <div class="row edit py-3" style="background-color: #FFFFFF;">
                 <!-- Hình ảnh sản phẩm -->
                 <div class="col-md-6">
                     <div>
@@ -123,7 +123,7 @@
                                 <h4 class="text-primary fw-bold">
                                     <span id="productPrice"
                                           th:text="${chiTietDauTien != null and chiTietDauTien.gia != null ? #numbers.formatDecimal(chiTietDauTien.gia, 0, 'COMMA', 0, 'POINT') : '0'}">500,000</span>
-                                    <small class="text-muted fw-normal">VNĐ</small>
+                                    <small class="text-muted fw-normal">đ</small>
                                 </h4>
                             </div>
 
@@ -147,9 +147,9 @@
                             <!-- Nút hành động -->
                             <div class="d-grid gap-2 mb-4">
                                 <button class="btn btn-primary btn-lg" id="addToCartBtn" onclick="addToCart()">
-                                    <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ hàng
+                                    <i class="fas fa-shopping-cart me-2"></i> Thêm vào giỏ hàng
                                 </button>
-                                <a href="/fanTech/index" class="btn btn-outline-primary">
+                                <a href="/fanTech/index" class="btn btn-outline-dark">
                                     <i class="fas fa-arrow-left me-2"></i>Quay lại trang chủ
                                 </a>
                             </div>
@@ -374,7 +374,7 @@
             html += `<tr><td><strong>Loại nút bấm:</strong></td><td>${detail.nutBam.ten}</td></tr>`;
         }
         if (detail.canNang) {
-            html += `<tr><td><strong>Cân nặng:</strong></td><td>${detail.canNang} kg</td></tr>`;
+            html += `<tr><td><strong>Cân nặng:</strong></td><td>${detail.canNang} g</td></tr>`;
         }
         if (detail.soLuong !== null && detail.soLuong !== undefined) {
             html += `<tr><td><strong>Số lượng có sẵn:</strong></td><td>${detail.soLuong}</td></tr>`;

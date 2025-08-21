@@ -213,6 +213,11 @@ public class HoaDonServiceImpl implements HoaDonService {
         List<HoaDonChiTiet> listHDCT = hoaDonChiTietRepo.findByHoaDon_Id(id);
 
         if (hoaDonOptional.isPresent()) {
+            HoaDon hoaDon = hoaDonOptional.get();
+
+            if (!hoaDon.getTrangThai().equals(getTrangThaiHoaDon().getChoXacNhan())) {
+                throw new RuntimeException("Hóa đơn đã được xử lý bởi người khác!");
+            }
             for (HoaDonChiTiet hdct : listHDCT) {
                 SanPhamChiTiet spct = hdct.getSanPhamChiTiet();
                 int soLuongTon = spct.getSoLuong();
@@ -222,7 +227,6 @@ public class HoaDonServiceImpl implements HoaDonService {
                     throw new RuntimeException("Số lượng tồn kho không đủ cho sản phẩm: " + spct.getSanPham().getTen());
                 }
             }
-            HoaDon hoaDon = hoaDonOptional.get();
             NhanVien currentNhanVien = getCurrentNhanVien();
 
             hoaDon.setTrangThai(getTrangThaiHoaDon().getDaXacNhan());
@@ -260,8 +264,12 @@ public class HoaDonServiceImpl implements HoaDonService {
         }
 
         if (hoaDonOptional.isPresent()) {
-
             HoaDon hoaDon = hoaDonOptional.get();
+
+            if (!hoaDon.getTrangThai().equals(getTrangThaiHoaDon().getChoXacNhan())) {
+                throw new RuntimeException("Hóa đơn đã được xử lý bởi người khác!");
+            }
+
             NhanVien currentNhanVien = getCurrentNhanVien();
 
             // Cập nhật trạng thái của HoaDon
@@ -287,6 +295,9 @@ public class HoaDonServiceImpl implements HoaDonService {
         Optional<HoaDon> hoaDonOptional = hoaDonRepo.findById(id);
         if (hoaDonOptional.isPresent()) {
             HoaDon hoaDon = hoaDonOptional.get();
+            if (!hoaDon.getTrangThai().equals(getTrangThaiHoaDon().getDaXacNhan())) {
+                throw new RuntimeException("Hóa đơn đã được xử lý bởi người khác!");
+            }
             NhanVien currentNhanVien = getCurrentNhanVien();
             // Cập nhật trạng thái của HoaDon giao hàng
             hoaDon.setTrangThai(getTrangThaiHoaDon().getDangGiaoHang());
@@ -310,6 +321,9 @@ public class HoaDonServiceImpl implements HoaDonService {
         Optional<HoaDon> hoaDonOptional = hoaDonRepo.findById(id);
         if (hoaDonOptional.isPresent()) {
             HoaDon hoaDon = hoaDonOptional.get();
+            if (!hoaDon.getTrangThai().equals(getTrangThaiHoaDon().getDangGiaoHang())) {
+                throw new RuntimeException("Hóa đơn đã được xử lý bởi người khác!");
+            }
             NhanVien currentNhanVien = getCurrentNhanVien();
             // Cập nhật trạng thái của HoaDon hoàn thành
             hoaDon.setTrangThai(getTrangThaiHoaDon().getHoanThanh());
@@ -332,6 +346,11 @@ public class HoaDonServiceImpl implements HoaDonService {
         Optional<HoaDon> optionalHoaDon = hoaDonRepo.findById(id);
         if (optionalHoaDon.isPresent()) {
             HoaDon hoaDon = optionalHoaDon.get();
+            if (!hoaDon.getTrangThai().equals(getTrangThaiHoaDon().getChoXacNhan())
+                    && !hoaDon.getTrangThai().equals(getTrangThaiHoaDon().getDaXacNhan())
+                    && !hoaDon.getTrangThai().equals(getTrangThaiHoaDon().getHoaDonCho())) {
+                throw new RuntimeException("Hóa đơn đã được xử lý bởi người khác!");
+            }
             NhanVien currentNhanVien = getCurrentNhanVien();
             List<HoaDonChiTiet> listHDCT = hoaDonChiTietRepo.findByHoaDon_Id(id);
 
@@ -371,6 +390,10 @@ public class HoaDonServiceImpl implements HoaDonService {
         Optional<HoaDon> optionalHoaDon = hoaDonRepo.findById(id);
         if (optionalHoaDon.isPresent()) {
             HoaDon hoaDon = optionalHoaDon.get();
+
+            if (!hoaDon.getTrangThai().equals(getTrangThaiHoaDon().getDangGiaoHang())) {
+                throw new RuntimeException("Hóa đơn đã được xử lý bởi người khác!");
+            }
             NhanVien currentNhanVien = getCurrentNhanVien();
             List<HoaDonChiTiet> listHDCT = hoaDonChiTietRepo.findByHoaDon_Id(id);
 
@@ -408,6 +431,9 @@ public class HoaDonServiceImpl implements HoaDonService {
         Optional<HoaDon> optionalHoaDon = hoaDonRepo.findById(id);
         if (optionalHoaDon.isPresent()) {
             HoaDon hoaDon = optionalHoaDon.get();
+            if (!hoaDon.getTrangThai().equals(getTrangThaiHoaDon().getChoXacNhan())) {
+                throw new RuntimeException("Hóa đơn đã được xử lý bởi người khác!");
+            }
             List<HoaDonChiTiet> listHDCT = hoaDonChiTietRepo.findByHoaDon_Id(id);
 
             // Cập nhật trạng thái hóa đơn sang HỦY

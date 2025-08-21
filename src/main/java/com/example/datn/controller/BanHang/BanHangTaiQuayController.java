@@ -104,8 +104,12 @@ public class BanHangTaiQuayController {
     @ResponseBody
     public ResponseEntity<String> huy(@RequestParam("id") Long id,
                                       @RequestParam("ghiChu") String ghiChu) {
-        hoaDonService.huy(id,ghiChu);
-        return ResponseEntity.ok("Hóa đơn đã được hủy !");
+        try {
+            hoaDonService.huy(id, ghiChu);
+            return ResponseEntity.ok("Hóa đơn đã được hủy !");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @PostMapping("/addSP")
@@ -196,8 +200,8 @@ public class BanHangTaiQuayController {
     @PostMapping("/thanh-toan")
     @ResponseBody
     public ResponseEntity<String> thanhToan(@RequestParam("idHD") Long idHD,
-                                           @RequestParam("phuongThucThanhToan") String phuongThucThanhToan,
-                                           @RequestParam(value = "shouldPrint", required = false, defaultValue = "false") Boolean shouldPrint) {
+                                            @RequestParam("phuongThucThanhToan") String phuongThucThanhToan,
+                                            @RequestParam(value = "shouldPrint", required = false, defaultValue = "false") Boolean shouldPrint) {
         try {
             // Kiểm tra xem hóa đơn có chi tiết nào không
             List<HoaDonChiTiet> listHDCT = hoaDonService.listHoaDonChiTiets(idHD);
@@ -205,15 +209,15 @@ public class BanHangTaiQuayController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Hóa đơn chưa có sản phẩm nào!");
             }
-            
+
             // Tìm hóa đơn
             Optional<HoaDon> hoaDonOpt = hoaDonService.findHoaDonById(idHD);
             if (!hoaDonOpt.isPresent()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy hóa đơn");
             }
-            
+
             HoaDon hoaDon = hoaDonOpt.get();
-            
+
             // Cập nhật phương thức thanh toán
             hoaDon.setPhuongThucThanhToan(phuongThucThanhToan);
             hoaDonService.saveHoaDon(hoaDon);
@@ -236,39 +240,39 @@ public class BanHangTaiQuayController {
                     .body(e.getMessage());
         }
     }
-    
+
     // Phương thức tạo thanh toán Momo
     private ResponseEntity<String> createMomoPayment(HoaDon hoaDon) {
         try {
             // Sử dụng MomoService để tạo giao dịch
             MomoTransaction transaction = momoService.createTransaction(hoaDon);
-            
+
             // Kiểm tra nếu có lỗi
             if (transaction.getTrangThai() == 2) { // 2: Lỗi
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Lỗi khi tạo thanh toán Momo: " + transaction.getMessage());
+                        .body("Lỗi khi tạo thanh toán Momo: " + transaction.getMessage());
             }
-            
+
             // Kiểm tra xem có payUrl từ Momo không
             if (transaction.getPayUrl() != null && !transaction.getPayUrl().isEmpty()) {
                 // Trả về URL thanh toán từ Momo
                 return ResponseEntity.ok("MOMO_REDIRECT:" + transaction.getPayUrl());
             } else {
                 // Trong trường hợp test hoặc không có payUrl, tạo QR code giả lập
-                String qrCodeUrl = "https://test-payment.momo.vn/gw_payment/qr?id=" + transaction.getOrderId() + 
-                                "&amount=" + transaction.getAmount() + 
-                                "&partnerCode=" + transaction.getPartnerCode();
-                
+                String qrCodeUrl = "https://test-payment.momo.vn/gw_payment/qr?id=" + transaction.getOrderId() +
+                        "&amount=" + transaction.getAmount() +
+                        "&partnerCode=" + transaction.getPartnerCode();
+
                 // Trả về URL QR code để hiển thị
                 return ResponseEntity.ok("MOMO_QR_CODE:" + qrCodeUrl);
             }
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Lỗi khi tạo thanh toán Momo: " + e.getMessage());
+                    .body("Lỗi khi tạo thanh toán Momo: " + e.getMessage());
         }
     }
-    
+
     // API để lấy danh sách phiếu giảm giá đang hoạt động
     @GetMapping("/api/phieu-giam-gia/active")
     @ResponseBody
@@ -458,10 +462,10 @@ public class BanHangTaiQuayController {
         try {
             // Lấy danh sách sản phẩm có trạng thái là true và còn hàng
             List<SanPhamChiTiet> danhSachSanPham = sanPhamChiTietRepo.findByTrangThaiTrue()
-                .stream()
-                .filter(sp -> sp.getSoLuong() > 0)
-                .collect(Collectors.toList());
-            
+                    .stream()
+                    .filter(sp -> sp.getSoLuong() > 0)
+                    .collect(Collectors.toList());
+
             // Đảm bảo các thuộc tính cần thiết được nạp đầy đủ
             for (SanPhamChiTiet sp : danhSachSanPham) {
                 // Kích hoạt lazy loading cho các thuộc tính cần thiết
@@ -472,7 +476,7 @@ public class BanHangTaiQuayController {
                     sp.getMauSac().getTen();
                 }
             }
-            
+
             return ResponseEntity.ok(danhSachSanPham);
         } catch (Exception e) {
             e.printStackTrace();
@@ -490,23 +494,23 @@ public class BanHangTaiQuayController {
             if (!hoaDonOpt.isPresent()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy hóa đơn");
             }
-            
+
             // Trong môi trường test, luôn xác nhận thành công
             boolean success = momoService.confirmTransaction(idHD);
-            
+
             if (success) {
                 return ResponseEntity.ok("Thanh toán Momo thành công!");
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Không thể xác nhận thanh toán Momo");
+                        .body("Không thể xác nhận thanh toán Momo");
             }
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Lỗi khi xác nhận thanh toán Momo: " + e.getMessage());
+                    .body("Lỗi khi xác nhận thanh toán Momo: " + e.getMessage());
         }
     }
-    
+
     // Hủy thanh toán Momo
     @PostMapping("/cancel-momo-payment")
     @ResponseBody
@@ -514,20 +518,20 @@ public class BanHangTaiQuayController {
         try {
             // Sử dụng MomoService để hủy giao dịch
             boolean success = momoService.cancelTransaction(idHD);
-            
+
             if (success) {
                 return ResponseEntity.ok("Đã hủy thanh toán Momo");
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Không thể hủy thanh toán Momo");
+                        .body("Không thể hủy thanh toán Momo");
             }
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Lỗi khi hủy thanh toán Momo: " + e.getMessage());
+                    .body("Lỗi khi hủy thanh toán Momo: " + e.getMessage());
         }
     }
-    
+
     // Kiểm tra trạng thái thanh toán Momo
     @GetMapping("/check-momo-payment-status")
     @ResponseBody
@@ -536,13 +540,13 @@ public class BanHangTaiQuayController {
         try {
             // Lấy thông tin giao dịch Momo
             MomoTransaction transaction = momoService.getTransactionByHoaDonId(idHD);
-            
+
             if (transaction == null) {
                 response.put("success", false);
                 response.put("message", "Không tìm thấy giao dịch Momo cho hóa đơn này");
                 return ResponseEntity.ok(response);
             }
-            
+
             // Kiểm tra trạng thái giao dịch
             // 0: Chờ thanh toán, 1: Đã thanh toán, 2: Lỗi, 3: Đã hủy
             if (transaction.getTrangThai() == 1) {
@@ -558,10 +562,10 @@ public class BanHangTaiQuayController {
                 response.put("success", false);
                 response.put("message", "Giao dịch đã bị hủy");
             }
-            
+
             response.put("status", transaction.getTrangThai());
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             response.put("success", false);

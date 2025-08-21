@@ -51,8 +51,8 @@ $(document).ready(function () {
                             location.reload(); // Reload lại trang sau khi nhấn OK
                         });
                     },
-                    error: function () {
-                        Swal.fire("Lỗi!", "Lỗi khi xác nhận hóa đơn", "error");
+                    error: function (xhr) {
+                        Swal.fire("Lỗi!", xhr.responseText, "error");
                         btn.prop("disabled", false);
                     }
                 });
@@ -87,8 +87,8 @@ $(document).ready(function () {
                     location.reload(); // Reload lại trang sau khi thành công
                 });
             },
-            error: function () {
-                Swal.fire("Lỗi!", "Lỗi khi giao hóa đơn", "error");
+            error: function (xhr) {
+                Swal.fire("Lỗi!", xhr.responseText, "error");
                 btn.prop("disabled", false);
             }
         });
@@ -119,8 +119,8 @@ $(document).ready(function () {
                     location.reload(); // Reload lại trang sau khi thành công
                 });
             },
-            error: function () {
-                Swal.fire("Lỗi!", "Lỗi khi hoàn thành hóa đơn", "error");
+            error: function (xhr) {
+                Swal.fire("Lỗi!", xhr.responseText, "error");
                 btn.prop("disabled", false);
 
             }
@@ -178,8 +178,8 @@ $(document).ready(function () {
                             location.reload(); // Reload lại trang sau khi nhấn OK
                         });
                     },
-                    error: function () {
-                        Swal.fire("Lỗi!", "Lỗi khi xác nhận hóa đơn", "error");
+                    error: function (xhr) {
+                        Swal.fire("Lỗi!", xhr.responseText, "error");
                     }
                 });
             }
@@ -237,8 +237,8 @@ $(document).ready(function () {
                             location.reload(); // Reload lại trang sau khi nhấn OK
                         });
                     },
-                    error: function () {
-                        Swal.fire("Lỗi!", "Lỗi khi xác nhận hóa đơn", "error");
+                    error: function (xhr) {
+                        Swal.fire("Lỗi!", xhr.responseText, "error");
                     }
                 });
             }
