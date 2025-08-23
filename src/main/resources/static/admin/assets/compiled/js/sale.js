@@ -619,10 +619,10 @@ function checkMomoPaymentStatus(hoaDonId) {
                 Swal.fire({
                     toast: true,
                     icon: 'success',
-                    title: 'Thanh toán Momo thành công!',
+                    title: response,
                     position: 'top-end',
                     showConfirmButton: false,
-                    timer: 1000,
+                    timer: 2000,
                     timerProgressBar: true
                 }).then(() => {
                     window.location.href = '/sale/index';
@@ -749,10 +749,10 @@ function confirmMomoPayment(hoaDonId) {
             Swal.fire({
                 toast: true,
                 icon: 'success',
-                title: 'Thanh toán Momo thành công!',
+                title: 'Thanh toán Momo thành công! Đơn hàng đã chuyển sang đang giao hàng.',
                 position: 'top-end',
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 timerProgressBar: true
             }).then(() => {
                 window.location.href = '/sale/index';
