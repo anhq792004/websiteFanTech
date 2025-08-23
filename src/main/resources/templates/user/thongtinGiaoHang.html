@@ -557,15 +557,14 @@
             const weightKg = data.totalWeight ? (data.totalWeight / 1000) : 0;
             document.getElementById('totalWeight').textContent = weightKg.toLocaleString('vi-VN', {maximumFractionDigits: 2}) + ' kg';
 
-            // Tính phí ship
             let shippingFee = 0;
-            if (data.totalAmount < 2000000) { // dưới 2 triệu
-                shippingFee = Math.ceil(weightKg * 10000); // 10.000đ/kg, làm tròn lên
+            if (data.totalAmount < 2000000) {
+                shippingFee = Math.ceil(weightKg * 10000); // 10.000đ/kg
             }
             document.getElementById('shippingFee').textContent = this.formatCurrency(shippingFee);
 
             const discountAmount = this.calculateDiscountAmount(data.totalAmount);
-            const finalAmount = data.totalAmount - discountAmount + shippingFee;
+            const finalAmount = Math.max(data.totalAmount - discountAmount + shippingFee, 0); // Đảm bảo không âm
 
             document.getElementById('discount').textContent = this.formatCurrency(-discountAmount);
             document.getElementById('totalAmount').textContent = this.formatCurrency(finalAmount);
@@ -779,10 +778,7 @@
 
             if (voucher.loaiGiam === 'PERCENT') {
                 const percent = Number(voucher.giaTriGiam);
-                if (isNaN(percent)) {
-                    console.error('giaTriGiam is not a number:', voucher.giaTriGiam);
-                    return 0;
-                }
+                if (isNaN(percent)) return 0;
                 discountAmount = originalAmount * (percent / 100);
             } else {
                 discountAmount = Number(voucher.giaTriGiam);
@@ -792,7 +788,9 @@
                 discountAmount = voucher.giaTriGiamToiDa;
             }
 
-            return discountAmount;
+            // Đảm bảo discountAmount không vượt quá totalAmount + shippingFee
+            const maxDiscount = originalAmount + (this.cartData.shippingFee || 0);
+            return Math.min(discountAmount, maxDiscount);
         }
 
         validatePhoneNumber(input) {
