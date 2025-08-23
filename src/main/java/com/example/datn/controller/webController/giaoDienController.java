@@ -1,7 +1,9 @@
 package com.example.datn.controller.webController;
 import com.example.datn.entity.SanPham.SanPham;
 import com.example.datn.entity.SanPham.SanPhamChiTiet;
+import com.example.datn.repository.KhachHangRepo.KhachHangRepo;
 import com.example.datn.repository.SanPhamRepo.SanPhamRepo;
+import com.example.datn.repository.TaiKhoanRepo;
 import com.example.datn.service.SanPhamSerivce.SanPhamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,10 @@ public class giaoDienController {
     private SanPhamService sanPhamService;
     @Autowired
     private SanPhamRepo sanPhamRepo;
+    @Autowired
+    private TaiKhoanRepo taiKhoanRepo;
+    @Autowired
+    private KhachHangRepo khachHangRepo;
 
     @GetMapping("/index")
     public String index(@RequestParam(name = "page", defaultValue = "0") int page, Model model) {
