@@ -1859,5 +1859,75 @@ function checkPaymentStatus() {
         // Xóa pending order khỏi sessionStorage
         sessionStorage.removeItem('pending_momo_order');
     }
+// Sự kiện xóa phiếu giảm giá
+    $(document).ready(function () {
+        $('#btnXoaPhieuGiamGia').on('click', function () {
+            const idHD = $(this).data('id');
+            Swal.fire({
+                title: 'Xóa phiếu giảm giá?',
+                text: 'Bạn có chắc chắn muốn xóa phiếu giảm giá đã áp dụng?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Xác nhận'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/sale/remove-discount',
+                        type: 'POST',
+                        data: {idHD: idHD},
+                        success: function (response) {
+                            Swal.fire({
+                                toast: true,
+                                icon: 'success',
+                                title: response,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 1000,
+                                timerProgressBar: true
+                            }).then(() => {
+                                // Reset UI
+                                $('#tenPhieuGiamGia').text('Chưa chọn');
+                                $('#giaTriGiamGia').text('0 đ');
+                                $('#giaTriGiamGia').attr('data-value', '0');
+                                const tongTien = parseFloat($('#tienThanhToan').attr('data-value')) || 0;
+                                $('#tongTienSauGiam').text(formatNumberToVND(tongTien));
+                                $('#tongTienSauGiam').attr('data-value', tongTien);
+
+                                // Reset selected discount
+                                selectedPhieuGiamGia = null;
+
+                                // Cập nhật lại tiền thừa
+                                const tienKhachTra = parseFloat($('#tienKhachTra').val()) || 0;
+                                const tienThua = tienKhachTra - tongTien;
+                                $('#tienThua').text(formatNumberToVND(tienThua));
+                                if (tienThua < 0) {
+                                    $('#tienThua').addClass("text-danger");
+                                    $('#btnThanhToan').removeClass('btn-success').addClass('btn-outline-warning');
+                                } else {
+                                    $('#tienThua').removeClass("text-danger");
+                                    $('#btnThanhToan').removeClass('btn-outline-warning').addClass('btn-success');
+                                }
+
+                                location.reload();
+                            });
+                        },
+                        error: function (xhr) {
+                            Swal.fire({
+                                toast: true,
+                                icon: 'error',
+                                title: xhr.responseText || 'Không thể xóa phiếu giảm giá',
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 2000,
+                                timerProgressBar: true
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    });
 }
 

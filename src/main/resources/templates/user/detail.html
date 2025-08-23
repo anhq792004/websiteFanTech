@@ -29,6 +29,9 @@
 <!-- FontAwesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+<!-- SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
 <body>
 <div id="page">
     <header th:replace="/user/fragments/header :: header"></header>
@@ -216,6 +219,8 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
 <!-- Custom JavaScript -->
 <script th:inline="javascript">
@@ -427,8 +432,8 @@
         }
     }
 
-    // Hàm thêm vào giỏ hàng (giữ nguyên logic cũ)
-    function addToCart() {
+    // Hàm thêm vào giỏ hàng với kiểm tra giới hạn 100 sản phẩm
+    async function addToCart() {
         const selectedColorOption = document.querySelector('input[name="selectedColor"]:checked');
         const selectedPowerOption = document.querySelector('input[name="selectedPower"]:checked');
         const quantity = parseInt(document.getElementById('quantity').value);
@@ -441,18 +446,30 @@
         }
 
         if (!selectedDetailId) {
-            showNotification('Vui lòng chọn màu sắc và công suất!', 'warning');
+            showSweetAlert('Vui lòng chọn màu sắc và công suất!', 'warning');
             return;
         }
 
         const selectedDetail = detailsMap[selectedDetailId];
         if (!selectedDetail) {
-            showNotification('Không tìm thấy thông tin sản phẩm!', 'error');
+            showSweetAlert('Không tìm thấy thông tin sản phẩm!', 'error');
             return;
         }
 
         if (quantity > selectedDetail.soLuong) {
-            showNotification(`Số lượng vượt quá số lượng có sẵn (${selectedDetail.soLuong})!`, 'warning');
+            showSweetAlert(`Số lượng vượt quá số lượng có sẵn (${selectedDetail.soLuong})!`, 'warning');
+            return;
+        }
+
+        // Kiểm tra giới hạn 100 sản phẩm
+        try {
+            const canAdd = await checkCartLimit(selectedDetailId, quantity);
+            if (!canAdd) {
+                return; // Dừng lại nếu vượt quá giới hạn
+            }
+        } catch (error) {
+            console.error('Error checking cart limit:', error);
+            showSweetAlert('Có lỗi xảy ra khi kiểm tra giới hạn giỏ hàng', 'error');
             return;
         }
 
@@ -467,6 +484,40 @@
         };
 
         addToCartServer(cartItem);
+    }
+
+    // Kiểm tra giới hạn 100 sản phẩm trong giỏ hàng
+    async function checkCartLimit(sanPhamChiTietId, newQuantity) {
+        try {
+            const response = await fetch('/cart/info');
+            const data = await response.json();
+            const currentTotal = data.itemCount || 0;
+
+            // Tìm sản phẩm hiện tại trong giỏ hàng (nếu có)
+            const existingItem = data.items.find(item => item.sanPhamChiTietId == sanPhamChiTietId);
+            const currentQuantity = existingItem ? existingItem.soLuong : 0;
+
+            // Tính tổng số lượng dự kiến sau khi thêm/cập nhật
+            const projectedTotal = currentTotal - currentQuantity + newQuantity;
+
+            // Chặn hoàn toàn nếu tổng số lượng hiện tại đã đạt hoặc vượt 100
+            if (currentTotal >= 100) {
+                showSweetAlert('Giỏ hàng đã đạt giới hạn 100 sản phẩm! Không thể thêm sản phẩm nào nữa.', 'warning');
+                return false;
+            }
+
+            // Kiểm tra nếu tổng số lượng dự kiến vượt quá 100
+            if (projectedTotal > 100) {
+                showSweetAlert(`Giỏ hàng đã đạt giới hạn 100 sản phẩm! Hiện tại có ${currentTotal} sản phẩm, bạn chỉ có thể thêm tối đa ${100 - currentTotal + currentQuantity} sản phẩm.`, 'warning');
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Error checking cart limit:', error);
+            showSweetAlert('Có lỗi xảy ra khi kiểm tra giới hạn giỏ hàng', 'error');
+            return false;
+        }
     }
 
     function addToCartServer(cartItem) {
@@ -486,13 +537,13 @@
             .then(response => response.ok ? response.json() : Promise.reject())
             .then(data => {
                 if (data.success) {
-                    showNotification('Đã thêm sản phẩm vào giỏ hàng!', 'success');
+                    showSweetAlert('Đã thêm sản phẩm vào giỏ hàng!', 'success');
                     updateCartCount(data.cartCount);
                 } else {
-                    showNotification(data.message || 'Có lỗi xảy ra!', 'error');
+                    showSweetAlert(data.message || 'Có lỗi xảy ra!', 'error');
                 }
             })
-            .catch(() => showNotification('Có lỗi xảy ra khi thêm vào giỏ hàng!', 'error'))
+            .catch(() => showSweetAlert('Có lỗi xảy ra khi thêm vào giỏ hàng!', 'error'))
             .finally(() => {
                 const selectedDetail = getCurrentSelectedDetail();
                 updateAddToCartButton(selectedDetail);
@@ -505,25 +556,19 @@
         return selectedPowerOption ? detailsMap[selectedPowerOption.value] : (selectedColorOption ? detailsMap[selectedColorOption.value] : null);
     }
 
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${getBootstrapAlertClass(type)} alert-dismissible fade show position-fixed`;
-        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-        notification.innerHTML = `${getNotificationIcon(type)}${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-        document.body.appendChild(notification);
-        setTimeout(() => notification.remove(), 5000);
-    }
-
-    function getBootstrapAlertClass(type) {
-        return {'success': 'success', 'error': 'danger', 'warning': 'warning'}[type] || 'info';
-    }
-
-    function getNotificationIcon(type) {
-        return {
-            'success': '<i class="fas fa-check-circle me-2"></i>',
-            'error': '<i class="fas fa-exclamation-circle me-2"></i>',
-            'warning': '<i class="fas fa-exclamation-triangle me-2"></i>'
-        }[type] || '<i class="fas fa-info-circle me-2"></i>';
+    // Hiển thị thông báo với SweetAlert2
+    function showSweetAlert(message, type = 'info', title = 'Thông báo') {
+        Swal.fire({
+            icon: type,
+            title: title,
+            text: message,
+            position: 'center',
+            showConfirmButton: true,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#3085d6',
+            timer: null, // Loại bỏ tự động đóng
+            width: '400px'
+        });
     }
 
     function updateCartCount(count) {
@@ -549,7 +594,7 @@
         const min = parseInt(this.min);
         if (value > max) {
             this.value = max;
-            showNotification(`Số lượng tối đa là ${max}`, 'warning');
+            showSweetAlert(`Số lượng tối đa là ${max}`, 'warning');
         } else if (value < min) this.value = min;
     });
 
