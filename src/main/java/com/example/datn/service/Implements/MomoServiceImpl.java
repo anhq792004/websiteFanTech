@@ -222,10 +222,10 @@ public class MomoServiceImpl implements MomoService {
                 HoaDon hoaDon = hoaDonOpt.get();
                 
                 if (hoaDon.getLoaiHoaDon() != null && !hoaDon.getLoaiHoaDon()) {
-                    // Đây là hóa đơn online (false), xử lý riêng
+                    // Đây là hóa đơn online (false) - chuyển sang "Xác nhận" (giống thanh toán khi nhận hàng)
                     confirmOnlineOrder(hoaDon);
                 } else {
-                    // Đây là hóa đơn admin (true), dùng logic cũ
+                    // Đây là hóa đơn tại quầy (true) - hoàn thành ngay
                     banHangService.thanhToan(hoaDonId);
                 }
             }
@@ -278,21 +278,21 @@ public class MomoServiceImpl implements MomoService {
     }
     
     /**
-     * Xử lý hoàn tất đơn hàng online mà không thay đổi loại hóa đơn
+     * Xử lý xác nhận đơn hàng online sau khi thanh toán thành công
      */
     private void confirmOnlineOrder(HoaDon hoaDon) {
-        // Cập nhật trạng thái hóa đơn thành hoàn thành nhưng giữ nguyên loaiHoaDon = false
+        // Cập nhật trạng thái hóa đơn thành "Xác nhận" (giống thanh toán khi nhận hàng)
         hoaDon.setNgaySua(LocalDateTime.now());
-        hoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getHoanThanh());
+        hoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getDaXacNhan());
         // Không thay đổi loaiHoaDon - giữ nguyên false (Online)
         
         // Tạo lịch sử hóa đơn
         LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
         lichSuHoaDon.setHoaDon(hoaDon);
-        lichSuHoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getHoanThanh());
+        lichSuHoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getDaXacNhan());
         lichSuHoaDon.setNgayTao(LocalDateTime.now());
         lichSuHoaDon.setNguoiTao(hoaDon.getKhachHang() != null ? hoaDon.getKhachHang().getTen() : "Online Customer");
-        lichSuHoaDon.setMoTa("Thanh toán MoMo thành công - Đơn hàng online");
+        lichSuHoaDon.setMoTa("Thanh toán MoMo thành công - Chuyển sang xác nhận");
         
         // Lưu vào database
         hoaDonService.saveHoaDon(hoaDon);
