@@ -499,6 +499,18 @@ public class BanHangTaiQuayController {
             boolean success = momoService.confirmTransaction(idHD);
 
             if (success) {
+                // Kiểm tra loại hóa đơn để hiển thị thông báo phù hợp
+                Optional<HoaDon> hoaDonForMessage = hoaDonService.findHoaDonById(idHD);
+                if (hoaDonForMessage.isPresent()) {
+                    HoaDon hoaDon = hoaDonForMessage.get();
+                    if (hoaDon.getLoaiHoaDon() != null && !hoaDon.getLoaiHoaDon()) {
+                        // Hóa đơn online - chuyển sang xác nhận (giống thanh toán khi nhận hàng)
+                        return ResponseEntity.ok("Thanh toán Momo thành công! Đơn hàng online đã chuyển sang xác nhận.");
+                    } else {
+                        // Hóa đơn tại quầy - hoàn thành ngay
+                        return ResponseEntity.ok("Thanh toán Momo thành công! Đơn hàng tại quầy đã hoàn thành.");
+                    }
+                }
                 return ResponseEntity.ok("Thanh toán Momo thành công!");
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -247,7 +247,7 @@ public class ThanhToanOnlController {
             hoaDon.setPhuongThucThanhToan(phuongThucThanhToan);
             hoaDon.setGhiChu(ghiChu);
             hoaDon.setLoaiHoaDon(false);
-            hoaDon.setTrangThai("MOMO".equals(phuongThucThanhToan) ? 2 : 1);
+            hoaDon.setTrangThai(1);
             hoaDon.setNgayTao(LocalDateTime.now());
             hoaDon.setNguoiTao(khachHang.getTen());
             hoaDon.setTongTien(totalAmount);
@@ -295,7 +295,7 @@ public class ThanhToanOnlController {
 
             LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
             lichSuHoaDon.setHoaDon(savedHoaDon);
-            lichSuHoaDon.setTrangThai("MOMO".equals(phuongThucThanhToan) ? 2 : 1);
+            lichSuHoaDon.setTrangThai(1);
             lichSuHoaDon.setNgayTao(LocalDateTime.now());
             lichSuHoaDon.setMoTa("Đơn hàng được tạo bởi khách hàng: " + khachHang.getTen());
             lichSuHoaDon.setNguoiTao(khachHang.getTen());
