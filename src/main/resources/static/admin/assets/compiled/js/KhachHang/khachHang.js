@@ -58,9 +58,9 @@ $(document).ready(function () {
             $('#btnIcon').removeClass('d-none');
             return;
         }
-        if (!ten.length > 100) {
-            showToast('error', 'Tên không được dài quá 100 ký tư');
-            $('#btnNV').prop('disabled', false);
+        if (ten.length > 100) {
+            showToast('error', 'Tên không được dài quá 100 ký tự');
+            $('#submitBtn').prop('disabled', false);
             $('#btnSpinner').addClass('d-none');
             $('#btnIcon').removeClass('d-none');
             return;

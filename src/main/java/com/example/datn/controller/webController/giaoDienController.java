@@ -23,10 +23,6 @@ public class giaoDienController {
     private SanPhamService sanPhamService;
     @Autowired
     private SanPhamRepo sanPhamRepo;
-    @Autowired
-    private TaiKhoanRepo taiKhoanRepo;
-    @Autowired
-    private KhachHangRepo khachHangRepo;
 
     @GetMapping("/index")
     public String index(@RequestParam(name = "page", defaultValue = "0") int page, Model model) {
