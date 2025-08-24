@@ -550,6 +550,22 @@ public class BanHangTaiQuayController {
     public ResponseEntity<Map<String, Object>> checkMomoPaymentStatus(@RequestParam("idHD") Long idHD) {
         Map<String, Object> response = new HashMap<>();
         try {
+            // Kiểm tra xem hóa đơn có tồn tại và đang ở trạng thái chờ thanh toán không
+            Optional<HoaDon> hoaDonOpt = hoaDonService.findHoaDonById(idHD);
+            if (!hoaDonOpt.isPresent()) {
+                response.put("success", false);
+                response.put("message", "Không tìm thấy hóa đơn");
+                return ResponseEntity.ok(response);
+            }
+            
+            HoaDon hoaDon = hoaDonOpt.get();
+            // Chỉ kiểm tra nếu hóa đơn đang ở trạng thái chờ thanh toán
+            if (hoaDon.getTrangThai() != hoaDonService.getTrangThaiHoaDon().getHoaDonCho()) {
+                response.put("success", false);
+                response.put("message", "Hóa đơn không ở trạng thái chờ thanh toán");
+                return ResponseEntity.ok(response);
+            }
+            
             // Lấy thông tin giao dịch Momo
             MomoTransaction transaction = momoService.getTransactionByHoaDonId(idHD);
 

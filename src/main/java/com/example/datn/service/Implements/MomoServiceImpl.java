@@ -1,10 +1,13 @@
 package com.example.datn.service.Implements;
 
 import com.example.datn.entity.HoaDon.HoaDon;
+import com.example.datn.entity.HoaDon.HoaDonChiTiet;
 import com.example.datn.entity.HoaDon.LichSuHoaDon;
 import com.example.datn.entity.MomoTransaction;
+import com.example.datn.entity.SanPham.SanPhamChiTiet;
 import com.example.datn.repository.HoaDonRepo.LichSuHoaDonRepo;
 import com.example.datn.repository.MomoTransactionRepository;
+import com.example.datn.repository.SanPhamRepo.SanPhamChiTietRepo;
 import com.example.datn.service.BanHang.BanHangService;
 import com.example.datn.service.HoaDonService.HoaDonService;
 import com.example.datn.service.MomoService;
@@ -34,6 +37,7 @@ public class MomoServiceImpl implements MomoService {
     private final HoaDonService hoaDonService;
     private final BanHangService banHangService;
     private final LichSuHoaDonRepo lichSuHoaDonRepo;
+    private final SanPhamChiTietRepo sanPhamChiTietRepo;
     private final RestTemplate restTemplate = new RestTemplate();
     
     @Value("${momo.partner-code}")
@@ -284,7 +288,24 @@ public class MomoServiceImpl implements MomoService {
         // Cập nhật trạng thái hóa đơn thành "Xác nhận" (giống thanh toán khi nhận hàng)
         hoaDon.setNgaySua(LocalDateTime.now());
         hoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getDaXacNhan());
-        // Không thay đổi loaiHoaDon - giữ nguyên false (Online)
+        try {
+            List<HoaDonChiTiet> listHDCT = hoaDonService.listHoaDonChiTiets(hoaDon.getId());
+            for (HoaDonChiTiet hdct : listHDCT) {
+                if (hdct.getSanPhamChiTiet() != null) {
+                    SanPhamChiTiet spct = hdct.getSanPhamChiTiet();
+                    int soLuongHienTai = spct.getSoLuong();
+                    int soLuongBan = hdct.getSoLuong();
+                    int soLuongConLai = soLuongHienTai - soLuongBan;
+                    
+                    if (soLuongConLai >= 0) {
+                        spct.setSoLuong(soLuongConLai);
+                        sanPhamChiTietRepo.save(spct);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Lỗi khi trừ số lượng sản phẩm: {}", e.getMessage());
+        }
         
         // Tạo lịch sử hóa đơn
         LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
@@ -292,7 +313,7 @@ public class MomoServiceImpl implements MomoService {
         lichSuHoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getDaXacNhan());
         lichSuHoaDon.setNgayTao(LocalDateTime.now());
         lichSuHoaDon.setNguoiTao(hoaDon.getKhachHang() != null ? hoaDon.getKhachHang().getTen() : "Online Customer");
-        lichSuHoaDon.setMoTa("Thanh toán MoMo thành công - Chuyển sang xác nhận");
+        lichSuHoaDon.setMoTa("Thanh toán MoMo thành công");
         
         // Lưu vào database
         hoaDonService.saveHoaDon(hoaDon);
