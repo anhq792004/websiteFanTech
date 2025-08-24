@@ -347,7 +347,12 @@
                                      class="product-img" alt="Sản phẩm">
 
                                 <div class="product-details ms-3">
-                                    <h5 class="mb-2" th:text="${item.sanPhamChiTiet.sanPham.ten}"></h5>
+                                    <h5 class="mb-2"
+                                        th:text="${#strings.length(item.sanPhamChiTiet.sanPham.ten) > 20
+                                          ? #strings.substring(item.sanPhamChiTiet.sanPham.ten, 0, 20) + '...'
+                                          : item.sanPhamChiTiet.sanPham.ten}">
+                                    </h5>
+
                                     <p class="mb-2">Giá: <span class="product-price giaVND"
                                                                th:text="${#numbers.formatDecimal(item.gia, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
                                     </p>
@@ -355,7 +360,7 @@
                                                                 th:text="${item.sanPhamChiTiet.hang.ten}"></span></p>
                                 </div>
                             </div>
-                            <div class="align-items-center ">
+                            <div class="align-items-center">
                                 <p class="mb-2">Màu: <span class="product-category"
                                                            th:text="${item.sanPhamChiTiet.mauSac.ten}"></span></p>
                                 <p class="mb-2">Công suất: <span class="product-category"
@@ -411,6 +416,11 @@
                             Phiếu giảm giá
                             <span class="discount float-end"
                                   th:text="${hoaDon.phieuGiamGia != null ? hoaDon.phieuGiamGia.ten : 'Null'}"></span>
+                        </p>
+                        <p>
+                            Giá trị giảm
+                            <span class="discount float-end"
+                                  th:text="${hoaDon.phieuGiamGia != null ? hoaDon.phieuGiamGia.giaTriGiam : 'Null'}"></span>
                         </p>
                         <p>Tổng tiền sau giảm giá <span class="order-total float-end giaVND"
                                                         th:text="${#numbers.formatDecimal(hoaDon.tongTienSauGiamGia, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
