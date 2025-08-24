@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface MomoTransactionRepository extends JpaRepository<MomoTransaction, Long> {
     Optional<MomoTransaction> findByOrderId(String orderId);
     Optional<MomoTransaction> findByHoaDonId(Long hoaDonId);
+
+
 } 

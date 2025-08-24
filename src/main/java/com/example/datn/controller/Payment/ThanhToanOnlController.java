@@ -10,6 +10,7 @@ import com.example.datn.repository.HoaDonRepo.HoaDonChiTietRepo;
 import com.example.datn.repository.HoaDonRepo.HoaDonRepo;
 import com.example.datn.repository.HoaDonRepo.LichSuHoaDonRepo;
 import com.example.datn.repository.KhachHangRepo.KhachHangRepo;
+import com.example.datn.repository.MomoTransactionRepository;
 import com.example.datn.repository.PhieuGiamGiaKhachHangRepo;
 import com.example.datn.repository.PhieuGiamGiaRepo;
 import com.example.datn.repository.SanPhamRepo.SanPhamChiTietRepo;
@@ -62,12 +63,15 @@ public class ThanhToanOnlController {
     private PhieuGiamGiaSercvice phieuGiamGiaService;
     @Autowired
     private PhieuGiamGiaKhachHangRepo phieuGiamGiaKhachHangRepo;
-    
+
     @Autowired
     private MomoService momoService;
-    
+
     @Autowired
     private SanPhamChiTietRepo sanPhamChiTietRepo;
+
+    @Autowired
+    private MomoTransactionRepository momoTransactionRepository;
 
     @Autowired
     private com.example.datn.service.KhachHangService.KhachHangService khachHangService;
@@ -179,29 +183,22 @@ public class ThanhToanOnlController {
                 return ResponseEntity.ok(response);
             }
 
-            BigDecimal totalAmount = (BigDecimal) cartInfo.get("totalAmount");
-            BigDecimal finalAmount = totalAmount;
-            BigDecimal discountAmount = BigDecimal.ZERO;
-            BigDecimal shippingFee = BigDecimal.ZERO;
+            BigDecimal totalAmount = (BigDecimal) cartInfo.get("totalAmount"); // Tiền hàng
+            BigDecimal shippingFee = BigDecimal.ZERO; // Phí vận chuyển
+            BigDecimal discountAmount = BigDecimal.ZERO; // Giảm giá
             PhieuGiamGia usedVoucher = null;
 
             // Tính phí vận chuyển
             float totalWeight = (Float) cartInfo.get("totalWeight");
             if (totalAmount.compareTo(new BigDecimal("2000000")) < 0) {
                 shippingFee = new BigDecimal(totalWeight / 1000).multiply(new BigDecimal("10000"));
-            } else {
-                shippingFee = BigDecimal.ZERO;
             }
 
-            // Xử lý phiếu giảm giá
+            // Xử lý phiếu giảm giá (chỉ áp dụng cho totalAmount)
             if (voucherId != null) {
                 Optional<PhieuGiamGia> voucherOpt = phieuGiamGiaRepo.findById(voucherId);
                 if (voucherOpt.isPresent()) {
                     PhieuGiamGia voucher = voucherOpt.get();
-                    System.out.println("DEBUG: Voucher - ID: " + voucher.getId() +
-                            ", loaiGiamGia: " + voucher.getLoaiGiamGia() +
-                            ", giaTriGiam: " + voucher.getGiaTriGiam());
-
                     if (!voucher.getLoaiPhieu()) {
                         Optional<PhieuGiamGiaKhachHang> pggkhOpt = phieuGiamGiaKhachHangRepo
                                 .findByPhieuGiamGiaAndKhachHang(voucher, khachHang);
@@ -210,8 +207,6 @@ public class ThanhToanOnlController {
                             response.put("message", "Phiếu giảm giá không hợp lệ hoặc đã được sử dụng");
                             return ResponseEntity.ok(response);
                         }
-                        // Xóa quan hệ sau khi sử dụng
-                        phieuGiamGiaKhachHangRepo.delete(pggkhOpt.get());
                     }
 
                     if (voucher.getSoLuongDaSuDung() >= voucher.getSoLuong()) {
@@ -219,122 +214,79 @@ public class ThanhToanOnlController {
                         response.put("message", "Phiếu giảm giá đã hết lượt sử dụng");
                         return ResponseEntity.ok(response);
                     }
-
-                    voucher.setSoLuongDaSuDung(voucher.getSoLuongDaSuDung() + 1);
-                    phieuGiamGiaRepo.save(voucher);
                     usedVoucher = voucher;
                     discountAmount = phieuGiamGiaService.calculateDiscountAmount(voucher, totalAmount);
-                } else {
-                    System.out.println("DEBUG: Voucher with ID " + voucherId + " not found");
+                    // Đảm bảo discountAmount không vượt quá totalAmount
+                    if (discountAmount.compareTo(totalAmount) > 0) {
+                        discountAmount = totalAmount; // Giới hạn giảm giá tối đa bằng totalAmount
+                    }
                 }
             }
 
-            finalAmount = totalAmount.add(shippingFee).subtract(discountAmount);
-            System.out.println("DEBUG: Calculated - totalAmount: " + totalAmount +
-                    ", shippingFee: " + shippingFee +
-                    ", discountAmount: " + discountAmount +
-                    ", finalAmount: " + finalAmount);
-
-            HoaDon hoaDon = new HoaDon();
-            hoaDon.setMa(generateOrderCode());
-            hoaDon.setKhachHang(khachHang);
-            hoaDon.setTenNguoiNhan(hoTen);
-            hoaDon.setSdtNguoiNhan(soDienThoai);
-            hoaDon.setTinh(tinhThanh);
-            hoaDon.setHuyen(quanHuyen);
-            hoaDon.setXa(phuongXa);
-            hoaDon.setSoNhaNgoDuong(diaChiChiTiet);
-            hoaDon.setPhuongThucThanhToan(phuongThucThanhToan);
-            hoaDon.setGhiChu(ghiChu);
-            hoaDon.setLoaiHoaDon(false);
-            hoaDon.setTrangThai(1);
-            hoaDon.setNgayTao(LocalDateTime.now());
-            hoaDon.setNguoiTao(khachHang.getTen());
-            hoaDon.setTongTien(totalAmount);
-            hoaDon.setTongTienSauGiamGia(finalAmount);
-            hoaDon.setPhiVanChuyen(shippingFee);
-            hoaDon.setPhieuGiamGia(usedVoucher);
-
-            HoaDon savedHoaDon = hoaDonRepo.save(hoaDon);
-            System.out.println("DEBUG: Saved HoaDon - ID: " + savedHoaDon.getId() +
-                    ", tongTien: " + savedHoaDon.getTongTien() +
-                    ", tongTienSauGiamGia: " + savedHoaDon.getTongTienSauGiamGia() +
-                    ", phieuGiamGiaId: " + (savedHoaDon.getPhieuGiamGia() != null ? savedHoaDon.getPhieuGiamGia().getId() : "null"));
-
-            List<gioHangDTO> cartItems = (List<gioHangDTO>) cartInfo.get("items");
-            if (cartItems == null || cartItems.isEmpty()) {
-                throw new RuntimeException("Giỏ hàng không chứa sản phẩm để lưu chi tiết hóa đơn");
+            // Tính finalAmount: (totalAmount - discountAmount) + shippingFee
+            BigDecimal amountAfterDiscount = totalAmount.subtract(discountAmount);
+            BigDecimal finalAmount = amountAfterDiscount.add(shippingFee);
+            if (finalAmount.compareTo(BigDecimal.ZERO) < 0) {
+                finalAmount = BigDecimal.ZERO; // Đảm bảo không âm
+                amountAfterDiscount = BigDecimal.ZERO; // Điều chỉnh lại
+                discountAmount = totalAmount; // Nếu cần, đặt discountAmount bằng totalAmount
             }
 
-            for (gioHangDTO item : cartItems) {
-                HoaDonChiTiet hoaDonChiTiet = new HoaDonChiTiet();
-                hoaDonChiTiet.setHoaDon(savedHoaDon);
-
-                Long sanPhamChiTietId = item.getSanPhamChiTietId();
-                Optional<SanPhamChiTiet> sanPhamChiTietOpt = sanPhamChiTietRepo.findById(sanPhamChiTietId);
-                if (!sanPhamChiTietOpt.isPresent()) {
-                    throw new RuntimeException("Không tìm thấy sản phẩm với ID: " + sanPhamChiTietId);
-                }
-                SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietOpt.get();
-
-                int soLuong = item.getSoLuong();
-                if (sanPhamChiTiet.getSoLuong() < soLuong) {
-                    throw new RuntimeException("Sản phẩm " + sanPhamChiTiet.getSanPham().getTen() + " không đủ số lượng tồn kho");
-                }
-
-                hoaDonChiTiet.setSanPhamChiTiet(sanPhamChiTiet);
-                hoaDonChiTiet.setSoLuong(soLuong);
-                hoaDonChiTiet.setGia(sanPhamChiTiet.getGia());
-                hoaDonChiTiet.setGiaSauGiam(sanPhamChiTiet.getGia());
-                hoaDonChiTiet.setThanhTien(sanPhamChiTiet.getGia().multiply(new BigDecimal(soLuong)));
-                hoaDonChiTiet.setTrangThai(1);
-                sanPhamChiTietRepo.save(sanPhamChiTiet);
-
-                hoaDonChiTietRepo.save(hoaDonChiTiet);
-            }
-
-            LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
-            lichSuHoaDon.setHoaDon(savedHoaDon);
-            lichSuHoaDon.setTrangThai(1);
-            lichSuHoaDon.setNgayTao(LocalDateTime.now());
-            lichSuHoaDon.setMoTa("Đơn hàng được tạo bởi khách hàng: " + khachHang.getTen());
-            lichSuHoaDon.setNguoiTao(khachHang.getTen());
-            lichSuHoaDonRepo.save(lichSuHoaDon);
+            // Tạo đối tượng hóa đơn tạm thời
+            Map<String, Object> tempOrder = new HashMap<>();
+            tempOrder.put("hoTen", hoTen);
+            tempOrder.put("soDienThoai", soDienThoai);
+            tempOrder.put("tinhThanh", tinhThanh);
+            tempOrder.put("quanHuyen", quanHuyen);
+            tempOrder.put("phuongXa", phuongXa);
+            tempOrder.put("diaChiChiTiet", diaChiChiTiet);
+            tempOrder.put("phuongThucThanhToan", phuongThucThanhToan);
+            tempOrder.put("ghiChu", ghiChu);
+            tempOrder.put("totalAmount", totalAmount);
+            tempOrder.put("finalAmount", finalAmount);
+            tempOrder.put("shippingFee", shippingFee);
+            tempOrder.put("discountAmount", discountAmount);
+            tempOrder.put("voucherId", voucherId);
+            tempOrder.put("cartItems", cartInfo.get("items"));
+            tempOrder.put("khachHangId", khachHang.getId());
 
             if ("MOMO".equals(phuongThucThanhToan)) {
-                try {
-                    MomoTransaction transaction = momoService.createTransaction(savedHoaDon, "user");
+                // Lưu thông tin hóa đơn tạm vào session
+                String tempOrderId = "TEMP_" + System.currentTimeMillis();
+                session.setAttribute("tempOrder_" + tempOrderId, tempOrder);
 
-                    if (transaction.getTrangThai() == 2) {
-                        response.put("success", false);
-                        response.put("message", "Lỗi khi tạo thanh toán MoMo: " + transaction.getMessage());
-                        return ResponseEntity.ok(response);
-                    }
-
-                    response.put("success", true);
-                    response.put("orderId", savedHoaDon.getId());
-                    response.put("finalAmount", finalAmount);
-                    response.put("discountAmount", discountAmount);
-                    response.put("shippingFee", shippingFee);
-                    response.put("paymentMethod", "MOMO");
-                    response.put("payUrl", transaction.getPayUrl());
-                    response.put("transactionId", transaction.getId());
-
-                } catch (Exception e) {
-                    logger.error("Error creating MoMo payment", e);
+                // Tạo giao dịch MoMo
+                MomoTransaction transaction = momoService.createTransaction(tempOrder, tempOrderId);
+                if (transaction.getTrangThai() == 2) {
                     response.put("success", false);
-                    response.put("message", "Lỗi khi tạo thanh toán MoMo: " + e.getMessage());
+                    response.put("message", "Lỗi khi tạo thanh toán MoMo: " + transaction.getMessage());
                     return ResponseEntity.ok(response);
                 }
+
+                response.put("success", true);
+                response.put("orderId", tempOrderId);
+                response.put("finalAmount", finalAmount);
+                response.put("discountAmount", discountAmount);
+                response.put("shippingFee", shippingFee);
+                response.put("paymentMethod", "MOMO");
+                response.put("payUrl", transaction.getPayUrl());
+                response.put("transactionId", transaction.getId());
             } else {
+                // Xử lý COD: Lưu hóa đơn trực tiếp
+                HoaDon hoaDon = createHoaDonFromTempOrder(tempOrder);
+                if (usedVoucher != null) {
+                    usedVoucher.setSoLuongDaSuDung(usedVoucher.getSoLuongDaSuDung() + 1);
+                    phieuGiamGiaRepo.save(usedVoucher);
+                }
+
                 gioHangService.clearCart(session);
                 response.put("success", true);
-                response.put("orderId", savedHoaDon.getId());
+                response.put("orderId", hoaDon.getId());
                 response.put("finalAmount", finalAmount);
                 response.put("discountAmount", discountAmount);
                 response.put("shippingFee", shippingFee);
                 response.put("paymentMethod", "COD");
-                response.put("redirectUrl", "/checkout/success?id=" + savedHoaDon.getId());
+                response.put("redirectUrl", "/checkout/success?id=" + hoaDon.getId());
             }
 
         } catch (Exception e) {
@@ -343,6 +295,107 @@ public class ThanhToanOnlController {
             e.printStackTrace();
         }
         return ResponseEntity.ok(response);
+    }
+    private HoaDon createHoaDonFromTempOrder(Map<String, Object> tempOrder) {
+        logger.info("Bắt đầu tạo hóa đơn từ tempOrder");
+        KhachHang khachHang = khachHangRepo.findById((Long) tempOrder.get("khachHangId"))
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng với ID: " + tempOrder.get("khachHangId")));
+
+        PhieuGiamGia usedVoucher = null;
+        Long voucherId = (Long) tempOrder.get("voucherId");
+        if (voucherId != null) {
+            usedVoucher = phieuGiamGiaRepo.findById(voucherId)
+                    .orElse(null);
+            if (usedVoucher != null) {
+                logger.info("Sử dụng phiếu giảm giá: {}", usedVoucher.getMa());
+            }
+        }
+
+        HoaDon hoaDon = new HoaDon();
+        hoaDon.setMa(generateOrderCode());
+        hoaDon.setKhachHang(khachHang);
+        hoaDon.setTenNguoiNhan((String) tempOrder.get("hoTen"));
+        hoaDon.setSdtNguoiNhan((String) tempOrder.get("soDienThoai"));
+        hoaDon.setTinh((String) tempOrder.get("tinhThanh"));
+        hoaDon.setHuyen((String) tempOrder.get("quanHuyen"));
+        hoaDon.setXa((String) tempOrder.get("phuongXa"));
+        hoaDon.setSoNhaNgoDuong((String) tempOrder.get("diaChiChiTiet"));
+        hoaDon.setPhuongThucThanhToan((String) tempOrder.get("phuongThucThanhToan"));
+        hoaDon.setGhiChu((String) tempOrder.get("ghiChu"));
+        hoaDon.setLoaiHoaDon(false);
+        hoaDon.setTrangThai("MOMO".equals(hoaDon.getPhuongThucThanhToan()) ? 2 : 1);
+        hoaDon.setNgayTao(LocalDateTime.now());
+        hoaDon.setNguoiTao(khachHang.getTen());
+        hoaDon.setTongTien((BigDecimal) tempOrder.get("totalAmount"));
+        hoaDon.setTongTienSauGiamGia((BigDecimal) tempOrder.get("finalAmount"));
+        hoaDon.setPhiVanChuyen((BigDecimal) tempOrder.get("shippingFee"));
+        hoaDon.setPhieuGiamGia(usedVoucher);
+
+        logger.info("Lưu hóa đơn với mã: {}", hoaDon.getMa());
+        HoaDon savedHoaDon = hoaDonRepo.save(hoaDon);
+
+        List<gioHangDTO> cartItems = (List<gioHangDTO>) tempOrder.get("cartItems");
+        logger.info("Số lượng sản phẩm trong giỏ hàng: {}", cartItems.size());
+        for (gioHangDTO item : cartItems) {
+            Optional<SanPhamChiTiet> sanPhamChiTietOpt = sanPhamChiTietRepo.findById(item.getSanPhamChiTietId());
+            if (!sanPhamChiTietOpt.isPresent()) {
+                logger.error("Không tìm thấy sản phẩm với ID: {}", item.getSanPhamChiTietId());
+                throw new RuntimeException("Không tìm thấy sản phẩm với ID: " + item.getSanPhamChiTietId());
+            }
+            SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietOpt.get();
+            int soLuong = item.getSoLuong();
+
+            // Kiểm tra số lượng tồn kho
+            if (sanPhamChiTiet.getSoLuong() < soLuong) {
+                logger.error("Sản phẩm {} không đủ số lượng tồn kho. Hiện có: {}, Cần: {}",
+                        sanPhamChiTiet.getSanPham().getTen(), sanPhamChiTiet.getSoLuong(), soLuong);
+                throw new RuntimeException("Sản phẩm " + sanPhamChiTiet.getSanPham().getTen() + " không đủ số lượng tồn kho");
+            }
+
+            // Chỉ trừ số lượng sản phẩm nếu phương thức thanh toán là MoMo
+            if ("MOMO".equals(hoaDon.getPhuongThucThanhToan())) {
+                sanPhamChiTiet.setSoLuong(sanPhamChiTiet.getSoLuong() - soLuong);
+                sanPhamChiTietRepo.save(sanPhamChiTiet);
+                logger.info("Đã trừ {} sản phẩm (ID: {}) khỏi tồn kho", soLuong, sanPhamChiTiet.getId());
+            } else {
+                logger.info("Phương thức thanh toán COD, không trừ số lượng sản phẩm (ID: {})", sanPhamChiTiet.getId());
+            }
+
+            HoaDonChiTiet hoaDonChiTiet = new HoaDonChiTiet();
+            hoaDonChiTiet.setHoaDon(savedHoaDon);
+            hoaDonChiTiet.setSanPhamChiTiet(sanPhamChiTiet);
+            hoaDonChiTiet.setSoLuong(soLuong);
+            hoaDonChiTiet.setGia(sanPhamChiTiet.getGia());
+            hoaDonChiTiet.setGiaSauGiam(sanPhamChiTiet.getGia());
+            hoaDonChiTiet.setThanhTien(sanPhamChiTiet.getGia().multiply(new BigDecimal(soLuong)));
+            hoaDonChiTiet.setTrangThai(1);
+            logger.info("Lưu chi tiết hóa đơn cho sản phẩm ID: {}", sanPhamChiTiet.getId());
+            hoaDonChiTietRepo.save(hoaDonChiTiet);
+        }
+
+        LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
+        lichSuHoaDon.setHoaDon(savedHoaDon);
+        lichSuHoaDon.setTrangThai("MOMO".equals(hoaDon.getPhuongThucThanhToan()) ? 2 : 1);
+        lichSuHoaDon.setNgayTao(LocalDateTime.now());
+        lichSuHoaDon.setMoTa("Đơn hàng được tạo bởi khách hàng: " + khachHang.getTen());
+        lichSuHoaDon.setNguoiTao(khachHang.getTen());
+        logger.info("Lưu lịch sử hóa đơn cho mã hóa đơn: {}", hoaDon.getMa());
+        lichSuHoaDonRepo.save(lichSuHoaDon);
+
+        // Cập nhật số lượng phiếu giảm giá
+        if (usedVoucher != null) {
+            if (usedVoucher.getSoLuong() <= 0) {
+                logger.error("Phiếu giảm giá {} đã hết số lượng", usedVoucher.getMa());
+                throw new RuntimeException("Phiếu giảm giá " + usedVoucher.getMa() + " đã hết số lượng");
+            }
+            usedVoucher.setSoLuongDaSuDung(usedVoucher.getSoLuongDaSuDung() + 1);
+            phieuGiamGiaRepo.save(usedVoucher);
+            logger.info("Đã cập nhật phiếu giảm giá {}. Số lượng sử dụng: {}",
+                    usedVoucher.getMa(), usedVoucher.getSoLuongDaSuDung());
+        }
+
+        logger.info("Hoàn tất tạo hóa đơn với mã: {}", savedHoaDon.getMa());
+        return savedHoaDon;
     }
 
     @GetMapping("/success")
@@ -446,34 +499,34 @@ public class ThanhToanOnlController {
      */
     @PostMapping("/momo-notify")
     @ResponseBody
-    public ResponseEntity<String> momoNotify(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<String> momoNotify(@RequestBody Map<String, Object> payload, HttpSession session) {
         logger.info("Received MoMo IPN notification: {}", payload);
 
         try {
-            // Xử lý thông báo từ MoMo
             if (payload.containsKey("orderId") && payload.containsKey("resultCode")) {
                 String orderId = payload.get("orderId").toString();
                 int resultCode = Integer.parseInt(payload.get("resultCode").toString());
 
-                // Kiểm tra kết quả giao dịch
                 if (resultCode == 0) {
-                    // Giao dịch thành công
-                    MomoTransaction transaction = momoService.getTransactionByOrderId(orderId);
-                    if (transaction != null) {
-                        // Cập nhật trạng thái giao dịch
-                        momoService.confirmTransaction(transaction.getHoaDon().getId());
+                    Map<String, Object> tempOrder = (Map<String, Object>) session.getAttribute("tempOrder_" + orderId);
+                    if (tempOrder != null) {
+                        HoaDon hoaDon = createHoaDonFromTempOrder(tempOrder); // Đã xử lý trừ voucher trong này
+                        MomoTransaction transaction = momoTransactionRepository.findByOrderId(orderId).orElse(null);
+                        if (transaction != null) {
+                            transaction.setHoaDon(hoaDon);
+                            momoService.confirmTransaction(hoaDon.getId());
+                        }
+                        session.removeAttribute("tempOrder_" + orderId);
                         return ResponseEntity.ok("Transaction processed successfully");
                     }
                 }
             }
-
             return ResponseEntity.ok("Transaction processing failed");
         } catch (Exception e) {
             logger.error("Error processing MoMo IPN: {}", e.getMessage());
             return ResponseEntity.ok("Error processing transaction");
         }
     }
-
     /**
      * Endpoint khi người dùng được redirect từ MoMo về
      */
@@ -487,18 +540,21 @@ public class ThanhToanOnlController {
                 int resultCode = Integer.parseInt(params.get("resultCode"));
 
                 if (resultCode == 0) {
-                    MomoTransaction transaction = momoService.getTransactionByOrderId(orderId);
-                    if (transaction != null) {
-                        // Cập nhật trạng thái giao dịch
-                        momoService.confirmTransaction(transaction.getHoaDon().getId());
-                        // Xóa giỏ hàng khi giao dịch thành công
+                    Map<String, Object> tempOrder = (Map<String, Object>) session.getAttribute("tempOrder_" + orderId);
+                    if (tempOrder != null) {
+                        HoaDon hoaDon = createHoaDonFromTempOrder(tempOrder); // Đã xử lý trừ voucher trong này
+                        MomoTransaction transaction = momoTransactionRepository.findByOrderId(orderId).orElse(null);
+                        if (transaction != null) {
+                            transaction.setHoaDon(hoaDon);
+                            momoService.confirmTransaction(hoaDon.getId());
+                        }
                         gioHangService.clearCart(session);
+                        session.removeAttribute("tempOrder_" + orderId);
                         redirectAttributes.addFlashAttribute("paymentStatus", "success");
                         redirectAttributes.addFlashAttribute("paymentMessage", "Thanh toán MoMo thành công!");
-                        return "redirect:/checkout/success?id=" + transaction.getHoaDon().getId();
+                        return "redirect:/checkout/success?id=" + hoaDon.getId();
                     }
                 } else {
-                    // Giao dịch thất bại
                     redirectAttributes.addFlashAttribute("paymentStatus", "error");
                     redirectAttributes.addFlashAttribute("paymentMessage", "Thanh toán MoMo thất bại!");
                     return "redirect:/checkout";
@@ -508,7 +564,6 @@ public class ThanhToanOnlController {
             redirectAttributes.addFlashAttribute("paymentStatus", "error");
             redirectAttributes.addFlashAttribute("paymentMessage", "Có lỗi xảy ra trong quá trình thanh toán!");
             return "redirect:/checkout";
-
         } catch (Exception e) {
             logger.error("Error processing MoMo return: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("paymentStatus", "error");
@@ -522,26 +577,23 @@ public class ThanhToanOnlController {
      */
     @GetMapping("/check-momo-status")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> checkMomoStatus(@RequestParam("orderId") Long orderId) {
+    public ResponseEntity<Map<String, Object>> checkMomoStatus(@RequestParam("orderId") String orderId) {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            MomoTransaction transaction = momoService.getTransactionByHoaDonId(orderId);
-
+            MomoTransaction transaction = momoService.getTransactionByOrderId(orderId);
             if (transaction == null) {
                 response.put("success", false);
                 response.put("message", "Không tìm thấy giao dịch MoMo");
                 return ResponseEntity.ok(response);
             }
 
-            // Kiểm tra trạng thái giao dịch
-            // 0: Chờ thanh toán, 1: Đã thanh toán, 2: Lỗi, 3: Đã hủy
             response.put("success", transaction.getTrangThai() == 1);
             response.put("status", transaction.getTrangThai());
             response.put("message", transaction.getMessage());
+            response.put("orderId", transaction.getHoaDon() != null ? transaction.getHoaDon().getId() : orderId);
 
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
             logger.error("Error checking MoMo status: {}", e.getMessage());
             response.put("success", false);
@@ -550,9 +602,7 @@ public class ThanhToanOnlController {
         }
     }
 
-    // Tạo mã đơn hàng
     private String generateOrderCode() {
-        // Đếm tổng số hóa đơn hiện có và cộng thêm 1
         Long count = hoaDonRepo.count() + 1;
         return String.format("HD%03d", count);
     }

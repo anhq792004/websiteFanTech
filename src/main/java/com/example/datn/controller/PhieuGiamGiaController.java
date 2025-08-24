@@ -37,6 +37,7 @@ public class PhieuGiamGiaController {
     public String hienThiDanhSach(Model model,
                                   @RequestParam(value = "search", required = false) String search,
                                   @RequestParam(value = "trangThai", required = false) Boolean trangThai,
+                                  @RequestParam(value = "loaiGiamGia", required = false) Boolean loaiGiamGia, // Thêm tham số này
                                   @RequestParam(value = "ngayBatDau", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date ngayBatDau,
                                   @RequestParam(value = "ngayKetThuc", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date ngayKetThuc,
                                   @RequestParam(value = "page", defaultValue = "0") int page,
@@ -49,11 +50,13 @@ public class PhieuGiamGiaController {
         // Tìm kiếm và lọc dữ liệu
         if ((search != null && !search.trim().isEmpty()) ||
                 trangThai != null ||
+                loaiGiamGia != null || // Thêm điều kiện kiểm tra loaiGiamGia
                 ngayBatDau != null ||
                 ngayKetThuc != null) {
             pagePhieuGiamGia = phieuGiamGiaRepo.findWithFilters(
                     search != null ? search.trim() : null,
                     trangThai,
+                    loaiGiamGia, // Truyền tham số này vào
                     ngayBatDau,
                     ngayKetThuc,
                     pageable
@@ -79,6 +82,7 @@ public class PhieuGiamGiaController {
         // Thêm các giá trị tìm kiếm vào model để giữ trong form
         model.addAttribute("search", search);
         model.addAttribute("trangThai", trangThai);
+        model.addAttribute("loaiGiamGia", loaiGiamGia); // Thêm vào model
         model.addAttribute("ngayBatDau", ngayBatDau);
         model.addAttribute("ngayKetThuc", ngayKetThuc);
 

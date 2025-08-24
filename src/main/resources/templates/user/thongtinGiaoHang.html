@@ -555,7 +555,7 @@
         updateSummary(data) {
             document.getElementById('subtotal').textContent = this.formatCurrency(data.totalAmount);
             const weightKg = data.totalWeight ? (data.totalWeight / 1000) : 0;
-            document.getElementById('totalWeight').textContent = weightKg.toLocaleString('vi-VN', {maximumFractionDigits: 2}) + ' kg';
+            document.getElementById('totalWeight').textContent = weightKg.toLocaleString('vi-VN', { maximumFractionDigits: 2 }) + ' kg';
 
             let shippingFee = 0;
             if (data.totalAmount < 2000000) {
@@ -780,17 +780,17 @@
                 const percent = Number(voucher.giaTriGiam);
                 if (isNaN(percent)) return 0;
                 discountAmount = originalAmount * (percent / 100);
-            } else {
+                if (voucher.giaTriGiamToiDa && discountAmount > voucher.giaTriGiamToiDa) {
+                    discountAmount = voucher.giaTriGiamToiDa;
+                }
+            } else { // loaiGiam === 'FIXED'
                 discountAmount = Number(voucher.giaTriGiam);
+                // Giới hạn giảm giá cố định không vượt quá originalAmount
+                discountAmount = Math.min(discountAmount, originalAmount);
             }
 
-            if (voucher.giaTriGiamToiDa && discountAmount > voucher.giaTriGiamToiDa) {
-                discountAmount = voucher.giaTriGiamToiDa;
-            }
-
-            // Đảm bảo discountAmount không vượt quá totalAmount + shippingFee
-            const maxDiscount = originalAmount + (this.cartData.shippingFee || 0);
-            return Math.min(discountAmount, maxDiscount);
+            // Đảm bảo không vượt quá originalAmount (cho cả PERCENT và FIXED)
+            return Math.min(discountAmount, originalAmount);
         }
 
         validatePhoneNumber(input) {
@@ -891,7 +891,7 @@
                     // Xóa sessionStorage cũ để tránh báo thành công lần nữa
                     sessionStorage.removeItem('pending_momo_order');
                     sessionStorage.removeItem('return_url');
-                    
+
                     sessionStorage.setItem('pending_momo_order', result.orderId);
                     sessionStorage.setItem('return_url', window.location.href);
                     window.location.href = result.payUrl;
@@ -956,7 +956,7 @@
     }
 
     const checkoutPage = new CheckoutPage();
-    
+
     // Xóa sessionStorage cũ nếu có để tránh báo thành công lần nữa
     const oldPendingOrder = sessionStorage.getItem('pending_momo_order');
     if (oldPendingOrder) {
@@ -964,7 +964,7 @@
         sessionStorage.removeItem('pending_momo_order');
         sessionStorage.removeItem('return_url');
     }
-    
+
     checkoutPage.checkMomoPaymentStatus();
 </script>
 </body>
