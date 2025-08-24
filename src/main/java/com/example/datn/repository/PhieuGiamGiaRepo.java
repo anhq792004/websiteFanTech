@@ -25,16 +25,18 @@ public interface PhieuGiamGiaRepo extends JpaRepository<PhieuGiamGia,Long> {
     @Query("SELECT p FROM PhieuGiamGia p WHERE p.trangThai = true AND (p.ngayKetThuc < :currentDate OR p.ngayBatDau > :currentDate)")
     List<PhieuGiamGia> findExpiredCoupons(@Param("currentDate") Date currentDate);
 
-    @Query("SELECT pgg FROM PhieuGiamGia pgg WHERE " +
-            "(:search IS NULL OR :search = '' OR LOWER(pgg.ma) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(pgg.ten) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
-            "(:trangThai IS NULL OR pgg.trangThai = :trangThai) AND " +
-            "(:ngayBatDau IS NULL OR pgg.ngayBatDau >= :ngayBatDau) AND " +
-            "(:ngayKetThuc IS NULL OR pgg.ngayKetThuc <= :ngayKetThuc) " +
-            "ORDER BY pgg.ngayTao DESC")
-    Page<PhieuGiamGia> findWithFilters(@Param("search") String search,
-                                       @Param("trangThai") Boolean trangThai,
-                                       @Param("ngayBatDau") Date ngayBatDau,
-                                       @Param("ngayKetThuc") Date ngayKetThuc,
-                                       Pageable pageable);
+    @Query("SELECT p FROM PhieuGiamGia p WHERE " +
+            "(:search IS NULL OR p.ma LIKE %:search% OR p.ten LIKE %:search%) AND " +
+            "(:trangThai IS NULL OR p.trangThai = :trangThai) AND " +
+            "(:loaiGiamGia IS NULL OR p.loaiGiamGia = :loaiGiamGia) AND " +
+            "(:ngayBatDau IS NULL OR p.ngayBatDau >= :ngayBatDau) AND " +
+            "(:ngayKetThuc IS NULL OR p.ngayKetThuc <= :ngayKetThuc)")
+    Page<PhieuGiamGia> findWithFilters(
+            @Param("search") String search,
+            @Param("trangThai") Boolean trangThai,
+            @Param("loaiGiamGia") Boolean loaiGiamGia, // Thêm tham số này
+            @Param("ngayBatDau") Date ngayBatDau,
+            @Param("ngayKetThuc") Date ngayKetThuc,
+            Pageable pageable);
 
 }

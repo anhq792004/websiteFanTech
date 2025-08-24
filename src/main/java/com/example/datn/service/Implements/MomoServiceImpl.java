@@ -11,6 +11,7 @@ import com.example.datn.repository.SanPhamRepo.SanPhamChiTietRepo;
 import com.example.datn.service.BanHang.BanHangService;
 import com.example.datn.service.HoaDonService.HoaDonService;
 import com.example.datn.service.MomoService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,6 +203,90 @@ public class MomoServiceImpl implements MomoService {
             throw new RuntimeException("Không thể tạo giao dịch MoMo: " + e.getMessage());
         }
     }
+    @Override
+    public MomoTransaction createTransaction(Map<String, Object> tempOrder, String tempOrderId) {
+        try {
+            // Tạo giao dịch mới
+            MomoTransaction transaction = new MomoTransaction();
+            transaction.setPartnerCode(partnerCode);
+            transaction.setOrderId(tempOrderId);
+            transaction.setRequestId("RQ" + tempOrderId + "_" + System.currentTimeMillis());
+            transaction.setAmount((BigDecimal) tempOrder.get("finalAmount"));
+            transaction.setOrderInfo("Thanh toán đơn hàng tạm " + tempOrderId);
+            transaction.setOrderType("momo_wallet");
+            transaction.setRedirectUrl(returnUrl.replace("/payment/", "/checkout/"));
+            transaction.setIpnUrl(notifyUrl.replace("/payment/", "/checkout/"));
+            transaction.setRequestType("captureWallet");
+            transaction.setExtraData("");
+            transaction.setNgayTao(LocalDateTime.now());
+            transaction.setTrangThai(0); // 0: Chờ thanh toán
+
+            // Tạo payload cho API MoMo
+            Map<String, Object> requestBody = new LinkedHashMap<>();
+            requestBody.put("partnerCode", partnerCode);
+            requestBody.put("requestId", transaction.getRequestId());
+            requestBody.put("amount", transaction.getAmount().longValue());
+            requestBody.put("orderId", transaction.getOrderId());
+            requestBody.put("orderInfo", transaction.getOrderInfo());
+            requestBody.put("redirectUrl", transaction.getRedirectUrl());
+            requestBody.put("ipnUrl", transaction.getIpnUrl());
+            requestBody.put("requestType", "captureWallet");
+            requestBody.put("extraData", "");
+            requestBody.put("lang", "vi");
+
+            // Tạo chữ ký
+            StringBuilder rawSignature = new StringBuilder();
+            rawSignature.append("accessKey=").append(accessKey)
+                    .append("&amount=").append(transaction.getAmount().longValue())
+                    .append("&extraData=")
+                    .append("&ipnUrl=").append(transaction.getIpnUrl())
+                    .append("&orderId=").append(transaction.getOrderId())
+                    .append("&orderInfo=").append(transaction.getOrderInfo())
+                    .append("&partnerCode=").append(partnerCode)
+                    .append("&redirectUrl=").append(transaction.getRedirectUrl())
+                    .append("&requestId=").append(transaction.getRequestId())
+                    .append("&requestType=captureWallet");
+
+            String signature = generateSignature(rawSignature.toString(), secretKey);
+            requestBody.put("signature", signature);
+            transaction.setSignature(signature);
+
+            // Gọi API MoMo
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+            Map<String, Object> response = restTemplate.postForObject(apiEndpoint, request, Map.class);
+
+            if (response != null && response.containsKey("resultCode")) {
+                Integer resultCode = Integer.parseInt(response.get("resultCode").toString());
+                transaction.setResultCode(resultCode);
+                if (resultCode != 0) {
+                    String message = response.containsKey("message") ? response.get("message").toString() : "Unknown error";
+                    transaction.setMessage(message);
+                    transaction.setTrangThai(2); // Lỗi
+                    momoTransactionRepository.save(transaction);
+                    throw new RuntimeException("Lỗi từ MoMo: " + message);
+                }
+
+                if (response.containsKey("payUrl")) {
+                    String payUrl = response.get("payUrl").toString();
+                    transaction.setPayUrl(payUrl);
+                    transaction.setMessage(response.containsKey("message") ? response.get("message").toString() : "Success");
+                    return momoTransactionRepository.save(transaction);
+                }
+            }
+
+            throw new RuntimeException("Không nhận được payUrl từ MoMo");
+        } catch (Exception e) {
+            logger.error("Lỗi khi tạo giao dịch MoMo: {}", e.getMessage());
+            MomoTransaction transaction = new MomoTransaction();
+            transaction.setOrderId(tempOrderId);
+            transaction.setMessage("Lỗi kết nối MoMo: " + e.getMessage());
+            transaction.setTrangThai(2); // Lỗi
+            return momoTransactionRepository.save(transaction);
+        }
+    }
 
     @Override
     public boolean confirmTransaction(Long hoaDonId) {
@@ -284,40 +369,61 @@ public class MomoServiceImpl implements MomoService {
     /**
      * Xử lý xác nhận đơn hàng online sau khi thanh toán thành công
      */
+    @Transactional
     private void confirmOnlineOrder(HoaDon hoaDon) {
-        // Cập nhật trạng thái hóa đơn thành "Xác nhận" (giống thanh toán khi nhận hàng)
-        hoaDon.setNgaySua(LocalDateTime.now());
-        hoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getDaXacNhan());
         try {
+            logger.info("Bắt đầu xác nhận đơn hàng online ID: {}", hoaDon.getId());
+
+            // Cập nhật trạng thái hóa đơn thành "Đã xác nhận"
+            hoaDon.setNgaySua(LocalDateTime.now());
+            hoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getDaXacNhan());
+
+            // Trừ số lượng sản phẩm trong kho
             List<HoaDonChiTiet> listHDCT = hoaDonService.listHoaDonChiTiets(hoaDon.getId());
+            logger.info("Tìm thấy {} chi tiết hóa đơn cho hóa đơn ID: {}", listHDCT.size(), hoaDon.getId());
+
             for (HoaDonChiTiet hdct : listHDCT) {
                 if (hdct.getSanPhamChiTiet() != null) {
                     SanPhamChiTiet spct = hdct.getSanPhamChiTiet();
                     int soLuongHienTai = spct.getSoLuong();
                     int soLuongBan = hdct.getSoLuong();
                     int soLuongConLai = soLuongHienTai - soLuongBan;
-                    
+
+                    logger.info("Sản phẩm ID: {} - Số lượng hiện tại: {}, Số lượng bán: {}, Còn lại: {}",
+                            spct.getId(), soLuongHienTai, soLuongBan, soLuongConLai);
+
                     if (soLuongConLai >= 0) {
                         spct.setSoLuong(soLuongConLai);
                         sanPhamChiTietRepo.save(spct);
+                        logger.info("Đã cập nhật số lượng sản phẩm ID: {} thành {}", spct.getId(), soLuongConLai);
+                    } else {
+                        logger.error("Số lượng sản phẩm ID: {} không đủ! Hiện tại: {}, Cần: {}",
+                                spct.getId(), soLuongHienTai, soLuongBan);
+                        throw new RuntimeException("Số lượng sản phẩm " + spct.getSanPham().getTen() + " không đủ!");
                     }
+                } else {
+                    logger.warn("⚠️ Chi tiết hóa đơn ID: {} không có sản phẩm chi tiết", hdct.getId());
                 }
             }
+
+            // Tạo lịch sử hóa đơn
+            LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
+            lichSuHoaDon.setHoaDon(hoaDon);
+            lichSuHoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getDaXacNhan());
+            lichSuHoaDon.setNgayTao(LocalDateTime.now());
+            lichSuHoaDon.setNguoiTao(hoaDon.getKhachHang() != null ? hoaDon.getKhachHang().getTen() : "Online Customer");
+            lichSuHoaDon.setMoTa("Thanh toán MoMo thành công - Đã trừ số lượng sản phẩm trong kho");
+            lichSuHoaDonRepo.save(lichSuHoaDon);
+
+            // Lưu hóa đơn
+            hoaDonService.saveHoaDon(hoaDon);
+
+            logger.info("Hoàn tất xác nhận đơn hàng online ID: {}", hoaDon.getId());
+
         } catch (Exception e) {
-            logger.error("Lỗi khi trừ số lượng sản phẩm: {}", e.getMessage());
+            logger.error("Lỗi khi xác nhận đơn hàng online ID: {} - Error: {}", hoaDon.getId(), e.getMessage(), e);
+            throw new RuntimeException("Lỗi khi xác nhận đơn hàng: " + e.getMessage());
         }
-        
-        // Tạo lịch sử hóa đơn
-        LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
-        lichSuHoaDon.setHoaDon(hoaDon);
-        lichSuHoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getDaXacNhan());
-        lichSuHoaDon.setNgayTao(LocalDateTime.now());
-        lichSuHoaDon.setNguoiTao(hoaDon.getKhachHang() != null ? hoaDon.getKhachHang().getTen() : "Online Customer");
-        lichSuHoaDon.setMoTa("Thanh toán MoMo thành công");
-        
-        // Lưu vào database
-        hoaDonService.saveHoaDon(hoaDon);
-        lichSuHoaDonRepo.save(lichSuHoaDon);
     }
     
     private String generateSignature(String message, String key) throws Exception {

@@ -35,6 +35,14 @@
                                     </select>
                                 </div>
                                 <div class="col-md-2">
+                                    <label class="form-label">Loại giảm giá:</label>
+                                    <select name="loaiGiamGia" class="form-select">
+                                        <option value="">Tất cả</option>
+                                        <option value="true" th:selected="${loaiGiamGia != null && loaiGiamGia}">Phần trăm</option>
+                                        <option value="false" th:selected="${loaiGiamGia != null && !loaiGiamGia}">Tiền cố định</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
                                     <label class="form-label">Từ ngày:</label>
                                     <input type="date" name="ngayBatDau" class="form-control"
                                            th:value="${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}">
@@ -44,7 +52,7 @@
                                     <input type="date" name="ngayKetThuc" class="form-control"
                                            th:value="${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''}">
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-1">
                                     <label class="form-label">&nbsp;</label>
                                     <div class="d-flex gap-2">
                                         <button type="submit" class="btn btn-outline-primary">
@@ -102,7 +110,7 @@
                                         <!-- Nếu loại giảm là phần trăm (true), hiển thị dấu % -->
                                         <span th:if="${pgg.loaiGiamGia}" th:text="${pgg.giaTriGiam} + ' %'"></span>
                                         <!-- Nếu loại giảm là tiền mặt (false), hiển thị VND -->
-                                        <span th:unless="${pgg.loaiGiamGia}" th:text="${pgg.giaTriGiam}"></span>
+                                        <span th:unless="${pgg.loaiGiamGia}" th:text="${pgg.giaTriGiam} + ' đ'"></span>
                                     </td>
                                     <td>
                                         <span th:if="${pgg.loaiGiamGia}">Phần trăm</span>
@@ -113,14 +121,14 @@
                                     </td>
                                     <td class="giaVND" th:text="${pgg.giaTriDonHangToiThieu}"></td>
                                     <td>
-                                        <span th:if="${pgg.loaiPhieu}">Công khai</span>
-                                        <span th:unless="${pgg.loaiPhieu}">Cá nhân</span>
+                                        <span class="text-warning" th:if="${pgg.loaiPhieu}">Công khai</span>
+                                        <span class="text-success" th:unless="${pgg.loaiPhieu}">Cá nhân</span>
                                     </td>
                                     <td>
-                                        <span th:if="${pgg.trangThai}">
+                                        <span class="text-success" th:if="${pgg.trangThai}">
                                             <i class="fas fa-check"></i> Hoạt động
                                         </span>
-                                        <span th:unless="${pgg.trangThai}">
+                                        <span class="text-danger" th:unless="${pgg.trangThai}">
                                             <i class="fas fa-times"></i> Không hoạt động
                                         </span>
                                     </td>
@@ -140,7 +148,7 @@
                                     <!-- Nút Previous -->
                                     <li th:class="${currentPage == 0} ? 'page-item disabled' : 'page-item'">
                                         <a class="page-link"
-                                           th:href="@{/admin/phieu-giam-gia/index(page=${currentPage - 1}, size=${pageSize}, search=${search}, trangThai=${trangThai}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}">
+                                           th:href="@{/admin/phieu-giam-gia/index(page=${currentPage - 1}, size=${pageSize}, search=${search}, trangThai=${trangThai}, loaiGiamGia=${loaiGiamGia}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}">
                                             <i class="bi bi-chevron-left"></i>
                                         </a>
                                     </li>
@@ -148,7 +156,7 @@
                                     <!-- Hiển thị trang đầu tiên nếu currentPage > 2 -->
                                     <li th:if="${currentPage > 2}" class="page-item">
                                         <a class="page-link"
-                                           th:href="@{/admin/phieu-giam-gia/index(page=0, size=${pageSize}, search=${search}, trangThai=${trangThai}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}">
+                                           th:href="@{/admin/phieu-giam-gia/index(page=0, size=${pageSize}, search=${search}, trangThai=${trangThai}, loaiGiamGia=${loaiGiamGia}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}">
                                             1
                                         </a>
                                     </li>
@@ -162,7 +170,7 @@
                                     <li th:each="i : ${#numbers.sequence(currentPage - 2 > 0 ? currentPage - 2 : 0, currentPage + 2 < totalPages - 1 ? currentPage + 2 : totalPages - 1)}"
                                         th:class="${currentPage == i} ? 'page-item active' : 'page-item'">
                                         <a class="page-link"
-                                           th:href="@{/admin/phieu-giam-gia/index(page=${i}, size=${pageSize}, search=${search}, trangThai=${trangThai}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}"
+                                           th:href="@{/admin/phieu-giam-gia/index(page=${i}, size=${pageSize}, search=${search}, trangThai=${trangThai}, loaiGiamGia=${loaiGiamGia}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}"
                                            th:text="${i + 1}">
                                         </a>
                                     </li>
@@ -175,7 +183,7 @@
                                     <!-- Trang cuối -->
                                     <li th:if="${currentPage + 2 < totalPages - 1}" class="page-item">
                                         <a class="page-link"
-                                           th:href="@{/admin/phieu-giam-gia/index(page=${totalPages - 1}, size=${pageSize}, search=${search}, trangThai=${trangThai}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}"
+                                           th:href="@{/admin/phieu-giam-gia/index(page=${totalPages - 1}, size=${pageSize}, search=${search}, trangThai=${trangThai}, loaiGiamGia=${loaiGiamGia}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}"
                                            th:text="${totalPages}">
                                         </a>
                                     </li>
@@ -183,7 +191,7 @@
                                     <!-- Nút Next -->
                                     <li th:class="${currentPage + 1 >= totalPages} ? 'page-item disabled' : 'page-item'">
                                         <a class="page-link"
-                                           th:href="@{/admin/phieu-giam-gia/index(page=${currentPage + 1}, size=${pageSize}, search=${search}, trangThai=${trangThai}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}">
+                                           th:href="@{/admin/phieu-giam-gia/index(page=${currentPage + 1}, size=${pageSize}, search=${search}, trangThai=${trangThai}, loaiGiamGia=${loaiGiamGia}, ngayBatDau=${ngayBatDau != null ? #dates.format(ngayBatDau, 'yyyy-MM-dd') : ''}, ngayKetThuc=${ngayKetThuc != null ? #dates.format(ngayKetThuc, 'yyyy-MM-dd') : ''})}">
                                             <i class="bi bi-chevron-right"></i>
                                         </a>
                                     </li>
@@ -287,6 +295,31 @@
         document.querySelector('form').submit();
     }
 
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ... (các đoạn mã JavaScript hiện có giữ nguyên)
+
+        // Auto-submit form khi chọn loại giảm giá
+        const loaiGiamGiaSelect = document.querySelector('select[name="loaiGiamGia"]');
+        if (loaiGiamGiaSelect) {
+            loaiGiamGiaSelect.addEventListener('change', function() {
+                this.form.submit();
+            });
+        }
+
+        // ... (phần còn lại của mã JavaScript giữ nguyên)
+
+        // Cập nhật hàm resetForm để reset thêm loaiGiamGia
+        function resetForm() {
+            document.querySelector('input[name="search"]').value = '';
+            document.querySelector('select[name="trangThai"]').value = '';
+            document.querySelector('select[name="loaiGiamGia"]').value = '';
+            document.querySelector('input[name="ngayBatDau"]').value = '';
+            document.querySelector('input[name="ngayKetThuc"]').value = '';
+            document.querySelector('form').submit();
+        }
+    });
 </script>
 </body>
 </html>
