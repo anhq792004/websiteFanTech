@@ -39,7 +39,8 @@ public class SecurityConfig {
                                 "/request-reset",
                                 "/reset-password",
                                 "/access-denied",
-                                "/verify-account").permitAll()
+                                "/verify-account",
+                                "/fanTech/**").permitAll()
 
                         // API thống kê - Admin và Employee có thể truy cập
                         .requestMatchers("/api/thong-ke/**",

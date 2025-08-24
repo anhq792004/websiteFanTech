@@ -85,10 +85,10 @@
                                     <td th:text="${khachHang.soDienThoai}"></td>
                                     <td th:text="${khachHang.gioiTinh}"></td>
                                     <td th:text="${#dates.format(khachHang.ngaySinh, 'dd/MM/yyyy')}"></td>
-                                    <td th:text="${khachHang.ten != null
-                                        ? (#strings.length(khachHang.taiKhoan.email) > 25
-                                            ? #strings.substring(khachHang.taiKhoan.email, 0, 25) + '...'
-                                            : khachHang.taiKhoan.email)
+                                    <td th:text="${khachHang.taiKhoan != null and khachHang.taiKhoan.email != null
+                                    ? (#strings.length(khachHang.taiKhoan.email) > 25
+                                      ? #strings.substring(khachHang.taiKhoan.email, 0, 25) + '...'
+                                        : khachHang.taiKhoan.email)
                                         : 'Chưa có mail'}">
                                     </td>
                                     <td th:text="${khachHang.trangThai ? 'Đang hoạt động' : 'Ngưng hoạt động'}"
