@@ -3,6 +3,8 @@ package com.example.datn.service;
 import com.example.datn.entity.HoaDon.HoaDon;
 import com.example.datn.entity.MomoTransaction;
 
+import java.util.Map;
+
 public interface MomoService {
     /**
      * Tạo giao dịch Momo mới
@@ -10,7 +12,7 @@ public interface MomoService {
      * @return Thông tin giao dịch Momo
      */
     MomoTransaction createTransaction(HoaDon hoaDon);
-    
+    MomoTransaction createTransaction(Map<String, Object> tempOrder, String tempOrderId);
     /**
      * Tạo giao dịch Momo mới với context cụ thể
      * @param hoaDon Hóa đơn cần thanh toán
