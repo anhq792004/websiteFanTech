@@ -139,7 +139,7 @@ $(document).ready(function () {
             $('#btnIcon').removeClass('d-none');
             return;
         }
-        if (!diaChiCuThe.length > 100) {
+        if (diaChiCuThe.length > 100) {
             showToast('error', 'Địa chỉ cụ thể không được dài quá 100 ký tự');
             $('#submitBtn').prop('disabled', false);
             $('#btnSpinner').addClass('d-none');
