@@ -154,19 +154,22 @@
                                     <div class="mb-3">
                                         <label class="form-label form-label-required">Số lượng</label>
                                         <input type="number" class="form-control" name="soLuong" 
-                                               th:value="${sanPhamChiTiet.soLuong}" min="0" required placeholder="Nhập số lượng">
+                                               th:value="${sanPhamChiTiet.soLuong}" min="1" required placeholder="Nhập số lượng">
+                                        <div class="invalid-feedback">Số lượng phải lớn hơn 0</div>
                                     </div>
 
                                     <div class="mb-3">
                                         <label class="form-label form-label-required">Giá bán (đ)</label>
                                         <input type="number" class="form-control" name="gia" 
-                                               th:value="${sanPhamChiTiet.gia}" min="0" step="1000" required placeholder="Nhập giá bán">
+                                               th:value="${sanPhamChiTiet.gia}" min="1" step="1000" required placeholder="Nhập giá bán">
+                                        <div class="invalid-feedback">Giá bán phải lớn hơn 0</div>
                                     </div>
 
                                     <div class="mb-3">
                                         <label class="form-label">Cân nặng (gram)</label>
                                         <input type="number" class="form-control" name="canNang" 
-                                               th:value="${sanPhamChiTiet.canNang}" min="0" step="0.1" placeholder="Nhập cân nặng">
+                                               th:value="${sanPhamChiTiet.canNang}" min="0.1" step="0.1" placeholder="Nhập cân nặng">
+                                        <div class="invalid-feedback">Cân nặng phải lớn hơn 0</div>
                                     </div>
 
                                     <div class="mb-3">
@@ -262,6 +265,40 @@
         
         const formData = new FormData(this);
         const variantId = formData.get('id');
+        
+        // Validate số lượng, giá và cân nặng
+        const soLuongInput = this.querySelector('input[name="soLuong"]');
+        const giaInput = this.querySelector('input[name="gia"]');
+        const canNangInput = this.querySelector('input[name="canNang"]');
+        
+        // Xóa trạng thái lỗi cũ
+        [soLuongInput, giaInput, canNangInput]
+            .forEach(el => el && el.classList.remove('is-invalid'));
+        
+        const soLuong = parseInt(formData.get('soLuong'));
+        const gia = parseInt(formData.get('gia'));
+        const canNang = parseFloat(formData.get('canNang'));
+        
+        // Validate số lượng
+        if (!soLuong || soLuong <= 0) {
+            soLuongInput.classList.add('is-invalid');
+            showToast('error', 'Số lượng phải lớn hơn 0');
+            return;
+        }
+        
+        // Validate giá
+        if (!gia || gia <= 0) {
+            giaInput.classList.add('is-invalid');
+            showToast('error', 'Giá bán phải lớn hơn 0');
+            return;
+        }
+        
+        // Validate cân nặng (nếu có nhập)
+        if (canNangInput.value && (isNaN(canNang) || canNang <= 0)) {
+            canNangInput.classList.add('is-invalid');
+            showToast('error', 'Cân nặng phải lớn hơn 0');
+            return;
+        }
         
         console.log('=== SUBMIT FORM ===');
         console.log('Variant ID:', variantId);
