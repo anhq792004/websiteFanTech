@@ -389,6 +389,7 @@ public class ThanhToanOnlController {
                 throw new RuntimeException("Phiếu giảm giá " + usedVoucher.getMa() + " đã hết số lượng");
             }
             usedVoucher.setSoLuongDaSuDung(usedVoucher.getSoLuongDaSuDung() + 1);
+            usedVoucher.setSoLuong(usedVoucher.getSoLuong() - 1);
             phieuGiamGiaRepo.save(usedVoucher);
             logger.info("Đã cập nhật phiếu giảm giá {}. Số lượng sử dụng: {}",
                     usedVoucher.getMa(), usedVoucher.getSoLuongDaSuDung());

@@ -33,6 +33,20 @@
         background-color: #dc3545;
         border-radius: 4px;
     }
+
+    /* Warning banner for over limit */
+    .cart-warning {
+        background: linear-gradient(45deg, #fff3cd, #ffeeba);
+        border: 2px solid #ffc107;
+        border-radius: 10px;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
 </style>
 
 <body>
@@ -43,6 +57,28 @@
     <div class="container p-5">
         <!-- Alert messages -->
         <div id="alertContainer"></div>
+
+        <!-- Over limit warning banner -->
+        <div id="overLimitWarning" class="alert cart-warning alert-dismissible fade show mb-4" style="display: none;">
+            <div class="row align-items-center">
+                <div class="col-md-1 col-2 text-center">
+                    <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
+                </div>
+                <div class="col-md-10 col-8">
+                    <h5 class="alert-heading mb-2">
+                        <i class="fas fa-shopping-cart me-2"></i>
+                        Giỏ hàng đã đạt giới hạn!
+                    </h5>
+                    <p class="mb-0">
+                        Giỏ hàng của bạn hiện có <strong id="currentItemCount">0</strong> sản phẩm, vượt quá giới hạn 100 sản phẩm.
+                        Vui lòng giảm số lượng một số sản phẩm để có trải nghiệm tốt nhất.
+                    </p>
+                </div>
+                <div class="col-md-1 col-2">
+                    <button type="button" class="btn-close" onclick="document.getElementById('overLimitWarning').style.display='none'"></button>
+                </div>
+            </div>
+        </div>
 
         <!-- Empty cart message -->
         <div id="emptyCart" class="card text-center py-5" style="display: none;">
@@ -184,7 +220,7 @@
                 const projectedTotal = currentTotal - currentQuantity + newQuantity;
 
                 if (projectedTotal > 100) {
-                    this.showSweetAlert('Giỏ hàng đã đạt giới hạn 100 sản phẩm! Vui lòng giảm số lượng.', 'warning');
+                    this.showSweetAlert('Giỏ hàng đã đạt giới hạn 100 sản phẩm! Vui lòng giảm số lượng một số sản phẩm khác trước.', 'warning');
                     return false;
                 }
                 return true;
@@ -195,22 +231,37 @@
             }
         }
 
-        showSweetAlert(message, type = 'success', position = 'top-end') {
-            const Toast = Swal.mixin({
-                toast: true,
-                position: position,
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
-            });
+        async safeUpdateQuantity(sanPhamChiTietId, newQuantity) {
+            newQuantity = Number(newQuantity); // Chuyển đổi thành số
+            if (newQuantity < 1) {
+                this.showSweetAlert('Số lượng phải lớn hơn 0!', 'warning');
+                return;
+            }
 
-            Toast.fire({
+            const canUpdate = await this.checkTotalLimit(sanPhamChiTietId, newQuantity);
+            if (canUpdate) {
+                this.updateQuantity(sanPhamChiTietId, newQuantity);
+            } else {
+                // Reset về giá trị cũ nếu vượt giới hạn
+                const cartItem = document.querySelector(`[data-id="${sanPhamChiTietId}"] input[type="number"]`);
+                if (cartItem) {
+                    const currentItem = await (await fetch('/cart/info')).json().items.find(item => item.sanPhamChiTietId === sanPhamChiTietId);
+                    cartItem.value = currentItem.soLuong;
+                }
+            }
+        }
+
+        showSweetAlert(message, type = 'success', position = 'center') {
+            Swal.fire({
                 icon: type,
-                title: message
+                title: message,
+                position: position,
+                showConfirmButton: true,
+                confirmButtonText: 'OK',
+                customClass: {
+                    confirmButton: 'btn btn-primary'
+                },
+                buttonsStyling: false
             });
         }
 
@@ -239,18 +290,37 @@
                 if (data.isEmpty) {
                     this.showEmptyCart();
                 } else {
-                    // Kiểm tra giới hạn 100 sản phẩm
-                    if (data.itemCount > 100) {
-                        this.showSweetAlert('Giỏ hàng đã đạt giới hạn 100 sản phẩm!', 'warning');
-                        document.getElementById('checkoutBtn').disabled = true;
-                        return;
-                    }
+                    // Luôn render cart items trước
                     this.renderCartItems(data.items);
                     this.updateSummary(data);
+
+                    // Kiểm tra và hiển thị cảnh báo nếu vượt giới hạn
+                    if (data.itemCount > 100) {
+                        this.showOverLimitWarning(data.itemCount);
+                    } else {
+                        this.hideOverLimitWarning();
+                    }
                 }
             } catch (error) {
                 console.error('Error loading cart:', error);
                 this.showSweetAlert('Có lỗi xảy ra khi tải giỏ hàng', 'error');
+            }
+        }
+
+        showOverLimitWarning(itemCount) {
+            const warningElement = document.getElementById('overLimitWarning');
+            const countElement = document.getElementById('currentItemCount');
+
+            if (warningElement && countElement) {
+                countElement.textContent = itemCount;
+                warningElement.style.display = 'block';
+            }
+        }
+
+        hideOverLimitWarning() {
+            const warningElement = document.getElementById('overLimitWarning');
+            if (warningElement) {
+                warningElement.style.display = 'none';
             }
         }
 
@@ -305,9 +375,9 @@
                                 </button>
                                 <input type="number" class="form-control text-center" value="${item.soLuong}"
                                        min="1" max="${item.soLuongTon}"
-                                       onchange="cart.updateQuantity(${item.sanPhamChiTietId}, this.value)">
+                                       onchange="cart.safeUpdateQuantity(${item.sanPhamChiTietId}, this.value)">
                                 <button class="btn btn-outline-secondary" type="button"
-                                    onclick="if (cart.checkTotalLimit(${item.sanPhamChiTietId}, ${item.soLuong + 1})) cart.updateQuantity(${item.sanPhamChiTietId}, ${item.soLuong + 1});"
+                                    onclick="cart.safeUpdateQuantity(${item.sanPhamChiTietId}, ${item.soLuong + 1})"
                                      ${item.soLuong >= item.soLuongTon ? 'disabled' : ''}>
                                         <i class="fas fa-plus"></i>
                                 </button>
@@ -354,20 +424,15 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Kiểm tra tổng số lượng sản phẩm
-                    if (data.itemCount > 100) {
-                        this.showSweetAlert('Giỏ hàng đã đạt giới hạn 100 sản phẩm! Vui lòng giảm số lượng.', 'warning');
-                        this.loadCart(); // Tải lại giỏ hàng để đảm bảo đồng bộ
-                        return;
-                    }
-                    this.loadCart(); // Reload entire cart
-                    this.showSweetAlert(data.message, 'success');
+                    this.loadCart();
                 } else {
                     this.showSweetAlert(data.message, 'error');
+                    this.loadCart();
                 }
             } catch (error) {
                 console.error('Error updating quantity:', error);
                 this.showSweetAlert('Có lỗi xảy ra khi cập nhật số lượng', 'error');
+                this.loadCart();
             } finally {
                 cartItem.style.opacity = '1';
                 cartItem.style.pointerEvents = 'auto';
@@ -410,6 +475,10 @@
                         this.showEmptyCart();
                     } else {
                         this.updateSummaryFromResponse(data);
+                        // Kiểm tra và ẩn cảnh báo nếu đã dưới giới hạn
+                        if (data.cartCount <= 100) {
+                            this.hideOverLimitWarning();
+                        }
                     }
                 } else {
                     this.showSweetAlert(data.message, 'error');
@@ -445,6 +514,7 @@
 
                 if (data.success) {
                     this.showEmptyCart();
+                    this.hideOverLimitWarning();
                     this.showSweetAlert(data.message, 'success');
                 } else {
                     this.showSweetAlert(data.message, 'error');
@@ -459,6 +529,7 @@
             document.getElementById('cartItems').innerHTML = '';
             document.getElementById('emptyCart').style.display = 'block';
             document.getElementById('cartSummary').style.display = 'none';
+            this.hideOverLimitWarning();
         }
 
         updateSummary(data) {

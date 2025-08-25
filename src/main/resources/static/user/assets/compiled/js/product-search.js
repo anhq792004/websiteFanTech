@@ -149,9 +149,9 @@ class ProductSearch {
 
         if (priceSlider && priceDisplay) {
             priceSlider.min = priceRange.min || 0;
-            // Cố định max = 5.000.000 VND
-            priceSlider.max = 5000000;
-            priceSlider.value = 5000000;
+            // Sử dụng giá trị max thực tế từ sản phẩm
+            priceSlider.max = priceRange.max || 5000000;
+            priceSlider.value = priceRange.max || 5000000;
 
             this.updatePriceDisplay();
         }

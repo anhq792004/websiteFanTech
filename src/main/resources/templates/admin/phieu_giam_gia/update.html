@@ -335,6 +335,19 @@
                 });
                 return;
             }
+            if (!ten.value.length() > 100) {
+                hasErrors = true;
+                await Swal.fire({
+                    text: 'Tên phiếu giảm giá không được quá 100 ký tự',
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    toast: true
+                });
+                return;
+            }
 
             if (!ngayBatDau.value) {
                 hasErrors = true;
@@ -408,7 +421,7 @@
             if (!giaTriDonHangToiThieu.value || giaTriDonHangToiThieu.value < 0) {
                 hasErrors = true;
                 await Swal.fire({
-                    text: 'Giá trị đơn hàng tối thiểu phải là số không âm',
+                    text: 'Giá trị đơn hàng tối thiểu phải lớn hơn 0',
                     icon: 'error',
                     position: 'top-end',
                     showConfirmButton: false,
@@ -468,18 +481,18 @@
                 }
             }
 
-            // Nếu không có lỗi, submit form và hiển thị thông báo thành công
+            // Nếu không có lỗi, hiển thị thông báo thành công giữa màn hình trong 3 giây và submit form
             if (!hasErrors) {
-                form.submit();
                 await Swal.fire({
+                    title: 'Thành công!',
                     text: 'Cập nhật phiếu giảm giá thành công!',
                     icon: 'success',
-                    position: 'top-end',
+                    position: 'center',
                     showConfirmButton: false,
                     timer: 2000,
-                    timerProgressBar: true,
-                    toast: true
+                    timerProgressBar: true
                 });
+                form.submit();
             }
         });
 

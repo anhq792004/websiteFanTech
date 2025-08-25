@@ -418,6 +418,12 @@ $(document).ready(function () {
             tinh: $("#city").val()
         };
 
+        // Validate form
+        if (!validateKhachHangForm(formData)) {
+            return; // Dừng nếu validate thất bại
+        }
+
+        // Tiến hành gửi AJAX nếu validate thành công
         $.ajax({
             url: "/hoa-don/updateInfor",
             type: "POST",
@@ -572,5 +578,144 @@ $(document).ready(function () {
     });
 });
 
+function validateKhachHangForm(formData) {
+    // Kiểm tra tên người nhận
+    if (!formData.tenNguoiNhan || formData.tenNguoiNhan.trim() === '') {
+        Swal.fire({
+            toast: true,
+            icon: 'error',
+            title: 'Vui lòng nhập tên người nhận!',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        return false;
+    }
+    if (!formData.tenNguoiNhan.length > 100) {
+        Swal.fire({
+            toast: true,
+            icon: 'error',
+            title: 'Tên người nhận không được vượt quá 100 ký tự!',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        return false;
+    }
 
+    // Kiểm tra tên chỉ chứa chữ cái, khoảng trắng và một số ký tự đặc biệt
+    const tenRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
+    if (!tenRegex.test(formData.tenNguoiNhan)) {
+        Swal.fire({
+            toast: true,
+            icon: 'error',
+            title: 'Tên người nhận chỉ được chứa chữ cái và khoảng trắng!',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        return false;
+    }
+
+    // Kiểm tra số điện thoại
+    if (!formData.sdtNguoiNhan || formData.sdtNguoiNhan.trim() === '') {
+        Swal.fire({
+            toast: true,
+            icon: 'error',
+            title: 'Vui lòng nhập số điện thoại!',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        return false;
+    }
+
+    // Kiểm tra định dạng số điện thoại (10 số, bắt đầu bằng 0)
+    const sdtRegex = /^0[0-9]{9}$/;
+    if (!sdtRegex.test(formData.sdtNguoiNhan)) {
+        Swal.fire({
+            toast: true,
+            icon: 'error',
+            title: 'Số điện thoại phải có 10 chữ số và bắt đầu bằng 0!',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        return false;
+    }
+
+    // Kiểm tra tỉnh
+    if (!formData.tinh || formData.tinh.trim() === '') {
+        Swal.fire({
+            toast: true,
+            icon: 'error',
+            title: 'Vui lòng chọn tỉnh/thành phố!',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        return false;
+    }
+
+    // Kiểm tra huyện
+    if (!formData.huyen || formData.huyen.trim() === '') {
+        Swal.fire({
+            toast: true,
+            icon: 'error',
+            title: 'Vui lòng chọn quận/huyện!',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        return false;
+    }
+
+    // Kiểm tra xã
+    if (!formData.xa || formData.xa.trim() === '') {
+        Swal.fire({
+            toast: true,
+            icon: 'error',
+            title: 'Vui lòng chọn phường/xã!',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        return false;
+    }
+
+    // Kiểm tra số nhà/ngõ đường
+    if (!formData.soNhaNgoDuong || formData.soNhaNgoDuong.trim() === '') {
+        Swal.fire({
+            toast: true,
+            icon: 'error',
+            title: 'Vui lòng nhập số nhà/ngõ đường!',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        return false;
+    }
+    if (formData.soNhaNgoDuong.length > 100) {
+        Swal.fire({
+            toast: true,
+            icon: 'error',
+            title: 'Số nhà/ngõ đường không được vượt quá 100 ký tự!',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        return false;
+    }
+    return true;
+}
 
