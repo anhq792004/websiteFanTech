@@ -509,12 +509,43 @@ class VariantsManager {
 
             const hangSelect = document.getElementById('hangId');
             const nutBamSelect = document.getElementById('nutBamId');
+            const soLuongInput = document.getElementById('soLuong');
+            const giaInput = document.getElementById('gia');
+            const canNangInput = document.getElementById('canNang');
+            
             const hangId = hangSelect.value;
             const nutBamId = nutBamSelect.value;
+            const soLuong = parseInt(soLuongInput.value);
+            const gia = parseInt(giaInput.value);
+            const canNang = parseFloat(canNangInput.value);
 
             // Clear trạng thái lỗi cũ
             hangSelect.classList.remove('is-invalid');
             nutBamSelect.classList.remove('is-invalid');
+            soLuongInput.classList.remove('is-invalid');
+            giaInput.classList.remove('is-invalid');
+            canNangInput.classList.remove('is-invalid');
+
+            // Validate số lượng
+            if (!soLuong || soLuong <= 0) {
+                soLuongInput.classList.add('is-invalid');
+                this.showError('Số lượng phải lớn hơn 0');
+                return;
+            }
+
+            // Validate giá
+            if (!gia || gia <= 0) {
+                giaInput.classList.add('is-invalid');
+                this.showError('Giá phải lớn hơn 0');
+                return;
+            }
+
+            // Validate cân nặng (nếu có nhập)
+            if (canNangInput.value && (isNaN(canNang) || canNang <= 0)) {
+                canNangInput.classList.add('is-invalid');
+                this.showError('Cân nặng phải lớn hơn 0');
+                return;
+            }
 
             // Validate riêng từng trường
             if (!hangId && !nutBamId) {
@@ -538,9 +569,9 @@ class VariantsManager {
             const commonData = {
                 hangId: parseInt(hangId),
                 nutBamId: parseInt(nutBamId),
-                soLuong: parseInt(document.getElementById('soLuong').value) || 0,
-                gia: parseInt(document.getElementById('gia').value) || 0,
-                canNang: parseFloat(document.getElementById('canNang').value) || 0,
+                soLuong: soLuong,
+                gia: gia,
+                canNang: canNang || 0,
                 moTa: document.getElementById('moTa').value || '',
                 trangThai: document.getElementById('trangThai').checked
             };
