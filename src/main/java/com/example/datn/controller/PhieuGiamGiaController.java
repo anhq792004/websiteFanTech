@@ -37,26 +37,27 @@ public class PhieuGiamGiaController {
     public String hienThiDanhSach(Model model,
                                   @RequestParam(value = "search", required = false) String search,
                                   @RequestParam(value = "trangThai", required = false) Boolean trangThai,
-                                  @RequestParam(value = "loaiGiamGia", required = false) Boolean loaiGiamGia, // Thêm tham số này
+                                  @RequestParam(value = "loaiGiamGia", required = false) Boolean loaiGiamGia,
                                   @RequestParam(value = "ngayBatDau", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date ngayBatDau,
                                   @RequestParam(value = "ngayKetThuc", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date ngayKetThuc,
                                   @RequestParam(value = "page", defaultValue = "0") int page,
                                   @RequestParam(value = "size", defaultValue = "5") int size) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("ma").ascending());
+        // Sửa đổi dòng này để sắp xếp theo ngayTao giảm dần
+        Pageable pageable = PageRequest.of(page, size, Sort.by("ngayTao").descending());
         Page<PhieuGiamGia> pagePhieuGiamGia;
         Date currentDate = new Date();
 
         // Tìm kiếm và lọc dữ liệu
         if ((search != null && !search.trim().isEmpty()) ||
                 trangThai != null ||
-                loaiGiamGia != null || // Thêm điều kiện kiểm tra loaiGiamGia
+                loaiGiamGia != null ||
                 ngayBatDau != null ||
                 ngayKetThuc != null) {
             pagePhieuGiamGia = phieuGiamGiaRepo.findWithFilters(
                     search != null ? search.trim() : null,
                     trangThai,
-                    loaiGiamGia, // Truyền tham số này vào
+                    loaiGiamGia,
                     ngayBatDau,
                     ngayKetThuc,
                     pageable
@@ -82,7 +83,7 @@ public class PhieuGiamGiaController {
         // Thêm các giá trị tìm kiếm vào model để giữ trong form
         model.addAttribute("search", search);
         model.addAttribute("trangThai", trangThai);
-        model.addAttribute("loaiGiamGia", loaiGiamGia); // Thêm vào model
+        model.addAttribute("loaiGiamGia", loaiGiamGia);
         model.addAttribute("ngayBatDau", ngayBatDau);
         model.addAttribute("ngayKetThuc", ngayKetThuc);
 

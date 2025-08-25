@@ -482,7 +482,8 @@
                             </tr>
                             </thead>
                             <tbody id="productTable">
-                            <tr th:each="item, iter : ${findSPCTByIdSanPham}">
+                            <tr th:each="item, iter : ${findSPCTByIdSanPham}"
+                                th:if="${item.soLuong > 0}">
                                 <td th:text="${iter.count}"></td>
                                 <td th:text="${item.sanPham.ten}"></td>
                                 <td th:text="${#numbers.formatDecimal(item.gia, 0, 'COMMA', 0, 'POINT')} + ' đ'">h1</td>
