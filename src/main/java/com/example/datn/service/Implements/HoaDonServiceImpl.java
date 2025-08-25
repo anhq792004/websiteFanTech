@@ -431,11 +431,23 @@ public class HoaDonServiceImpl implements HoaDonService {
         Optional<HoaDon> optionalHoaDon = hoaDonRepo.findById(id);
         if (optionalHoaDon.isPresent()) {
             HoaDon hoaDon = optionalHoaDon.get();
-            if (!hoaDon.getTrangThai().equals(getTrangThaiHoaDon().getChoXacNhan())) {
+            if (!hoaDon.getTrangThai().equals(getTrangThaiHoaDon().getChoXacNhan())
+                    && !hoaDon.getTrangThai().equals(getTrangThaiHoaDon().getDaXacNhan())
+                    && !hoaDon.getTrangThai().equals(getTrangThaiHoaDon().getHoaDonCho())) {
                 throw new RuntimeException("Hóa đơn đã được xử lý bởi người khác!");
             }
             List<HoaDonChiTiet> listHDCT = hoaDonChiTietRepo.findByHoaDon_Id(id);
 
+            if (hoaDon.getTrangThai() != getTrangThaiHoaDon().getChoXacNhan()) {
+                for (HoaDonChiTiet hdct : listHDCT) {
+                    SanPhamChiTiet spct = hdct.getSanPhamChiTiet();
+                    int soLuongTon = spct.getSoLuong();   // Số lượng hiện tại trong kho
+                    int soLuongHoan = hdct.getSoLuong();  // Số lượng cần hoàn lại
+
+                    spct.setSoLuong(soLuongTon + soLuongHoan); // Cộng lại số lượng
+                    sanPhamChiTietRepo.save(spct);
+                }
+            }
             // Cập nhật trạng thái hóa đơn sang HỦY
             hoaDon.setGhiChu(ghiChu);
             hoaDon.setTrangThai(getTrangThaiHoaDon().getHuy());
