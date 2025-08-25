@@ -151,7 +151,7 @@ public class gioHangService {
         cartInfo.put("isEmpty", cart.isEmpty());
         cartInfo.put("totalAmount", getTotalAmount(session));
         cartInfo.put("itemCount", getCartItemCount(session));
-        cartInfo.put("totalWeight", getTotalWeight(session)); // Thêm dòng này
+        cartInfo.put("totalWeight", getTotalWeight(session));
         return cartInfo;
     }
 
