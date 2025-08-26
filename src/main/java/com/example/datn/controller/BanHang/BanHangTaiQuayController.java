@@ -507,8 +507,8 @@ public class BanHangTaiQuayController {
                         // Hóa đơn online - chuyển sang xác nhận (giống thanh toán khi nhận hàng)
                         return ResponseEntity.ok("Thanh toán Momo thành công! Đơn hàng online đã chuyển sang xác nhận.");
                     } else {
-                        // Hóa đơn tại quầy - hoàn thành ngay
-                        return ResponseEntity.ok("Thanh toán Momo thành công! Đơn hàng tại quầy đã hoàn thành.");
+                        // Hóa đơn tại quầy - hoàn thành ngay và in hóa đơn
+                        return ResponseEntity.ok("Thanh toán Momo thành công! Đơn hàng tại quầy đã hoàn thành. PRINT_INVOICE:" + idHD);
                     }
                 }
                 return ResponseEntity.ok("Thanh toán Momo thành công!");

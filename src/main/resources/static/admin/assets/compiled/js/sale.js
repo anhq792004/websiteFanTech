@@ -757,15 +757,29 @@ function confirmMomoPayment(hoaDonId) {
         type: 'POST',
         data: {idHD: hoaDonId},
         success: function (response) {
+            let message = response;
+            let shouldPrintInvoice = false;
+
+            // Kiểm tra xem có yêu cầu in hóa đơn không
+            if (response.includes('PRINT_INVOICE:')) {
+                const parts = response.split('PRINT_INVOICE:');
+                message = parts[0].trim();
+                shouldPrintInvoice = true;
+            }
+
             Swal.fire({
                 toast: true,
                 icon: 'success',
-                title: 'Thanh toán Momo thành công! Đơn hàng đã chuyển sang đang giao hàng.',
+                title: message,
                 position: 'top-end',
                 showConfirmButton: false,
                 timer: 2000,
                 timerProgressBar: true
             }).then(() => {
+                // Nếu người dùng chọn in hóa đơn, mở tab in hóa đơn
+                if (shouldPrintInvoice) {
+                    window.open(`/hoa-don/print/${hoaDonId}`, '_blank');
+                }
                 window.location.href = '/sale/index';
             });
         },
