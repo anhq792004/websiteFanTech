@@ -24,6 +24,7 @@ public interface HoaDonService {
 
     Page<HoaDon> searchHoaDon(String query, Boolean loaiHoaDon, LocalDateTime tuNgay, LocalDateTime denNgay, Integer trangThai, Pageable pageable);
 
+    Optional<HoaDon> findHoaDonByIdWithDiscount(Long id);
 
     Optional<HoaDon> findHoaDonById(Long id);
 
