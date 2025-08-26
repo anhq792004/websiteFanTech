@@ -218,17 +218,26 @@ public class BanHangTaiQuayController {
 
             HoaDon hoaDon = hoaDonOpt.get();
 
+            // Kiểm tra số lượng phiếu giảm giá trước khi thanh toán
+            if (hoaDon.getPhieuGiamGia() != null) {
+                PhieuGiamGia pgg = hoaDon.getPhieuGiamGia();
+                if (pgg.getSoLuong() != null && pgg.getSoLuong() <= 0) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Phiếu giảm giá đã hết số lượng, không thể thanh toán!");
+                }
+            }
+
             // Cập nhật phương thức thanh toán
             hoaDon.setPhuongThucThanhToan(phuongThucThanhToan);
             hoaDonService.saveHoaDon(hoaDon);
 
             // Xử lý thanh toán dựa trên phương thức
             if ("MOMO".equals(phuongThucThanhToan)) {
-                // Tạo QR code thanh toán Momo
                 return createMomoPayment(hoaDon);
             } else {
-                // Thanh toán tiền mặt (mặc định)
+                // Thanh toán tiền mặt
                 banHangService.thanhToan(idHD);
+                subtractDiscountQuantity(hoaDon);
                 String responseMessage = "Thanh toán thành công!";
                 if (shouldPrint) {
                     responseMessage += " PRINT_INVOICE:" + idHD;
@@ -241,6 +250,32 @@ public class BanHangTaiQuayController {
         }
     }
 
+    private void subtractDiscountQuantity(HoaDon hoaDon) {
+        if (hoaDon.getPhieuGiamGia() != null) {
+            PhieuGiamGia pgg = hoaDon.getPhieuGiamGia();
+
+            // Trừ số lượng cho phiếu công khai hoặc cá nhân (nếu có soLuong)
+            if (pgg.getSoLuong() != null && pgg.getSoLuong() > 0) {
+                pgg.setSoLuong(pgg.getSoLuong() - 1);
+                phieuGiamGiaRepo.saveAndFlush(pgg); // Đảm bảo cập nhật ngay lập tức
+                System.out.println("Đã trừ số lượng PGG " + pgg.getId() + " từ " + (pgg.getSoLuong() + 1) + " thành " + pgg.getSoLuong());
+            }
+
+            // Nếu là phiếu cá nhân (loaiPhieu = false), set trangThai = false cho PhieuGiamGiaKhachHang
+            if (!pgg.getLoaiPhieu() && hoaDon.getKhachHang() != null) {
+                List<PhieuGiamGiaKhachHang> pggkhList = phieuGiamGiaKhachHangRepo.findByKhachHangIdAndTrangThaiTrue(hoaDon.getKhachHang().getId());
+                Optional<PhieuGiamGiaKhachHang> pggkhOpt = pggkhList.stream()
+                        .filter(pggkh -> pggkh.getPhieuGiamGia().getId().equals(pgg.getId()))
+                        .findFirst();
+                if (pggkhOpt.isPresent()) {
+                    PhieuGiamGiaKhachHang pggkh = pggkhOpt.get();
+                    pggkh.setTrangThai(false);
+                    phieuGiamGiaKhachHangRepo.saveAndFlush(pggkh);
+                    System.out.println("Đã set trangThai = false cho PGGKH " + pggkh.getId());
+                }
+            }
+        }
+    }
     // Phương thức tạo thanh toán Momo
     private ResponseEntity<String> createMomoPayment(HoaDon hoaDon) {
         try {
@@ -414,6 +449,9 @@ public class BanHangTaiQuayController {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Phiếu giảm giá cá nhân không hợp lệ");
                 }
             }
+            if (phieuGiamGia.getSoLuong() != null && phieuGiamGia.getSoLuong() <= 0) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Phiếu giảm giá đã hết số lượng");
+            }
 
             // Áp dụng phiếu giảm giá vào hóa đơn
             hoaDon.setPhieuGiamGia(phieuGiamGia);
@@ -489,29 +527,34 @@ public class BanHangTaiQuayController {
     @ResponseBody
     public ResponseEntity<String> confirmMomoPayment(@RequestParam("idHD") Long idHD) {
         try {
-            // Tìm giao dịch Momo
+            // Tìm hóa đơn
             Optional<HoaDon> hoaDonOpt = hoaDonService.findHoaDonById(idHD);
             if (!hoaDonOpt.isPresent()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy hóa đơn");
+            }
+
+            HoaDon hoaDon = hoaDonOpt.get();
+
+            // Kiểm tra số lượng phiếu giảm giá trước khi xác nhận
+            if (hoaDon.getPhieuGiamGia() != null) {
+                PhieuGiamGia pgg = hoaDon.getPhieuGiamGia();
+                if (pgg.getSoLuong() != null && pgg.getSoLuong() <= 0) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Phiếu giảm giá đã hết số lượng, không thể xác nhận thanh toán!");
+                }
             }
 
             // Trong môi trường test, luôn xác nhận thành công
             boolean success = momoService.confirmTransaction(idHD);
 
             if (success) {
+                subtractDiscountQuantity(hoaDon);
                 // Kiểm tra loại hóa đơn để hiển thị thông báo phù hợp
-                Optional<HoaDon> hoaDonForMessage = hoaDonService.findHoaDonById(idHD);
-                if (hoaDonForMessage.isPresent()) {
-                    HoaDon hoaDon = hoaDonForMessage.get();
-                    if (hoaDon.getLoaiHoaDon() != null && !hoaDon.getLoaiHoaDon()) {
-                        // Hóa đơn online - chuyển sang xác nhận (giống thanh toán khi nhận hàng)
-                        return ResponseEntity.ok("Thanh toán Momo thành công! Đơn hàng online đã chuyển sang xác nhận.");
-                    } else {
-                        // Hóa đơn tại quầy - hoàn thành ngay
-                        return ResponseEntity.ok("Thanh toán Momo thành công! Đơn hàng tại quầy đã hoàn thành.");
-                    }
+                if (hoaDon.getLoaiHoaDon() != null && !hoaDon.getLoaiHoaDon()) {
+                    return ResponseEntity.ok("Thanh toán Momo thành công! Đơn hàng online đã chuyển sang xác nhận.");
+                } else {
+                    return ResponseEntity.ok("Thanh toán Momo thành công! Đơn hàng tại quầy đã hoàn thành.");
                 }
-                return ResponseEntity.ok("Thanh toán Momo thành công!");
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body("Không thể xác nhận thanh toán Momo");

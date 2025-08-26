@@ -474,7 +474,8 @@
                     if (data.isEmpty) {
                         this.showEmptyCart();
                     } else {
-                        this.updateSummaryFromResponse(data);
+                        // Load lại toàn bộ giỏ hàng để đảm bảo tính nhất quán
+                        this.loadCart();
                         // Kiểm tra và ẩn cảnh báo nếu đã dưới giới hạn
                         if (data.cartCount <= 100) {
                             this.hideOverLimitWarning();
@@ -564,7 +565,8 @@
         updateSummaryFromResponse(data) {
             this.updateSummary({
                 itemCount: data.cartCount,
-                totalAmount: data.totalAmount
+                totalAmount: data.totalAmount,
+                totalWeight: data.totalWeight
             });
         }
 

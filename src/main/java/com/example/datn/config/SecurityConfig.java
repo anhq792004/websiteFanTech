@@ -32,7 +32,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         // Tài nguyên tĩnh và trang công khai
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/admin/assets/**", "/", "/home",
+                        .requestMatchers("/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/admin/assets/**",
+                                "/user/assets/**",
+                                "/",
+                                "/home",
                                 "/register",
                                 "/login",
                                 "/forgot-password/**",
@@ -40,7 +46,16 @@ public class SecurityConfig {
                                 "/reset-password",
                                 "/access-denied",
                                 "/verify-account",
-                                "/fanTech/**").permitAll()
+                                "/fanTech/index",
+                                "/api/products/search",
+                                "/api/auth/check",
+                                "/api/products/filters",
+                                "/api/chat-ai/ask",
+                                "/cart/**",
+                                "/uploads/**").permitAll()
+
+                        .requestMatchers("/cart/**").authenticated()
+
 
                         // API thống kê - Admin và Employee có thể truy cập
                         .requestMatchers("/api/thong-ke/**",
