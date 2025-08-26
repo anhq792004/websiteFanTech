@@ -88,7 +88,7 @@
                                                     <div class="Day">
                                                         <span class="text-success">Đã xác nhận</span>
                                                         <div class="MonthYear text-success"
-                                                             th:text="${#temporals.format(history.ngayTao, 'dd-MM-yyyy')}">
+                                                             th:text="${#temporals.format(history.ngaySua, 'dd-MM-yyyy')}">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -100,7 +100,7 @@
                                                     <div class="Day">
                                                         <span class="text-primary-emphasis">Giao hàng</span>
                                                         <div class="MonthYear text-primary-emphasis"
-                                                             th:text="${#temporals.format(history.ngayTao, 'dd-MM-yyyy')}">
+                                                             th:text="${#temporals.format(history.ngaySua, 'dd-MM-yyyy')}">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -112,7 +112,7 @@
                                                     <div class="Day">
                                                         <span class="text-danger-emphasis">Hoàn thành</span>
                                                         <div class="MonthYear text-danger-emphasis"
-                                                             th:text="${#temporals.format(history.ngayTao, 'dd-MM-yyyy')}">
+                                                             th:text="${#temporals.format(history.ngaySua, 'dd-MM-yyyy')}">
 
                                                         </div>
                                                     </div>
@@ -124,7 +124,18 @@
                                                     <div class="Day text-danger">
                                                         <span>Hủy</span>
                                                         <div class="MonthYear text-danger"
-                                                             th:text="${#temporals.format(history.ngayTao, 'dd-MM-yyyy')}">
+                                                             th:text="${#temporals.format(history.ngaySua, 'dd-MM-yyyy')}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div th:case="6" class="eventTime">
+                                                    <div class="DayDigit text-dark">
+                                                        <i class="bi bi-arrow-left-right"></i>
+                                                    </div>
+                                                    <div class="Day text-dark">
+                                                        <span>Hoàn hàng</span>
+                                                        <div class="MonthYear text-dark"
+                                                             th:text="${#temporals.format(history.ngaySua, 'dd-MM-yyyy')}">
                                                         </div>
                                                     </div>
                                                 </div>

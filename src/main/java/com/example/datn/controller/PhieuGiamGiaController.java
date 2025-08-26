@@ -1,10 +1,14 @@
 package com.example.datn.controller;
 
+import com.example.datn.entity.NhanVien.NhanVien;
 import com.example.datn.entity.PhieuGiamGia;
 import com.example.datn.entity.PhieuGiamGiaKhachHang;
+import com.example.datn.entity.TaiKhoan;
 import com.example.datn.repository.KhachHangRepo.KhachHangRepo;
+import com.example.datn.repository.NhanVienRepo;
 import com.example.datn.repository.PhieuGiamGiaKhachHangRepo;
 import com.example.datn.repository.PhieuGiamGiaRepo;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +36,9 @@ public class PhieuGiamGiaController {
 
     @Autowired
     private KhachHangRepo khachHangRepo;
+
+    @Autowired
+    private NhanVienRepo nhanVienRepo;
 
     @GetMapping("/index")
     public String hienThiDanhSach(Model model,
@@ -103,13 +110,29 @@ public class PhieuGiamGiaController {
     @PostMapping("/save")
     public String themMoi(@ModelAttribute PhieuGiamGia phieuGiamGia,
                           @RequestParam(value = "selectedKhachHang", required = false) List<Long> selectedKhachHang,
-                          RedirectAttributes redirectAttributes) {
+                          RedirectAttributes redirectAttributes,
+                          HttpSession session) {
         try {
+            // Kiểm tra đăng nhập
+            TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
+            if (currentUser == null) {
+                redirectAttributes.addFlashAttribute("error", "Vui lòng đăng nhập để thực hiện thao tác này!");
+                return "redirect:/login";
+            }
+
+            // Lấy tên nhân viên từ NhanVien
+            String nguoiTao = "Admin"; // Mặc định
+            Optional<NhanVien> nhanVienOpt = nhanVienRepo.findByTaiKhoanId(currentUser.getId());
+            if (nhanVienOpt.isPresent() && nhanVienOpt.get().getTen() != null) {
+                nguoiTao = nhanVienOpt.get().getTen(); // Lấy tên nhân viên
+            }
+
             if (phieuGiamGia.getMa() == null || phieuGiamGia.getMa().trim().isEmpty()) {
                 phieuGiamGia.setMa(generateNextCode());
             }
 
             phieuGiamGia.setNgayTao(new Date());
+            phieuGiamGia.setNguoiTao(nguoiTao); // Set nguoiTao
 
             if (!validatePhieuGiamGia(phieuGiamGia, redirectAttributes)) {
                 return "redirect:/admin/phieu-giam-gia/create";
@@ -124,8 +147,7 @@ public class PhieuGiamGiaController {
                     pggKh.setKhachHang(khachHangRepo.findById(khachHangId).orElse(null));
                     pggKh.setNgayTao(new Date());
                     pggKh.setTrangThai(true);
-                    pggKh.setNguoiTao("Admin");
-
+                    pggKh.setNguoiTao(nguoiTao); // Set nguoiTao cho PhieuGiamGiaKhachHang
                     phieuGiamGiaKhachHangRepo.save(pggKh);
                 }
                 redirectAttributes.addFlashAttribute("success",
@@ -164,11 +186,27 @@ public class PhieuGiamGiaController {
     @PostMapping("/update")
     public String capNhat(@ModelAttribute PhieuGiamGia phieuGiamGia,
                           @RequestParam(value = "selectedKhachHang", required = false) List<Long> selectedKhachHang,
-                          RedirectAttributes redirectAttributes) {
+                          RedirectAttributes redirectAttributes,
+                          HttpSession session) {
         try {
+            // Kiểm tra đăng nhập
+            TaiKhoan currentUser = (TaiKhoan) session.getAttribute("currentUser");
+            if (currentUser == null) {
+                redirectAttributes.addFlashAttribute("error", "Vui lòng đăng nhập để thực hiện thao tác này!");
+                return "redirect:/login";
+            }
+
+            // Lấy tên nhân viên từ NhanVien
+            String nguoiTao = "Admin"; // Mặc định
+            Optional<NhanVien> nhanVienOpt = nhanVienRepo.findByTaiKhoanId(currentUser.getId());
+            if (nhanVienOpt.isPresent() && nhanVienOpt.get().getTen() != null) {
+                nguoiTao = nhanVienOpt.get().getTen(); // Lấy tên nhân viên
+            }
+
             Optional<PhieuGiamGia> pggCu = phieuGiamGiaRepo.findById(phieuGiamGia.getId());
             if (pggCu.isPresent()) {
                 phieuGiamGia.setNgayTao(pggCu.get().getNgayTao());
+                phieuGiamGia.setNguoiTao(nguoiTao); // Set nguoiTao
 
                 if (phieuGiamGia.getMa() == null || phieuGiamGia.getMa().trim().isEmpty()) {
                     phieuGiamGia.setMa(pggCu.get().getMa());
@@ -194,7 +232,7 @@ public class PhieuGiamGiaController {
                                 pggKh.setKhachHang(khachHangRepo.findById(khachHangId).orElse(null));
                                 pggKh.setNgayTao(new Date());
                                 pggKh.setTrangThai(true);
-                                pggKh.setNguoiTao("Admin");
+                                pggKh.setNguoiTao(nguoiTao); // Set nguoiTao cho PhieuGiamGiaKhachHang
                                 phieuGiamGiaKhachHangRepo.save(pggKh);
                             }
                         }
