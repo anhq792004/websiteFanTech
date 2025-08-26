@@ -154,21 +154,21 @@
                                     <div class="mb-3">
                                         <label class="form-label form-label-required">Số lượng</label>
                                         <input type="number" class="form-control" name="soLuong" 
-                                               th:value="${sanPhamChiTiet.soLuong}" min="1" required placeholder="Nhập số lượng">
+                                               th:value="${sanPhamChiTiet.soLuong}" placeholder="Nhập số lượng">
                                         <div class="invalid-feedback">Số lượng phải lớn hơn 0</div>
                                     </div>
 
                                     <div class="mb-3">
                                         <label class="form-label form-label-required">Giá bán (đ)</label>
                                         <input type="number" class="form-control" name="gia" 
-                                               th:value="${sanPhamChiTiet.gia}" min="1" step="1000" required placeholder="Nhập giá bán">
+                                               th:value="${sanPhamChiTiet.gia}" placeholder="Nhập giá bán">
                                         <div class="invalid-feedback">Giá bán phải lớn hơn 0</div>
                                     </div>
 
                                     <div class="mb-3">
                                         <label class="form-label">Cân nặng (gram)</label>
                                         <input type="number" class="form-control" name="canNang" 
-                                               th:value="${sanPhamChiTiet.canNang}" min="0.1" step="0.1" placeholder="Nhập cân nặng">
+                                               th:value="${sanPhamChiTiet.canNang}" placeholder="Nhập cân nặng">
                                         <div class="invalid-feedback">Cân nặng phải lớn hơn 0</div>
                                     </div>
 
