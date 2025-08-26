@@ -137,6 +137,8 @@ $(document).ready(function() {
             success: function(data) {
                 console.log("Dữ liệu kiểu quạt:", data);
                 addOptionToSelect("#fanType", data, "-- Chọn kiểu quạt --");
+                // Thêm load cho dropdown lọc kiểu quạt trong trang danh sách
+                addOptionToSelect("#kieuQuat", data, "Tất cả kiểu quạt");
             },
             error: function(error) {
                 console.error("Lỗi khi tải danh sách kiểu quạt:", error);
