@@ -30,6 +30,8 @@ public interface NhanVienRepo extends JpaRepository<NhanVien,Long> {
 
     Optional<NhanVien> findByTaiKhoan(TaiKhoan taiKhoan);
 
+    Optional<NhanVien> findByTaiKhoanId(Long taiKhoanId);
+
     Optional<NhanVien> findByTaiKhoanAndTrangThai(TaiKhoan taiKhoan, Boolean trangThai);
 
 }
