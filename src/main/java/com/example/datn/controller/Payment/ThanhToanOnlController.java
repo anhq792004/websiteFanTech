@@ -377,6 +377,7 @@ public class ThanhToanOnlController {
         lichSuHoaDon.setHoaDon(savedHoaDon);
         lichSuHoaDon.setTrangThai("MOMO".equals(hoaDon.getPhuongThucThanhToan()) ? 2 : 1);
         lichSuHoaDon.setNgayTao(LocalDateTime.now());
+        lichSuHoaDon.setNgaySua(LocalDateTime.now());
         lichSuHoaDon.setMoTa("Đơn hàng được tạo bởi khách hàng: " + khachHang.getTen());
         lichSuHoaDon.setNguoiTao(khachHang.getTen());
         logger.info("Lưu lịch sử hóa đơn cho mã hóa đơn: {}", hoaDon.getMa());
