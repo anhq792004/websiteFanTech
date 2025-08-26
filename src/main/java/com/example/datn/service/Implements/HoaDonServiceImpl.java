@@ -70,6 +70,20 @@ public class HoaDonServiceImpl implements HoaDonService {
         }
         throw new RuntimeException("Không tìm thấy thông tin người dùng đang đăng nhập");
     }
+    @Override
+    public Optional<HoaDon> findHoaDonByIdWithDiscount(Long id) {
+        return hoaDonRepo.findById(id)
+                .map(hoaDon -> {
+                    // Eager loading để đảm bảo dữ liệu được load đầy đủ
+                    if (hoaDon.getPhieuGiamGia() != null) {
+                        hoaDon.getPhieuGiamGia().getId(); // Force load
+                    }
+                    if (hoaDon.getKhachHang() != null) {
+                        hoaDon.getKhachHang().getId(); // Force load
+                    }
+                    return hoaDon;
+                });
+    }
 
     @Override
     public List<HoaDon> findAll() {
@@ -454,12 +468,34 @@ public class HoaDonServiceImpl implements HoaDonService {
             hoaDon.setNgaySua(LocalDateTime.now());
             hoaDonRepo.save(hoaDon);
 
+            // Lấy thông tin khách hàng đang đăng nhập
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String nguoiTao = "Khách lẻ";
+            if (authentication != null && authentication.isAuthenticated()) {
+                Object principal = authentication.getPrincipal();
+                String username;
+                if (principal instanceof UserDetails) {
+                    username = ((UserDetails) principal).getUsername();
+                } else {
+                    username = principal.toString();
+                }
+
+                TaiKhoan taiKhoan = taiKhoanRepo.findByEmail(username);
+                if (taiKhoan != null) {
+                    KhachHang khachHang = khachHangRepo.findByTaiKhoan(taiKhoan);
+                    if (khachHang != null) {
+                        nguoiTao = khachHang.getTen() != null ? khachHang.getTen() : "Khách lẻ";
+                    }
+                }
+            }
+
             // Tạo một bản ghi lịch sử cho HoaDon hủy
             LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
             lichSuHoaDon.setHoaDon(hoaDon);
             lichSuHoaDon.setTrangThai(getTrangThaiHoaDon().getHuy());
             lichSuHoaDon.setNgaySua(LocalDateTime.now());
             lichSuHoaDon.setMoTa(ghiChu);
+            lichSuHoaDon.setNguoiTao(nguoiTao); // Sử dụng tên khách hàng
             lichSuHoaDonRepo.save(lichSuHoaDon);
         } else {
             throw new RuntimeException("Không tìm thấy hóa đơn với ID: " + id);

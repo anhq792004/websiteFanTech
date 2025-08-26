@@ -7303,7 +7303,7 @@ img.mfp-img {
 .login-btn-custom {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  color: black;
   padding: 8px 20px;
   border-radius: 25px;
   text-decoration: none;

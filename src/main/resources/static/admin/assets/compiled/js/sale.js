@@ -617,10 +617,10 @@ function checkMomoPaymentStatus(hoaDonId) {
                 // Nếu thanh toán thành công và chưa hiển thị thông báo
                 if (!window.momoPaymentCompleted) {
                     window.momoPaymentCompleted = true; // Đánh dấu đã hoàn tất
-                    
+
                     // Xóa ID hóa đơn khỏi sessionStorage ngay lập tức
                     sessionStorage.removeItem('pending_momo_order');
-                    
+
                     Swal.close(); // Đóng dialog hiện tại
                     Swal.fire({
                         toast: true,
@@ -1882,5 +1882,71 @@ function checkPaymentStatus() {
         console.log('Xóa pending Momo order cũ khi load trang:', oldPendingOrder);
         sessionStorage.removeItem('pending_momo_order');
     }
+    $(document).ready(function () {
+        $('#btnXoaPhieuGiamGia').click(function () {
+            const idHD = $(this).data('id');
+
+            Swal.fire({
+                title: 'Xóa phiếu giảm giá?',
+                text: 'Bạn có chắc chắn muốn xóa phiếu giảm giá này khỏi hóa đơn?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/sale/remove-discount',
+                        type: 'POST',
+                        data: { idHD: idHD },
+                        success: function (response) {
+                            Swal.fire({
+                                toast: true,
+                                icon: 'success',
+                                title: response,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+
+                            // Cập nhật UI sau xóa
+                            $('#tenPhieuGiamGia').text('Chưa chọn');
+                            $('#giaTriGiamGia').text('0 đ');
+                            $('#giaTriGiamGia').attr('data-value', '0');
+
+                            const tongTien = parseFloat($('#tienThanhToan').attr('data-value')) || 0;
+                            $('#tongTienSauGiam').text(formatNumberToVND(tongTien));
+                            $('#tongTienSauGiam').attr('data-value', tongTien);
+
+                            // Cập nhật tiền thừa
+                            const tienKhachTra = parseFloat($('#tienKhachTra').val().replace(/[^0-9]/g, '')) || 0;
+                            const tienThua = tienKhachTra - tongTien;
+                            $('#tienThua').text(formatNumberToVND(tienThua));
+                            if (tienThua < 0) {
+                                $('#tienThua').addClass("text-danger");
+                                $('#btnThanhToan').removeClass('btn-success').addClass('btn-outline-warning');
+                            } else {
+                                $('#tienThua').removeClass("text-danger");
+                                $('#btnThanhToan').removeClass('btn-outline-warning').addClass('btn-success');
+                            }
+
+                            // Disable nút xóa sau khi xóa
+                            $('#btnXoaPhieuGiamGia').prop('disabled', true);
+                        },
+                        error: function (xhr) {
+                            Swal.fire({
+                                toast: true,
+                                icon: 'error',
+                                title: xhr.responseText || 'Lỗi khi xóa phiếu giảm giá',
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    });
 }
 

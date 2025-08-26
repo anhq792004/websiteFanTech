@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,6 +101,9 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietService {
                 variant.setCanNang(request.getCanNang());
                 variant.setMoTa(request.getMoTa());
                 variant.setTrangThai(request.getTrangThai());
+                variant.setNgayTao(LocalDateTime.now());
+                variant.setNgaySua(LocalDateTime.now());
+                variant.setNguoiTao("Admin"); // Có thể thay đổi thành user thực tế sau
 
                 SanPhamChiTiet savedVariant = sanPhamChiTietRepository.save(variant);
                 createdVariants.add(savedVariant);
@@ -219,6 +223,9 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietService {
             log.info("Không có hình ảnh mới để cập nhật");
         }
 
+        // Set ngày sửa khi cập nhật
+        spct.setNgaySua(LocalDateTime.now());
+        
         try {
             SanPhamChiTiet saved = sanPhamChiTietRepository.save(spct);
             log.info("=== CẬP NHẬT THÀNH CÔNG ===");
@@ -280,6 +287,11 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietService {
         spct.setCanNang(canNang != null ? canNang.floatValue() : null);
         spct.setTrangThai(trangThai);
         spct.setMoTa(moTa);
+        
+        // Set ngày tạo và người tạo
+        spct.setNgayTao(LocalDateTime.now());
+        spct.setNgaySua(LocalDateTime.now());
+        spct.setNguoiTao("Admin"); // Có thể thay đổi thành user thực tế sau
 
         // Xử lý hình ảnh
         if (hinhAnh != null && !hinhAnh.isEmpty()) {
@@ -324,6 +336,9 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietService {
             spct.setGia(BigDecimal.valueOf(gia));
             log.info("Cập nhật giá: {}", gia);
         }
+
+        // Set ngày sửa khi cập nhật inline
+        spct.setNgaySua(LocalDateTime.now());
 
         try {
             SanPhamChiTiet saved = sanPhamChiTietRepository.save(spct);
@@ -388,6 +403,9 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietService {
             newVariant.setCanNang(variant.getCanNang() != null ? variant.getCanNang().floatValue() : null);
             newVariant.setMoTa(variant.getMoTa());
             newVariant.setTrangThai(variant.getTrangThai());
+            newVariant.setNgayTao(LocalDateTime.now());
+            newVariant.setNgaySua(LocalDateTime.now());
+            newVariant.setNguoiTao("Admin"); // Có thể thay đổi thành user thực tế sau
 
             SanPhamChiTiet savedVariant = sanPhamChiTietRepository.save(newVariant);
             createdVariants.add(savedVariant);
@@ -420,6 +438,7 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietService {
         log.info("Trạng thái hiện tại: {}, Trạng thái mới: {}", currentStatus, newStatus);
         
         spct.setTrangThai(newStatus);
+        spct.setNgaySua(LocalDateTime.now());
         
         try {
             SanPhamChiTiet saved = sanPhamChiTietRepository.save(spct);
