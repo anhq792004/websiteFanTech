@@ -540,8 +540,8 @@ class VariantsManager {
                 return;
             }
 
-            // Validate cân nặng (nếu có nhập)
-            if (canNangInput.value && (isNaN(canNang) || canNang <= 0)) {
+            // Validate cân nặng (bắt buộc)
+            if (isNaN(canNang) || canNang <= 0) {
                 canNangInput.classList.add('is-invalid');
                 this.showError('Cân nặng phải lớn hơn 0');
                 return;
@@ -935,6 +935,23 @@ class VariantsManager {
             if (this.variantsList.length === 0) {
                 this.showError('Không có biến thể nào để lưu. Vui lòng tạo danh sách trước!');
                 return;
+            }
+
+            // Kiểm tra từng biến thể trước khi gửi
+            for (let i = 0; i < this.variantsList.length; i++) {
+                const v = this.variantsList[i];
+                if (!v.soLuong || v.soLuong <= 0) {
+                    this.showError(`Biến thể #${i + 1}: Số lượng phải lớn hơn 0`);
+                    return;
+                }
+                if (!v.gia || v.gia <= 0) {
+                    this.showError(`Biến thể #${i + 1}: Giá phải lớn hơn 0`);
+                    return;
+                }
+                if (!v.canNang || v.canNang <= 0) {
+                    this.showError(`Biến thể #${i + 1}: Cân nặng phải lớn hơn 0`);
+                    return;
+                }
             }
 
             // Xác nhận trước khi lưu

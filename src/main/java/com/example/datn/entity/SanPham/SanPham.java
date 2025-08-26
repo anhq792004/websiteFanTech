@@ -3,6 +3,7 @@ package com.example.datn.entity.SanPham;
 import com.example.datn.entity.ThuocTinh.KieuQuat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -27,6 +28,7 @@ public class SanPham {
     String ma;
 
     @Column(name = "ten")
+    @Size(max = 150, message = "Tên sản phẩm tối đa 150 ký tự")
     String ten;
 
     @Column(name = "mo_ta", columnDefinition = "TEXT")
