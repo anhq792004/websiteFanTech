@@ -8,12 +8,14 @@ import com.example.datn.entity.KhachHang;
 import com.example.datn.entity.NhanVien.NhanVien;
 import com.example.datn.entity.SanPham.SanPhamChiTiet;
 import com.example.datn.entity.TaiKhoan;
+import com.example.datn.entity.PhieuGiamGia;
 import com.example.datn.repository.HoaDonRepo.HoaDonChiTietRepo;
 import com.example.datn.repository.HoaDonRepo.HoaDonRepo;
 import com.example.datn.repository.HoaDonRepo.LichSuHoaDonRepo;
 import com.example.datn.repository.NhanVienRepo;
 import com.example.datn.repository.SanPhamRepo.SanPhamChiTietRepo;
 import com.example.datn.repository.TaiKhoanRepo;
+import com.example.datn.repository.PhieuGiamGiaRepo;
 import com.example.datn.service.BanHang.BanHangService;
 import com.example.datn.service.HoaDonService.HoaDonService;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,7 @@ public class BanHangServiceImpl implements BanHangService {
     private final SanPhamChiTietRepo sanPhamChiTietRepo;
     private final TaiKhoanRepo taiKhoanRepo;
     private final NhanVienRepo nhanVienRepo;
+    private final PhieuGiamGiaRepo phieuGiamGiaRepo;
 
     private NhanVien getCurrentNhanVien() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -130,6 +133,8 @@ public class BanHangServiceImpl implements BanHangService {
         hoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getHoanThanh());
         hoaDon.setLoaiHoaDon(true);
         hoaDon.setNguoiTao(currentNhanVien.getTen());
+
+        // Ghi lịch sử hóa đơn
         LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
         lichSuHoaDon.setNhanVien(currentNhanVien);
         lichSuHoaDon.setHoaDon(hoaDon);
@@ -138,6 +143,25 @@ public class BanHangServiceImpl implements BanHangService {
         lichSuHoaDon.setMoTa("Thanh toán thành công");
         lichSuHoaDon.setNguoiTao(currentNhanVien.getTen());
         lichSuHoaDonRepo.save(lichSuHoaDon);
+
+        // Trừ số lượng phiếu giảm giá nếu hóa đơn có áp dụng
+        PhieuGiamGia voucher = hoaDon.getPhieuGiamGia();
+        if (voucher != null) {
+            // Reload bản ghi mới nhất để tránh stale entity
+            PhieuGiamGia v = phieuGiamGiaRepo.findById(voucher.getId())
+                    .orElse(null);
+            if (v != null) {
+                Integer soLuong = v.getSoLuong();
+                Integer daSuDung = v.getSoLuongDaSuDung();
+                if (soLuong == null) soLuong = 0;
+                if (daSuDung == null) daSuDung = 0;
+                if (soLuong > 0) {
+                    v.setSoLuong(soLuong - 1);
+                    v.setSoLuongDaSuDung(daSuDung + 1);
+                    phieuGiamGiaRepo.save(v);
+                }
+            }
+        }
 
         hoaDonRepo.save(hoaDon);
     }
