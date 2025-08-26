@@ -886,18 +886,26 @@
 
         handleMomoPayment(result) {
             if (result.payUrl) {
-                const confirmed = confirm('Bạn sẽ được chuyển hướng đến trang thanh toán MoMo. Bạn có muốn tiếp tục?');
-                if (confirmed) {
-                    // Xóa sessionStorage cũ để tránh báo thành công lần nữa
-                    sessionStorage.removeItem('pending_momo_order');
-                    sessionStorage.removeItem('return_url');
+                Swal.fire({
+                    title: 'Chuyển hướng đến MoMo',
+                    text: 'Bạn sẽ được chuyển hướng đến trang thanh toán MoMo. Bạn có muốn tiếp tục?',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Đồng ý',
+                    cancelButtonText: 'Hủy'
+                }).then((swalResult) => {
+                    if (swalResult.isConfirmed) {
+                        // Xóa sessionStorage cũ để tránh báo thành công lần nữa
+                        sessionStorage.removeItem('pending_momo_order');
+                        sessionStorage.removeItem('return_url');
 
-                    sessionStorage.setItem('pending_momo_order', result.orderId);
-                    sessionStorage.setItem('return_url', window.location.href);
-                    window.location.href = result.payUrl;
-                } else {
-                    this.showAlert('Thanh toán bị hủy', 'warning');
-                }
+                        sessionStorage.setItem('pending_momo_order', result.orderId);
+                        sessionStorage.setItem('return_url', window.location.href);
+                        window.location.href = result.payUrl;
+                    } else {
+                        this.showAlert('Thanh toán bị hủy', 'warning');
+                    }
+                });
             } else {
                 this.showAlert('Không thể tạo liên kết thanh toán MoMo', 'danger');
             }

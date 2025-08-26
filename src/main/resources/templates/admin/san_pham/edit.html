@@ -33,8 +33,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="editProductName" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="editProductName" name="ten" th:value="${sanPham.ten}" required>
-                                    <div class="invalid-feedback">Vui lòng nhập tên sản phẩm</div>
+                                    <input type="text" class="form-control" id="editProductName" name="ten" th:value="${sanPham.ten}" maxlength="150" required>
+                                    <div class="invalid-feedback">Vui lòng nhập tên sản phẩm (tối đa 150 ký tự)</div>
                                 </div>
                             </div>
 
