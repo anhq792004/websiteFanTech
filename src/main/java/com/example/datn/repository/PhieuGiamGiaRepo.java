@@ -39,4 +39,5 @@ public interface PhieuGiamGiaRepo extends JpaRepository<PhieuGiamGia,Long> {
             @Param("ngayKetThuc") Date ngayKetThuc,
             Pageable pageable);
 
+
 }
