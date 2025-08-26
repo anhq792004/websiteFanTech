@@ -70,6 +70,20 @@ public class HoaDonServiceImpl implements HoaDonService {
         }
         throw new RuntimeException("Không tìm thấy thông tin người dùng đang đăng nhập");
     }
+    @Override
+    public Optional<HoaDon> findHoaDonByIdWithDiscount(Long id) {
+        return hoaDonRepo.findById(id)
+                .map(hoaDon -> {
+                    // Eager loading để đảm bảo dữ liệu được load đầy đủ
+                    if (hoaDon.getPhieuGiamGia() != null) {
+                        hoaDon.getPhieuGiamGia().getId(); // Force load
+                    }
+                    if (hoaDon.getKhachHang() != null) {
+                        hoaDon.getKhachHang().getId(); // Force load
+                    }
+                    return hoaDon;
+                });
+    }
 
     @Override
     public List<HoaDon> findAll() {
