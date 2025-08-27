@@ -5,6 +5,61 @@
     <link rel="stylesheet" th:href="@{/admin/assets/compiled/css/bootstrap.min.css}"/>
     <style>
         .card-summary { min-height: 110px; }
+        .clickable-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .clickable-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .clickable-card::after {
+            content: '👆 Click để xem chi tiết';
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #666;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .clickable-card:hover::after {
+            opacity: 1;
+        }
+        
+        /* Submenu styles */
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .submenu.submenu-open {
+            max-height: 500px;
+        }
+        
+        .submenu.submenu-closed {
+            max-height: 0;
+        }
+        
+        .submenu-item {
+            padding-left: 2rem;
+        }
+        
+        .submenu-link {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #6c757d;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .submenu-link:hover {
+            color: #007bff;
+            background-color: rgba(0, 123, 255, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -221,6 +276,8 @@
 <!-- Load scripts -->
 <script th:src="@{/admin/assets/compiled/js/chart.umd.min.js}"></script>
 
+<!-- Sidebar Script -->
+<div th:replace="/admin/fragments/scripts :: sidebar-script"></div>
 
 <script>
 window.addEventListener('load', function() {

@@ -550,10 +550,18 @@ public class BanHangTaiQuayController {
             if (success) {
                 subtractDiscountQuantity(hoaDon);
                 // Kiểm tra loại hóa đơn để hiển thị thông báo phù hợp
-                if (hoaDon.getLoaiHoaDon() != null && !hoaDon.getLoaiHoaDon()) {
-                    return ResponseEntity.ok("Thanh toán Momo thành công! Đơn hàng online đã chuyển sang xác nhận.");
+                Optional<HoaDon> hoaDonForMessage = hoaDonService.findHoaDonById(idHD);
+                if (hoaDonForMessage.isPresent()) {
+                    HoaDon hoaDonForDisplay = hoaDonForMessage.get();
+                    if (hoaDonForDisplay.getLoaiHoaDon() != null && !hoaDonForDisplay.getLoaiHoaDon()) {
+                        // Hóa đơn online - chuyển sang xác nhận (giống thanh toán khi nhận hàng)
+                        return ResponseEntity.ok("Thanh toán Momo thành công! Đơn hàng online đã chuyển sang xác nhận.");
+                    } else {
+                        // Hóa đơn tại quầy - hoàn thành ngay và in hóa đơn
+                        return ResponseEntity.ok("Thanh toán Momo thành công! Đơn hàng tại quầy đã hoàn thành. PRINT_INVOICE:" + idHD);
+                    }
                 } else {
-                    return ResponseEntity.ok("Thanh toán Momo thành công! Đơn hàng tại quầy đã hoàn thành.");
+                    return ResponseEntity.ok("Thanh toán Momo thành công!");
                 }
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
