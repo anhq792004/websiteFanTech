@@ -314,8 +314,12 @@ public class MomoServiceImpl implements MomoService {
                     // Đây là hóa đơn online (false) - chuyển sang "Xác nhận" (giống thanh toán khi nhận hàng)
                     confirmOnlineOrder(hoaDon);
                 } else {
-                    // Đây là hóa đơn tại quầy (true) - hoàn thành ngay
+                    // Đây là hóa đơn tại quầy (true) - hoàn thành ngay và in hóa đơn
                     banHangService.thanhToan(hoaDonId);
+                    
+                    // Thêm thông tin để frontend biết cần in hóa đơn
+                    // Lưu vào session hoặc trả về thông tin qua response
+                    // Ở đây chúng ta sẽ sử dụng một cách khác: thêm vào response message
                 }
             }
             return true;
