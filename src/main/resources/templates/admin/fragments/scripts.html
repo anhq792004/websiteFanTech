@@ -1,0 +1,47 @@
+<!-- Sidebar Script Fragment -->
+<script th:fragment="sidebar-script">
+// Sidebar submenu functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle submenu toggle
+    const sidebarItems = document.querySelectorAll(".sidebar-item.has-sub");
+    
+    sidebarItems.forEach(item => {
+        const sidebarLink = item.querySelector(".sidebar-link");
+        const submenu = item.querySelector(".submenu");
+        
+        if (sidebarLink && submenu) {
+            sidebarLink.addEventListener("click", function(e) {
+                e.preventDefault();
+                
+                // Toggle submenu
+                if (submenu.classList.contains("submenu-closed")) {
+                    submenu.classList.remove("submenu-closed");
+                    submenu.classList.add("submenu-open");
+                } else {
+                    submenu.classList.remove("submenu-open");
+                    submenu.classList.add("submenu-closed");
+                }
+            });
+        }
+    });
+    
+    // Handle sidebar toggle for mobile
+    const burgerBtn = document.querySelector(".burger-btn");
+    const sidebarHide = document.querySelector(".sidebar-hide");
+    const sidebar = document.querySelector("#sidebar");
+    
+    if (burgerBtn) {
+        burgerBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            sidebar.classList.toggle("active");
+        });
+    }
+    
+    if (sidebarHide) {
+        sidebarHide.addEventListener("click", function(e) {
+            e.preventDefault();
+            sidebar.classList.remove("active");
+        });
+    }
+});
+</script>
