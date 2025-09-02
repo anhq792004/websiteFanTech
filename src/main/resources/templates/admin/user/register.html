@@ -138,7 +138,14 @@
             });
             return;
         }
-    });
+        if (matKhau.length <= 3 || matKhau.length >= 20) {
+            e.preventDefault();
+            Toast.fire({
+                icon: 'error',
+                title: 'Mật khẩu phải có độ dài từ 3 đến 20 ký tự'
+            });
+            return;
+        }
 
     // Hiển thị thông báo lỗi từ server (nếu có)
     const serverError = /*[[${error}]]*/ null;

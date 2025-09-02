@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -31,6 +32,9 @@ public interface NhanVienRepo extends JpaRepository<NhanVien,Long> {
     Optional<NhanVien> findByTaiKhoan(TaiKhoan taiKhoan);
 
     Optional<NhanVien> findByTaiKhoanId(Long taiKhoanId);
+
+    @Query("SELECT COUNT(n) FROM NhanVien n WHERE n.chucVu.id = :chucVuId AND n.trangThai = :trangThai")
+    long countByChucVuIdAndTrangThai(@Param("chucVuId") Long chucVuId, @Param("trangThai") boolean trangThai);
 
     Optional<NhanVien> findByTaiKhoanAndTrangThai(TaiKhoan taiKhoan, Boolean trangThai);
 

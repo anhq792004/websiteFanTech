@@ -600,10 +600,10 @@ $(document).ready(function () {
                     Swal.fire({
                         toast: true,
                         icon: 'error',
-                        title: response,
+                        title: response, // Hiển thị thông báo lỗi từ server
                         position: 'top-end',
                         showConfirmButton: false,
-                        timer: 1000,
+                        timer: 3000,
                         timerProgressBar: true
                     });
                 }
@@ -612,7 +612,7 @@ $(document).ready(function () {
                 Swal.fire({
                     toast: true,
                     icon: 'error',
-                    title: "Có lỗi xảy ra khi cập nhật trạng thái nhân viên",
+                    title: xhr.responseText || "Có lỗi xảy ra khi cập nhật trạng thái nhân viên",
                     position: 'top-end',
                     showConfirmButton: false,
                     timer: 3000,

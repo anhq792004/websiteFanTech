@@ -6,6 +6,7 @@
 <title>Đặt Hàng Thành Công</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
 <body class="bg-light">
 
 <!-- Header -->
@@ -134,13 +135,8 @@
                     <!-- Delivery Address -->
                     <div class="border-top pt-3">
                         <strong class="text-muted">Địa chỉ giao hàng:</strong>
-                        <div class="mt-2">
-                            <!--                            <div th:if="${hoaDon?.diaChi}">-->
-                            <!--                                <span th:text="${hoaDon.diaChi.soNhaNgoDuong}">123 Đường ABC</span>,-->
-                            <!--                                <span th:text="${hoaDon.diaChi.xa}">Phường XYZ</span>,-->
-                            <!--                                <span th:text="${hoaDon.diaChi.huyen}">Quận 1</span>,-->
-                            <!--                                <span th:text="${hoaDon.diaChi.tinh}">TP. Hồ Chí Minh</span>-->
-                            <!--                            </div>-->
+                        <div class="mt-2" id="deliveryAddress">
+                            <span class="text-muted">Đang tải...</span>
                         </div>
                     </div>
 
@@ -248,9 +244,9 @@
                             <span class="text-success fw-bold">
                                 <span th:if="${hoaDon?.phieuGiamGia == null || hoaDon?.phieuGiamGia?.giaTriGiam == null || hoaDon?.phieuGiamGia?.giaTriGiam == 0}">-0₫</span>
                                 <span th:if="${hoaDon?.phieuGiamGia != null && hoaDon?.phieuGiamGia?.giaTriGiam != null && hoaDon?.phieuGiamGia?.giaTriGiam > 0}"
-                                    th:with="giaTriGiam=${hoaDon.phieuGiamGia.giaTriGiam}, loaiGiam=${hoaDon.phieuGiamGia.loaiGiamGia}"
-                                    th:text="${loaiGiam} ? ${#numbers.formatDecimal(giaTriGiam, 0, 'COMMA', 0, 'POINT')} + '%' : '-' + ${#numbers.formatDecimal(giaTriGiam, 0, 'COMMA', 0, 'POINT')} + '₫'"
-                                    class="currency-format"></span>
+                                      th:with="giaTriGiam=${hoaDon.phieuGiamGia.giaTriGiam}, loaiGiam=${hoaDon.phieuGiamGia.loaiGiamGia}"
+                                      th:text="${loaiGiam} ? ${#numbers.formatDecimal(giaTriGiam, 0, 'COMMA', 0, 'POINT')} + '%' : '-' + ${#numbers.formatDecimal(giaTriGiam, 0, 'COMMA', 0, 'POINT')} + '₫'"
+                                      class="currency-format"></span>
                             </span>
                         </div>
                         <hr>
@@ -335,42 +331,182 @@
 <div class="py-5"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-<script>
-    // Function to format currency for Vietnamese locale
-    function formatCurrency(amount) {
-        if (amount === null || amount === undefined) return '0₫';
-        return new Intl.NumberFormat('vi-VN').format(amount) + '₫';
-    }
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        /*<![CDATA[*/
+        // Lấy dữ liệu từ Thymeleaf với kiểm tra null
+        const hoaDon = {
+            ma: [[${hoaDon?.ma}]] || 'N/A',
+            tenNguoiNhan: [[${hoaDon?.tenNguoiNhan}]] || 'N/A',
+            sdtNguoiNhan: [[${hoaDon?.sdtNguoiNhan}]] || 'N/A',
+            tinh: [[${hoaDon?.tinh}]] || null,
+            huyen: [[${hoaDon?.huyen}]] || null,
+            xa: [[${hoaDon?.xa}]] || null,
+            soNhaNgoDuong: [[${hoaDon?.soNhaNgoDuong}]] || '',
+            phuongThucThanhToan: [[${hoaDon?.phuongThucThanhToan}]] || 'N/A',
+            ghiChu: [[${hoaDon?.ghiChu}]] || '',
+            tongTien: [[${hoaDon?.tongTien}]] || 0,
+            tongTienSauGiamGia: [[${hoaDon?.tongTienSauGiamGia}]] || 0,
+            phiVanChuyen: [[${hoaDon?.phiVanChuyen}]] || 0,
+            ngayTao: [[${#temporals.format(hoaDon?.ngayTao, 'dd/MM/yyyy HH:mm')}]] || 'N/A'
+        };
+        /*]]>*/
 
-    // Function to format all currency elements on page load
-    function formatAllCurrencyElements() {
-        // Find all elements with currency-format class that don't have Thymeleaf attributes
-        const currencyElements = document.querySelectorAll('.currency-format');
+        const deliveryAddressDiv = document.getElementById("deliveryAddress");
+        if (!deliveryAddressDiv) {
+            console.error("Không tìm thấy phần tử deliveryAddress");
+            return;
+        }
 
-        currencyElements.forEach(element => {
-            // Only format if the element doesn't already contain formatted text
-            const text = element.textContent.trim();
-            const numericValue = text.replace(/[^\d]/g, '');
+        console.log("HoaDon data:", hoaDon); // Debug
 
-            if (numericValue && !text.includes('₫')) {
-                element.textContent = formatCurrency(parseInt(numericValue));
+        // Kiểm tra dữ liệu địa chỉ có tồn tại không
+        if (!hoaDon.tinh || !hoaDon.huyen || !hoaDon.xa) {
+            console.warn("Thiếu thông tin địa chỉ:", {
+                tinh: hoaDon.tinh,
+                huyen: hoaDon.huyen,
+                xa: hoaDon.xa
+            });
+            deliveryAddressDiv.innerHTML = `
+            <span class="text-warning">
+                <i class="fas fa-exclamation-triangle me-1"></i>
+                Thông tin địa chỉ không đầy đủ: ${hoaDon.soNhaNgoDuong || 'Chưa có địa chỉ cụ thể'}
+            </span>
+        `;
+            return;
+        }
+
+        // Hiển thị loading state
+        deliveryAddressDiv.innerHTML = `
+        <span class="text-muted">
+            <i class="fas fa-spinner fa-spin me-1"></i>
+            Đang tải thông tin địa chỉ...
+        </span>
+    `;
+
+        // Cấu hình axios request
+        const axiosConfig = {
+            url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",
+            method: "GET",
+            responseType: "json", // ← Sửa lại đúng format
+            timeout: 10000, // 10 giây timeout
+            headers: {
+                'Accept': 'application/json',
             }
-        });
-    }
+        };
 
+        console.log("Bắt đầu tải dữ liệu địa chỉ...");
 
-    document.addEventListener('DOMContentLoaded', formatAllCurrencyElements);
+        axios(axiosConfig)
+            .then(function (result) {
+                console.log("Tải dữ liệu thành công");
+                const data = result.data;
 
+                if (!data || !Array.isArray(data)) {
+                    throw new Error("Dữ liệu địa chỉ không hợp lệ");
+                }
 
-    function formatCurrencyInResponse(data) {
+                const addressData = {};
 
-        if (data.tongTien) data.tongTienFormatted = formatCurrency(data.tongTien);
-        if (data.phiVanChuyen) data.phiVanChuyenFormatted = formatCurrency(data.phiVanChuyen);
-        if (data.tienGiam) data.tienGiamFormatted = formatCurrency(data.tienGiam);
-        if (data.tongTienSauGiamGia) data.tongTienSauGiamGiaFormatted = formatCurrency(data.tongTienSauGiamGia);
+                // Tạo map ánh xạ ID sang tên với error handling
+                try {
+                    data.forEach(tinh => {
+                        if (tinh && tinh.Id && tinh.Name) {
+                            addressData['tinh_' + tinh.Id] = tinh.Name;
 
-        return data;
+                            if (tinh.Districts && Array.isArray(tinh.Districts)) {
+                                tinh.Districts.forEach(huyen => {
+                                    if (huyen && huyen.Id && huyen.Name) {
+                                        addressData['huyen_' + huyen.Id] = huyen.Name;
+
+                                        if (huyen.Wards && Array.isArray(huyen.Wards)) {
+                                            huyen.Wards.forEach(xa => {
+                                                if (xa && xa.Id && xa.Name) {
+                                                    addressData['xa_' + xa.Id] = xa.Name;
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                    console.log("Đã xử lý dữ liệu địa chỉ:", Object.keys(addressData).length + " entries");
+
+                } catch (parseError) {
+                    console.error("Lỗi xử lý dữ liệu:", parseError);
+                    throw new Error("Không thể xử lý dữ liệu địa chỉ");
+                }
+
+                // Ánh xạ và hiển thị địa chỉ
+                const diaChiFull = {
+                    soNhaNgoDuong: hoaDon.soNhaNgoDuong || '',
+                    xa: addressData['xa_' + hoaDon.xa] || `Xã/Phường [${hoaDon.xa}]`,
+                    huyen: addressData['huyen_' + hoaDon.huyen] || `Huyện/Quận [${hoaDon.huyen}]`,
+                    tinh: addressData['tinh_' + hoaDon.tinh] || `Tỉnh/TP [${hoaDon.tinh}]`
+                };
+
+                console.log("Địa chỉ đã ánh xạ:", diaChiFull);
+
+                // Hiển thị địa chỉ hoàn chỉnh
+                const addressParts = [
+                    diaChiFull.soNhaNgoDuong,
+                    diaChiFull.xa,
+                    diaChiFull.huyen,
+                    diaChiFull.tinh
+                ].filter(part => part && part.trim() !== '');
+
+                deliveryAddressDiv.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-map-marker-alt text-danger me-2 mt-1"></i>
+                    <span>${addressParts.join(', ')}</span>
+                </div>
+            `;
+
+            })
+            .catch(function (error) {
+                console.error('Chi tiết lỗi:', error);
+
+                let errorMessage = "Không thể tải thông tin địa chỉ";
+                let errorDetail = "";
+
+                if (error.code === 'ECONNABORTED') {
+                    errorDetail = "Timeout - Vui lòng thử lại";
+                } else if (error.response) {
+                    errorDetail = `Server error: ${error.response.status}`;
+                } else if (error.request) {
+                    errorDetail = "Không thể kết nối đến server";
+                } else {
+                    errorDetail = error.message;
+                }
+
+                deliveryAddressDiv.innerHTML = `
+                <div class="alert alert-warning alert-sm mb-0 py-2">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>${errorMessage}</strong><br>
+                    <small class="text-muted">${errorDetail}</small><br>
+                    <small>Địa chỉ thô: ${hoaDon.soNhaNgoDuong || ''} - ID: T${hoaDon.tinh}/H${hoaDon.huyen}/X${hoaDon.xa}</small>
+                    <br>
+                    <button class="btn btn-sm btn-outline-primary mt-1" onclick="location.reload()">
+                        <i class="fas fa-redo me-1"></i>Thử lại
+                    </button>
+                </div>
+            `;
+            });
+    });
+
+    // Thêm function retry riêng nếu cần
+    function retryLoadAddress() {
+        const deliveryAddressDiv = document.getElementById("deliveryAddress");
+        if (deliveryAddressDiv) {
+            deliveryAddressDiv.innerHTML = '<span class="text-muted">Đang thử lại...</span>';
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
     }
 </script>
 
@@ -380,12 +516,10 @@
         font-variant-numeric: tabular-nums;
     }
 
-    /* Ensure consistent currency display */
     .table td.text-end,
     .d-flex span.fw-bold {
         white-space: nowrap;
     }
 </style>
-
 </body>
 </html>
