@@ -240,10 +240,20 @@ public class NhanVienServicelmpl implements NhanVienService {
         return String.format("NV%03d", count + 1); // VD: HD001, HD002
     }
 
+    @Override
     public ResponseEntity<?> changeStatus(Long id) {
         NhanVien nhanVien = nhanVienRepo.findById(id).orElse(null);
         if (nhanVien == null) {
-            return ResponseEntity.badRequest().body("Không tìm nhân viên.");
+            return ResponseEntity.badRequest().body("Không tìm thấy nhân viên.");
+        }
+
+        // Kiểm tra nếu nhân viên là admin (chức vụ id = 1) và đang hoạt động
+        if (nhanVien.getChucVu().getId() == 1 && nhanVien.getTrangThai()) {
+            // Đếm số lượng admin đang hoạt động (trạng thái true và chức vụ id = 1)
+            long activeAdminCount = nhanVienRepo.countByChucVuIdAndTrangThai(1L, true);
+            if (activeAdminCount <= 1) {
+                return ResponseEntity.badRequest().body("Không thể tắt trạng thái của admin cuối cùng.");
+            }
         }
 
         // Thay đổi trạng thái nhân viên
