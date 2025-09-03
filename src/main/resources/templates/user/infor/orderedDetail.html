@@ -151,10 +151,13 @@
                                         </svg>
                                         <div class="time"
                                              th:text="${#temporals.format(history.ngayTao, 'HH:mm')}"></div>
+                                        <div class="time"
+                                             th:text="${#temporals.format(history.ngaySua, 'HH:mm')}"></div>
                                     </div>
                                 </div>
                                 <div class="mb-4">
-                                    <div class="d-flex" th:if="${hoaDon.trangThai != 4 && hoaDon.trangThai != 5 }">
+                                    <div class="d-flex"
+                                         th:if="${hoaDon.trangThai != 4 && hoaDon.trangThai != 5 && hoaDon.trangThai != 6}">
                                         <form th:if="${hoaDon.trangThai != 3}"
                                               class="me-2" th:data-id="${hoaDon.id}">
                                             <button type="button" class="btn btn-outline-danger btn-huy">Hủy</button>

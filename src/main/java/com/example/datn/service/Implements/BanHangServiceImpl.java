@@ -139,7 +139,7 @@ public class BanHangServiceImpl implements BanHangService {
         lichSuHoaDon.setNhanVien(currentNhanVien);
         lichSuHoaDon.setHoaDon(hoaDon);
         lichSuHoaDon.setTrangThai(hoaDonService.getTrangThaiHoaDon().getHoanThanh());
-        lichSuHoaDon.setNgayTao(LocalDateTime.now());
+        lichSuHoaDon.setNgaySua(LocalDateTime.now());
         lichSuHoaDon.setMoTa("Thanh toán thành công");
         lichSuHoaDon.setNguoiTao(currentNhanVien.getTen());
         lichSuHoaDonRepo.save(lichSuHoaDon);
