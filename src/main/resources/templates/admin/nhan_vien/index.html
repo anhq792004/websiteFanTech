@@ -71,6 +71,7 @@
                                     <th style="width: 5%;">Giới tính</th>
                                     <th style="width: 5%;">Ngày sinh</th>
                                     <th style="width: 5%;">Email</th>
+                                    <th style="width: 5%;">Chức vụ</th>
                                     <th style="width: 5%;">Trạng thái</th>
                                     <th style="width: 5%;">Hành động</th>
                                 </tr>
@@ -93,6 +94,7 @@
                                             : nhanVien.taiKhoan.email)
                                         : 'Chưa có mail'}">
                                     </td>
+                                    <td th:text="${nhanVien.chucVu != null ? nhanVien.chucVu.viTri : 'Chưa có chức vụ'}"></td>
                                     <td th:text="${nhanVien.trangThai ? 'Đang làm việc' : 'Đã nghỉ việc'}"
                                         th:classappend="${nhanVien.trangThai ? 'text-success' : 'text-danger'}">
                                     </td>

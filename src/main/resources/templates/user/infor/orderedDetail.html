@@ -243,7 +243,11 @@
                                         <div class="product-item d-flex align-items-center justify-content-between border-bottom border-top p-2"
                                              th:each="item: ${listHDCT}">
                                             <div class="align-items-center d-flex">
-                                                <img src="https://i.pinimg.com/736x/4c/83/36/4c83365869bfd6d9c19c554e8e7a0ad1.jpg"
+                                                <img th:if="${item.sanPhamChiTiet.hinhAnh != null}"
+                                                     th:src="${item.sanPhamChiTiet.hinhAnh.hinhAnh}"
+                                                     class="product-img" alt="Sản phẩm">
+                                                <img th:unless="${item.sanPhamChiTiet.hinhAnh != null}"
+                                                     src="/user/assets/images/default_product.jpg"
                                                      class="product-img" alt="Sản phẩm">
 
                                                 <div class="product-details ms-3">

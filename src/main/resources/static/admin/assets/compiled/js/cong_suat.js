@@ -182,9 +182,9 @@ $(document).ready(function() {
         e.preventDefault(); // Ngăn chặn sự kiện mặc định
 
         const name = $('#searchInput').val();
-        const trangThai = $('#trangThai').val();
+        const status = $('#trangThai').val();
 
         // Submit form tìm kiếm
-        window.location.href = `/cong-suat/index?name=${name}&trangThai=${trangThai}`;
+        window.location.href = `/cong-suat/index?name=${name}&status=${status}`;
     });
 });
