@@ -156,6 +156,14 @@
             });
             return;
         }
+        if (newPassword.length <= 3 || newPassword.length >= 20) {
+            e.preventDefault();
+            Toast.fire({
+                icon: 'error',
+                title: 'Mật khẩu mới phải có độ dài từ 3 đến 20 ký tự'
+            });
+            return;
+        }
 
         Toast.fire({
             icon: 'info',

@@ -66,12 +66,15 @@
                                         <tbody>
                                         <tr th:each="hoaDon : ${hoaDons}" class="text-gray-800 hover:bg-gray-50">
                                             <td class="px-4 py-2 border text-center" th:text="${hoaDon.ma}"></td>
-                                            <td class="px-4 py-2 border text-center" th:text="${hoaDon.ngayTao}"></td>
-                                            <td class="px-4 py-2 border text-center giaVND" th:text="${hoaDon.tongTien}"></td>
+                                            <td class="px-4 py-2 border text-center"
+                                                th:text="${#temporals.format(hoaDon.ngayTao, 'dd-MM-yyyy')}"></td>
+                                            <td class="px-4 py-2 border text-center giaVND"
+                                                th:text="${hoaDon.tongTien}"></td>
                                             <td class="px-4 py-2 border text-center"
                                                 th:switch="${hoaDon.trangThai}">
                                                 <span th:case="0" class="text-success-emphasis">Đang treo</span>
-                                                <span th:case="1" class="text-secondary-emphasis">Đang chờ xác nhận</span>
+                                                <span th:case="1"
+                                                      class="text-secondary-emphasis">Đang chờ xác nhận</span>
                                                 <span th:case="2" class="text-success">Đã xác nhận</span>
                                                 <span th:case="3" class="text-warning">Đang giao hàng</span>
                                                 <span th:case="4" class="text-primary">Hoàn thành</span>
@@ -79,7 +82,7 @@
                                             </td>
                                             <td class="px-4 py-2 border text-center">
                                                 <a th:href="@{/profile/ordered-detail(id=${hoaDon.id})}" type="button"
-                                                   class="btn btn-outline-warning" >
+                                                   class="btn btn-outline-warning">
                                                     <i class="bi bi-pencil-square"></i>
                                                 </a>
                                             </td>
@@ -106,8 +109,18 @@
 <!-- COMMON SCRIPTS -->
 <script th:src="@{/user/assets/compiled/js/common_scripts.min.js}"></script>
 <script th:src="@{/user/assets/compiled/js/main.js}"></script>
-
-
 <script th:src="@{/user/assets/compiled/js/droptk.js}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.giaVND').forEach(element => {
+            const originalValue = parseFloat(element.innerText || '0');
+            if (!isNaN(originalValue)) {
+                element.innerText = originalValue.toLocaleString('vi-VN') + ' đ';
+            }
+        });
+
+    });
+
+</script>
 </body>
 </html>
